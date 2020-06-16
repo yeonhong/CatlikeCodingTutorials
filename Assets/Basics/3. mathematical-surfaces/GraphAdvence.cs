@@ -14,7 +14,7 @@ public class GraphAdvence : MonoBehaviour
 	[SerializeField] private GraphFunctionName graphName = GraphFunctionName.Sine;
 
 	private Transform[] _points;
-	private delegate float GraphFunction(float x, float t);
+	private delegate float GraphFunction(float x, float z, float t);
 	private static GraphFunction[] functions = {
 		GetSine, GetMultiSine
 	};
@@ -26,12 +26,18 @@ public class GraphAdvence : MonoBehaviour
 		var initScale = Vector3.one * maxStep;
 		var initPosition = Vector3.zero;
 
-		_points = new Transform[_resolution];
+		_points = new Transform[_resolution * _resolution];
 
-		for (int i = 0; i < _points.Length; i++) {
+		for (int i = 0, x = 0, z = 0; i < _points.Length; i++, x++) {
 			Transform point = Instantiate(_pointPrefab);
 
-			initPosition.x = (i + 0.5f) * maxStep - 1f;
+			if (x == _resolution) {
+				x = 0;
+				z += 1;
+			}
+
+			initPosition.x = (x + 0.5f) * maxStep - 1f;
+			initPosition.z = (z + 0.5f) * maxStep - 1f;
 
 			point.localPosition = initPosition;
 			point.localScale = initScale;
@@ -48,17 +54,17 @@ public class GraphAdvence : MonoBehaviour
 		for (int i = 0; i < _points.Length; i++) {
 			var point = _points[i];
 			var position = point.localPosition;
-			position.y = graphFunction(position.x, t);
+			position.y = graphFunction(position.x, position.z, t);
 			point.localPosition = position;
 		}
 	}
 
-	private static float GetSine(float x, float t) {
+	private static float GetSine(float x, float z, float t) {
 		return Mathf.Sin(Mathf.PI * (x + t));
 	}
 
-	private static float GetMultiSine(float x, float t) {
-		float y = GetSine(x, t);
+	private static float GetMultiSine(float x, float z, float t) {
+		float y = GetSine(x, z, t);
 
 		//사인파에 더 많은 복잡성을 추가하는 가장 간단한 방법은 주파수가 두 배인 다른 파형을 추가하는 것입니다.이는 사인 함수의 인수에 2를 곱하여 수행되는 것보다 두 배 빠르게 변경됨을 의미합니다.동시에이 함수의 결과는 절반으로 줄어 듭니다. 이는 사인파의 모양을 절반 크기로 동일하게 유지합니다
 		y += Mathf.Sin(2f * Mathf.PI * (x + 2f * t)) / 2f;
