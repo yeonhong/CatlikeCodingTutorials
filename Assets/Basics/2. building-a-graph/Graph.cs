@@ -2,7 +2,7 @@
 
 public class Graph : MonoBehaviour
 {
-	[SerializeField] private Transform _pointPrefab;
+	[SerializeField] private Transform _pointPrefab = null;
 	[SerializeField] [Range(10,100)] private int _resolution = 10;
 
 	private Transform[] _points;
