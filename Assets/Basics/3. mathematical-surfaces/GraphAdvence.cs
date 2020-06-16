@@ -6,7 +6,9 @@ public class GraphAdvence : MonoBehaviour
 	private enum GraphFunctionName : int
 	{
 		Sine,
-		MultiSine
+		MultiSine,
+		Sine2DFunction,
+		MultiSine2DFunction
 	}
 
 	[SerializeField] private Transform _pointPrefab = null;
@@ -16,7 +18,7 @@ public class GraphAdvence : MonoBehaviour
 	private Transform[] _points;
 	private delegate float GraphFunction(float x, float z, float t);
 	private static GraphFunction[] functions = {
-		GetSine, GetMultiSine
+		GetSine, GetMultiSine, Sine2DFunction, MultiSine2DFunction
 	};
 
 	private void Awake() {
@@ -28,22 +30,20 @@ public class GraphAdvence : MonoBehaviour
 
 		_points = new Transform[_resolution * _resolution];
 
-		for (int i = 0, x = 0, z = 0; i < _points.Length; i++, x++) {
-			Transform point = Instantiate(_pointPrefab);
+		for (int i = 0, z = 0; z < _resolution; z++) {
 
-			if (x == _resolution) {
-				x = 0;
-				z += 1;
-			}
-
-			initPosition.x = (x + 0.5f) * maxStep - 1f;
 			initPosition.z = (z + 0.5f) * maxStep - 1f;
 
-			point.localPosition = initPosition;
-			point.localScale = initScale;
-			point.SetParent(transform, false);
+			for (int x = 0; x < _resolution; x++, i++) {
+				var point = Instantiate(_pointPrefab);
 
-			_points[i] = point;
+				initPosition.x = (x + 0.5f) * maxStep - 1f;
+
+				point.localPosition = initPosition;
+				point.localScale = initScale;
+				point.SetParent(transform, false);
+				_points[i] = point;
+			}
 		}
 	}
 
@@ -72,6 +72,21 @@ public class GraphAdvence : MonoBehaviour
 		//함수의 양과 음의 극단이 모두 1과 - 1이므로이 새로운 함수의 최대 값과 최소값은 1.5와 - 1.5입니다. 
 		//−1–1 범위에 머 무르려면 전체를 1.5로 나누어야합니다
 		y *= 2f / 3f;
+		return y;
+	}
+
+	static float Sine2DFunction(float x, float z, float t) {
+		float y = Mathf.Sin(Mathf.PI * (x + t));
+		y += Mathf.Sin(Mathf.PI * (z + t));
+		y *= 0.5f;
+		return y;
+	}
+
+	static float MultiSine2DFunction(float x, float z, float t) {
+		float y = 4f * Mathf.Sin(Mathf.PI * (x + z + t * 0.5f));
+		y += Mathf.Sin(Mathf.PI * (x + t));
+		y += Mathf.Sin(2f * Mathf.PI * (z + 2f * t)) * 0.5f;
+		y *= 1f / 5.5f;
 		return y;
 	}
 }
