@@ -10,7 +10,8 @@ public class GraphAdvence : MonoBehaviour
 		Sine2DFunction,
 		MultiSine2DFunction,
 		Ripple,
-		Cylinder
+		Cylinder,
+		Sphere
 	}
 
 	[SerializeField] private Transform _pointPrefab = null;
@@ -21,7 +22,7 @@ public class GraphAdvence : MonoBehaviour
 	private delegate Vector3 GraphFunction(float u, float v, float t);
 	private static GraphFunction[] functions = {
 		GetSine, GetMultiSine, Sine2DFunction, MultiSine2DFunction, Ripple,
-		Cylinder
+		Cylinder, Sphere
 	};
 
 	private void Awake() {
@@ -106,11 +107,22 @@ public class GraphAdvence : MonoBehaviour
 	private static Vector3 Cylinder(float u, float v, float t) {
 		//float r = 1f + Mathf.Sin(6f * Mathf.PI * u) * 0.2f;
 		//float r = 1f + Mathf.Sin(2f * Mathf.PI * v) * 0.2f;
-		float r = 0.8f + Mathf.Sin(Mathf.PI * (6f * u + 2f * v + t)) * 0.2f;
+		float radius = 0.8f + Mathf.Sin(Mathf.PI * (6f * u + 2f * v + t)) * 0.2f;
 		Vector3 p;
-		p.x = r * Mathf.Sin(Mathf.PI * u);
+		p.x = radius * Mathf.Sin(Mathf.PI * u);
 		p.y = v;
-		p.z = r * Mathf.Cos(Mathf.PI * u);
+		p.z = radius * Mathf.Cos(Mathf.PI * u);
+		return p;
+	}
+
+	private static Vector3 Sphere(float u, float v, float t) {
+		Vector3 p;
+		float r = 0.8f + Mathf.Sin(Mathf.PI * (6f * u + t)) * 0.1f;
+		r += Mathf.Sin(Mathf.PI * (4f * v + t)) * 0.1f;
+		float s = r * Mathf.Cos(Mathf.PI * 0.5f * v);
+		p.x = s * Mathf.Sin(Mathf.PI * u);
+		p.y = r * Mathf.Sin(Mathf.PI * 0.5f * v);
+		p.z = s * Mathf.Cos(Mathf.PI * u);
 		return p;
 	}
 }
