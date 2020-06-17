@@ -9,7 +9,8 @@ public class GraphAdvence : MonoBehaviour
 		MultiSine,
 		Sine2DFunction,
 		MultiSine2DFunction,
-		Ripple
+		Ripple,
+		Cylinder
 	}
 
 	[SerializeField] private Transform _pointPrefab = null;
@@ -19,7 +20,8 @@ public class GraphAdvence : MonoBehaviour
 	private Transform[] _points;
 	private delegate Vector3 GraphFunction(float u, float v, float t);
 	private static GraphFunction[] functions = {
-		GetSine, GetMultiSine, Sine2DFunction, MultiSine2DFunction, Ripple
+		GetSine, GetMultiSine, Sine2DFunction, MultiSine2DFunction, Ripple,
+		Cylinder
 	};
 
 	private void Awake() {
@@ -99,5 +101,16 @@ public class GraphAdvence : MonoBehaviour
 		ret.y /= 1f + 10f * distance;
 		ret.z = z;
 		return ret;
+	}
+
+	private static Vector3 Cylinder(float u, float v, float t) {
+		//float r = 1f + Mathf.Sin(6f * Mathf.PI * u) * 0.2f;
+		//float r = 1f + Mathf.Sin(2f * Mathf.PI * v) * 0.2f;
+		float r = 0.8f + Mathf.Sin(Mathf.PI * (6f * u + 2f * v + t)) * 0.2f;
+		Vector3 p;
+		p.x = r * Mathf.Sin(Mathf.PI * u);
+		p.y = v;
+		p.z = r * Mathf.Cos(Mathf.PI * u);
+		return p;
 	}
 }
