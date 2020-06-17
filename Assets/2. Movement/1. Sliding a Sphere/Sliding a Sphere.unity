@@ -372,6 +372,51 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_ReceiveShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].time
+      value: 0.95186
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].value
+      value: 0.08653849
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].inSlope
+      value: -2.4412365
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].outSlope
+      value: -2.4412365
+      objectReference: {fileID: 0}
+    - target: {fileID: -3165367715574147462, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].inWeight
+      value: 0.06206902
+      objectReference: {fileID: 0}
     - target: {fileID: 7511670647407305769, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
         type: 3}
       propertyPath: m_Name
