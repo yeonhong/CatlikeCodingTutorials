@@ -2,14 +2,23 @@
 
 public class MovingSphere : MonoBehaviour
 {
-	void Update() {
+	[SerializeField, Range(0f, 100f)] private float maxSpeed = 10f;
+	[SerializeField, Range(0f, 100f)] private float maxAcceleration = 10f;
+	private Vector3 velocity = Vector3.zero;
+
+	private void Update() {
 		Vector2 playerInput;
 		playerInput.x = Input.GetAxis("Horizontal");
 		playerInput.y = Input.GetAxis("Vertical");
-
 		playerInput.Normalize();
-		//playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
-		transform.localPosition = new Vector3(playerInput.x, 0f, playerInput.y);
+		Vector3 desiredVelocity = new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
+		float maxSpeedChange = maxAcceleration * Time.deltaTime;
+
+		velocity.x = Mathf.MoveTowards(velocity.x, desiredVelocity.x, maxSpeedChange);
+		velocity.z = Mathf.MoveTowards(velocity.z, desiredVelocity.z, maxSpeedChange);
+
+		Vector3 displacement = velocity * Time.deltaTime;
+		transform.localPosition += displacement;
 	}
 }
