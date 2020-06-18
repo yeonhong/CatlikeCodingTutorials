@@ -417,6 +417,26 @@ PrefabInstance:
       propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[1].inWeight
       value: 0.06206902
       objectReference: {fileID: 0}
+    - target: {fileID: -2313672215823569492, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: allowedArea.x
+      value: -4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2313672215823569492, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: allowedArea.y
+      value: -4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2313672215823569492, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: allowedArea.width
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: -2313672215823569492, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
+        type: 3}
+      propertyPath: allowedArea.height
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 7511670647407305769, guid: 822ff016f984dbb42bd9e09b1ff76a2c,
         type: 3}
       propertyPath: m_Name
