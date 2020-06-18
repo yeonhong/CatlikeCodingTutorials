@@ -7,10 +7,10 @@ public class FPSDisplay : MonoBehaviour
 	private FPSCounter fpsCounter;
 
 	[System.Serializable]
-	private struct FPSColor
+	private class FPSColor
 	{
-		public Color color;
-		public int minimumFPS;
+		public Color color = Color.white;
+		public int minimumFPS = 0;
 	}
 
 	[SerializeField] private FPSColor[] coloring = null;
