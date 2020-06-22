@@ -9,10 +9,10 @@ namespace SurfaceContract
 		[SerializeField, Range(0f, 100f)] private float maxAirAcceleration = 1f;
 		[SerializeField, Range(0f, 10f)] private float jumpHeight = 2f;
 		[SerializeField, Range(0, 5)] private int maxAirJumps = 1;
-		[SerializeField, Range(0f, 90f)] private float maxGroundAngle = 25f;
+		[SerializeField, Range(0f, 90f)] private float maxGroundAngle = 25f, maxStairsAngle = 50f;
 		[SerializeField, Range(0f, 100f)] private float maxSnapSpeed = 100f;
 		[SerializeField, Min(0f)] private float probeDistance = 1f;
-		[SerializeField] private LayerMask probeMask = -1;
+		[SerializeField] private LayerMask probeMask = -1, stairsMask = -1;
 
 		private Rigidbody body;
 		private Vector3 velocity, desiredVelocity;
@@ -20,12 +20,13 @@ namespace SurfaceContract
 		private int groundContactCount;
 		private bool OnGround => groundContactCount > 0;
 		private int jumpPhase;
-		private float minGroundDotProduct;
+		private float minGroundDotProduct, minStairsDotProduct;
 		private Vector3 contactNormal;
 		private int stepsSinceLastGrounded, stepsSinceLastJump;
 
 		private void OnValidate() {
 			minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
+			minStairsDotProduct = Mathf.Cos(maxStairsAngle * Mathf.Deg2Rad);
 		}
 
 		private void Awake() {
@@ -55,9 +56,10 @@ namespace SurfaceContract
 		}
 
 		private void EvaluateCollision(Collision collision) {
+			float minDot = GetMinDot(collision.gameObject.layer);
 			for (int i = 0; i < collision.contactCount; i++) {
 				Vector3 normal = collision.GetContact(i).normal;
-				if (normal.y >= minGroundDotProduct) {
+				if (normal.y >= minDot) {
 					groundContactCount += 1;
 					contactNormal += normal;
 				}
@@ -115,7 +117,7 @@ namespace SurfaceContract
 				return false;
 			}
 
-			if (hit.normal.y < minGroundDotProduct) {
+			if (hit.normal.y < GetMinDot(hit.collider.gameObject.layer)) {
 				return false;
 			}
 
@@ -161,6 +163,11 @@ namespace SurfaceContract
 			float newZ = Mathf.MoveTowards(currentZ, desiredVelocity.z, maxSpeedChange);
 
 			velocity += xAxis * (newX - currentX) + zAxis * (newZ - currentZ);
+		}
+
+		private float GetMinDot(int layer) {
+			return (stairsMask & (1 << layer)) == 0 ?
+				minGroundDotProduct : minStairsDotProduct;
 		}
 	}
 }

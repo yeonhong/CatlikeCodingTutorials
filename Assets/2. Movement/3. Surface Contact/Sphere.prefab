@@ -236,8 +236,12 @@ MonoBehaviour:
   jumpHeight: 2
   maxAirJumps: 1
   maxGroundAngle: 25
+  maxStairsAngle: 50
   maxSnapSpeed: 100
   probeDistance: 1
   probeMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1079
+  stairsMask:
+    serializedVersion: 2
+    m_Bits: 1024
