@@ -9,8 +9,10 @@ namespace SurfaceContract
 		[SerializeField, Range(0f, 100f)] private float maxAirAcceleration = 1f;
 		[SerializeField, Range(0f, 10f)] private float jumpHeight = 2f;
 		[SerializeField, Range(0, 5)] private int maxAirJumps = 1;
-
 		[SerializeField, Range(0f, 90f)] private float maxGroundAngle = 25f;
+		[SerializeField, Range(0f, 100f)] private float maxSnapSpeed = 100f;
+		[SerializeField, Min(0f)] private float probeDistance = 1f;
+		[SerializeField] private LayerMask probeMask = -1;
 
 		private Rigidbody body;
 		private Vector3 velocity, desiredVelocity;
@@ -20,6 +22,7 @@ namespace SurfaceContract
 		private int jumpPhase;
 		private float minGroundDotProduct;
 		private Vector3 contactNormal;
+		private int stepsSinceLastGrounded, stepsSinceLastJump;
 
 		private void OnValidate() {
 			minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -39,6 +42,8 @@ namespace SurfaceContract
 			desiredVelocity = new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
 
 			desiredJump |= Input.GetButtonDown("Jump");
+
+			GetComponent<Renderer>().material.SetColor("_Color", OnGround ? Color.black : Color.white);
 		}
 
 		private void OnCollisionEnter(Collision collision) {
@@ -79,8 +84,12 @@ namespace SurfaceContract
 		}
 
 		private void UpdateState() {
+			stepsSinceLastGrounded++;
+			stepsSinceLastJump++;
+
 			velocity = body.velocity;
-			if (OnGround) {
+			if (OnGround || SnapToGround()) {
+				stepsSinceLastGrounded = 0;
 				jumpPhase = 0;
 				if (groundContactCount > 1) {
 					contactNormal.Normalize();
@@ -91,8 +100,39 @@ namespace SurfaceContract
 			}
 		}
 
+		private bool SnapToGround() {
+			if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2) {
+				return false;
+			}
+
+			float speed = velocity.magnitude;
+			if (speed > maxSnapSpeed) {
+				return false;
+			}
+
+			if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit,
+				probeDistance, probeMask)) {
+				return false;
+			}
+
+			if (hit.normal.y < minGroundDotProduct) {
+				return false;
+			}
+
+			groundContactCount = 1;
+			contactNormal = hit.normal;
+
+			float dot = Vector3.Dot(velocity, hit.normal);
+			if (dot > 0f) {
+				velocity = (velocity - hit.normal * dot).normalized * speed;
+			}
+
+			return true;
+		}
+
 		private void Jump() {
 			if (OnGround || jumpPhase < maxAirJumps) {
+				stepsSinceLastJump = 0;
 				jumpPhase++;
 				float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
 				float alignedSpeed = Vector3.Dot(velocity, contactNormal);
