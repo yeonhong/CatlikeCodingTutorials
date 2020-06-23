@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomGravity
+namespace CustomGravityTutorial
 {
 	public class MovingSphere : MonoBehaviour
 	{
@@ -36,6 +36,7 @@ namespace CustomGravity
 
 		private void Awake() {
 			body = GetComponent<Rigidbody>();
+			body.useGravity = false;
 			OnValidate();
 		}
 
@@ -86,16 +87,17 @@ namespace CustomGravity
 		}
 
 		private void FixedUpdate() {
-			upAxis = -Physics.gravity.normalized;
+			Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
 
 			UpdateState();
 			AdjustVelocity();
 
 			if (desiredJump) {
 				desiredJump = false;
-				Jump();
+				Jump(gravity);
 			}
 
+			velocity += gravity * Time.deltaTime;
 			body.velocity = velocity;
 
 			ClearState();
@@ -156,7 +158,7 @@ namespace CustomGravity
 			return true;
 		}
 
-		private void Jump() {
+		private void Jump(Vector3 gravity) {
 			Vector3 jumpDirection = Vector3.zero;
 
 			if (OnGround) {
@@ -178,7 +180,7 @@ namespace CustomGravity
 
 			stepsSinceLastJump = 0;
 			jumpPhase++;
-			float jumpSpeed = Mathf.Sqrt(2f * Physics.gravity.magnitude * jumpHeight);
+			float jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
 			jumpDirection = (jumpDirection + upAxis).normalized;
 			float alignedSpeed = Vector3.Dot(velocity, jumpDirection);
 			if (alignedSpeed > 0f) {

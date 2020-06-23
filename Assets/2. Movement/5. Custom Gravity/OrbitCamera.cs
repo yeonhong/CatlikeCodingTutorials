@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomGravity
+namespace CustomGravityTutorial
 {
 	[RequireComponent(typeof(Camera))]
 	public class OrbitCamera : MonoBehaviour
@@ -37,7 +37,7 @@ namespace CustomGravity
 
 		private void LateUpdate() {
 			gravityAlignment = Quaternion.FromToRotation(
-				gravityAlignment * Vector3.up, -Physics.gravity.normalized) * gravityAlignment;
+				gravityAlignment * Vector3.up, CustomGravity.GetUpAxis(focusPoint)) * gravityAlignment;
 
 			UpdateFocusPoint();
 			ManualRotation();
