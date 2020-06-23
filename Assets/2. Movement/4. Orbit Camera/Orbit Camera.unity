@@ -379,7 +379,7 @@ MeshRenderer:
   m_GameObject: {fileID: 73843343}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
@@ -1172,6 +1172,9 @@ MonoBehaviour:
   maxVerticalAngle: 60
   alignDelay: 5
   alignSmoothRange: 45
+  obstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1176487707
 GameObject:
   m_ObjectHideFlags: 0
@@ -1200,7 +1203,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Color: {r: 1, g: 0.9892992, b: 0.8915094, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -1210,7 +1213,7 @@ Light:
     m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.612
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
