@@ -21,13 +21,10 @@ namespace ComplexGravityTutorial
 		}
 
 		private void OnDrawGizmos() {
-			var mesh = GetComponent<MeshFilter>().sharedMesh;
-			var bounds = mesh.bounds;
-
 			Vector3 scale = transform.localScale;
 			scale.y = range;
 			Gizmos.matrix =	Matrix4x4.TRS(transform.position, transform.rotation, scale);
-			Vector3 size = new Vector3(bounds.size.x, 0f, bounds.size.z);
+			Vector3 size = new Vector3(1f, 0f, 1f);
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(Vector3.zero, size);
 			if (range > 0f) {
