@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using ComplexGravityTutorial;
+﻿using ComplexGravityTutorial;
+using UnityEngine;
 
 namespace MovingTheGroundTutorial
 {
@@ -15,9 +15,9 @@ namespace MovingTheGroundTutorial
 		[SerializeField, Min(0f)] private float probeDistance = 1f;
 		[SerializeField] private LayerMask probeMask = -1, stairsMask = -1;
 		[SerializeField] private Transform playerInputSpace = default;
-		
-		private Rigidbody body;
-		private Vector3 velocity, desiredVelocity;
+
+		private Rigidbody body, connectedBody, previousConnectedBody;
+		private Vector3 velocity, desiredVelocity, connectionVelocity;
 		private bool desiredJump;
 		private int jumpPhase;
 		private float minGroundDotProduct, minStairsDotProduct;
@@ -29,6 +29,7 @@ namespace MovingTheGroundTutorial
 		private bool OnSteep => steepContactCount > 0;
 
 		private Vector3 upAxis, rightAxis, forwardAxis;
+		private Vector3 connectionWorldPosition, connectionLocalPosition;
 
 		private void OnValidate() {
 			minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -79,10 +80,14 @@ namespace MovingTheGroundTutorial
 				if (upDot >= minDot) {
 					groundContactCount += 1;
 					contactNormal += normal;
+					connectedBody = collision.rigidbody;
 				}
 				else if (upDot > -0.01f) { // 가파른 곳인지
 					steepContactCount += 1;
 					steepNormal += normal;
+					if (groundContactCount == 0) {
+						connectedBody = collision.rigidbody;
+					}
 				}
 			}
 		}
@@ -106,7 +111,9 @@ namespace MovingTheGroundTutorial
 
 		private void ClearState() {
 			groundContactCount = steepContactCount = 0;
-			contactNormal = steepNormal = Vector3.zero;
+			contactNormal = steepNormal = connectionVelocity = Vector3.zero;
+			previousConnectedBody = connectedBody;
+			connectedBody = null;
 		}
 
 		private void UpdateState() {
@@ -126,6 +133,24 @@ namespace MovingTheGroundTutorial
 			else {
 				contactNormal = upAxis;
 			}
+
+			if (connectedBody) {
+				UpdateConnectionState();
+			}
+		}
+
+		private void UpdateConnectionState() {
+			if (connectedBody == previousConnectedBody) {
+				Vector3 connectionMovement = 
+					connectedBody.transform.TransformPoint(connectionLocalPosition) - 
+					connectionWorldPosition;
+				connectionVelocity = connectionMovement / Time.deltaTime;
+			}
+
+			connectionWorldPosition = body.position;
+			connectionLocalPosition = connectedBody.transform.InverseTransformPoint(
+				connectionWorldPosition
+			);
 		}
 
 		private bool SnapToGround() {
@@ -156,6 +181,7 @@ namespace MovingTheGroundTutorial
 				velocity = (velocity - hit.normal * dot).normalized * speed;
 			}
 
+			connectedBody = hit.rigidbody;
 			return true;
 		}
 
@@ -190,16 +216,16 @@ namespace MovingTheGroundTutorial
 			velocity += jumpDirection * jumpSpeed;
 		}
 
-		Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal) {
+		private Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal) {
 			return (direction - normal * Vector3.Dot(direction, normal)).normalized;
 		}
 
 		private void AdjustVelocity() {
 			Vector3 xAxis = ProjectDirectionOnPlane(rightAxis, contactNormal).normalized;
 			Vector3 zAxis = ProjectDirectionOnPlane(forwardAxis, contactNormal).normalized;
-
-			float currentX = Vector3.Dot(velocity, xAxis);
-			float currentZ = Vector3.Dot(velocity, zAxis);
+			Vector3 relativeVelocity = velocity - connectionVelocity;
+			float currentX = Vector3.Dot(relativeVelocity, xAxis);
+			float currentZ = Vector3.Dot(relativeVelocity, zAxis);
 
 			float acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
 			float maxSpeedChange = acceleration * Time.deltaTime;
