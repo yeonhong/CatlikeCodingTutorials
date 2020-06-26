@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ObjectManagement
 {
@@ -11,6 +12,13 @@ namespace ObjectManagement
 		[SerializeField] private bool recycle;
 
 		private List<Shape>[] pools;
+
+		/*
+		 * Shape가 변경 될 때 게임 성능에 부정적인 영향을 줄 수 있습니다.
+		 * 객체의 활성 또는 변환 상태가 변경 될 때마다 모든 상위 객체에 변경 사항이 통보됩니다.
+		 * 따라서 꼭 필요한 것이 아닌 경우 다른 개체의 자식 개체를 만들지 않는 것이 가장 좋습니다.
+		 */
+		private Scene poolScene;
 
 		public Shape Get(int shapeId = 0, int materialId = 0) {
 			Shape instance;
@@ -29,6 +37,7 @@ namespace ObjectManagement
 				else {
 					instance = Instantiate(prefabs[shapeId]);
 					instance.ShapeId = shapeId;
+					SceneManager.MoveGameObjectToScene(instance.gameObject, poolScene);
 				}
 			}
 			else {
@@ -65,6 +74,22 @@ namespace ObjectManagement
 			for (int i = 0; i < pools.Length; i++) {
 				pools[i] = new List<Shape>();
 			}
+
+			// Recovering from Recompilation.
+			if (Application.isEditor) {
+				poolScene = SceneManager.GetSceneByName(name);
+				if (poolScene.isLoaded) {
+					GameObject[] rootObjects = poolScene.GetRootGameObjects();
+					for (int i = 0; i < rootObjects.Length; i++) {
+						Shape pooledShape = rootObjects[i].GetComponent<Shape>();
+						if (!pooledShape.gameObject.activeSelf) {
+							pools[pooledShape.ShapeId].Add(pooledShape);
+						}
+					}
+					return;
+				}
+			}
+			poolScene = SceneManager.CreateScene(name);
 		}
 	}
 }
