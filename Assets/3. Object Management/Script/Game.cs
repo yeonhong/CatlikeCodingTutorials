@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ObjectManagement
 {
@@ -21,8 +23,18 @@ namespace ObjectManagement
 
 		private List<Shape> shapes = null;
 
-		private void Awake() {
+		private void Start() {
 			shapes = new List<Shape>();
+
+			if (Application.isEditor) {
+				Scene loadedLevel = SceneManager.GetSceneByName("Level 1");
+				if (loadedLevel.isLoaded) {
+					SceneManager.SetActiveScene(loadedLevel);
+					return;
+				}
+			}
+
+			StartCoroutine(LoadLevel());
 		}
 
 		private void Update() {
@@ -118,6 +130,15 @@ namespace ObjectManagement
 				instance.Load(reader);
 				shapes.Add(instance);
 			}
+		}
+
+		IEnumerator LoadLevel() {
+			enabled = false;
+			yield return SceneManager.LoadSceneAsync(
+				"Level 1", LoadSceneMode.Additive
+			);
+			SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
+			enabled = true;
 		}
 	}
 }
