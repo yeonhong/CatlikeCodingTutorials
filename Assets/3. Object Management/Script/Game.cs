@@ -15,6 +15,10 @@ namespace ObjectManagement
 		public KeyCode loadKey = KeyCode.L;
 		public KeyCode destroyKey = KeyCode.X;
 
+		public float CreationSpeed { get; set; }
+		public float DestructionSpeed { get; set; }
+		float creationProgress, destructionProgress;
+
 		private List<Shape> shapes = null;
 
 		private void Awake() {
@@ -42,6 +46,18 @@ namespace ObjectManagement
 			else if (Input.GetKeyDown(destroyKey)) {
 				DestroyShape();
 				Debug.Log($"key - {destroyKey}");
+			}
+
+			creationProgress += Time.deltaTime * CreationSpeed;
+			while (creationProgress >= 1f) {
+				creationProgress -= 1f;
+				CreateShape();
+			}
+
+			destructionProgress += Time.deltaTime * DestructionSpeed;
+			while (destructionProgress >= 1f) {
+				destructionProgress -= 1f;
+				DestroyShape();
 			}
 		}
 
