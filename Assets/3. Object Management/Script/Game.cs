@@ -13,6 +13,7 @@ namespace ObjectManagement
 		public KeyCode newGameKey = KeyCode.N;
 		public KeyCode saveKey = KeyCode.S;
 		public KeyCode loadKey = KeyCode.L;
+		public KeyCode destroyKey = KeyCode.X;
 
 		private List<Shape> shapes = null;
 
@@ -38,6 +39,10 @@ namespace ObjectManagement
 				storage.Load(this);
 				Debug.Log($"key - {loadKey}");
 			}
+			else if (Input.GetKeyDown(destroyKey)) {
+				DestroyShape();
+				Debug.Log($"key - {destroyKey}");
+			}
 		}
 
 		private void BeginNewGame() {
@@ -47,7 +52,7 @@ namespace ObjectManagement
 			shapes.Clear();
 		}
 
-		void CreateShape() {
+		private void CreateShape() {
 			Shape instance = shapeFactory.GetRandom();
 			Transform t = instance.transform;
 			t.localPosition = Random.insideUnitSphere * 5f;
@@ -60,6 +65,18 @@ namespace ObjectManagement
 				alphaMin: 1f, alphaMax: 1f
 			));
 			shapes.Add(instance);
+		}
+
+		private void DestroyShape() {
+			if (shapes.Count > 0) {
+				int index = Random.Range(0, shapes.Count);
+				Destroy(shapes[index].gameObject);
+
+				// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
+				int lastIndex = shapes.Count - 1;
+				shapes[index] = shapes[lastIndex];
+				shapes.RemoveAt(lastIndex);
+			}
 		}
 
 		public override void Save(GameDataWriter writer) {
