@@ -8,7 +8,9 @@ namespace ObjectManagement
 		[SerializeField] private Shape[] prefabs = null;
 
 		public Shape Get(int shapeId) {
-			return Instantiate(prefabs[shapeId]);
+			Shape instance = Instantiate(prefabs[shapeId]);
+			instance.ShapeId = shapeId;
+			return instance;
 		}
 
 		public Shape GetRandom() {
