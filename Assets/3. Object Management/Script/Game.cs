@@ -63,7 +63,7 @@ namespace ObjectManagement
 
 		private void BeginNewGame() {
 			for (int i = 0; i < shapes.Count; i++) {
-				Destroy(shapes[i].gameObject);
+				shapeFactory.Reclaim(shapes[i]);
 			}
 			shapes.Clear();
 		}
@@ -86,7 +86,7 @@ namespace ObjectManagement
 		private void DestroyShape() {
 			if (shapes.Count > 0) {
 				int index = Random.Range(0, shapes.Count);
-				Destroy(shapes[index].gameObject);
+				shapeFactory.Reclaim(shapes[index]);
 
 				// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
 				int lastIndex = shapes.Count - 1;
