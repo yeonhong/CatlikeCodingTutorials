@@ -61,6 +61,7 @@ namespace ObjectManagement
 			writer.Write(shapes.Count);
 			for (int i = 0; i < shapes.Count; i++) {
 				writer.Write(shapes[i].ShapeId);
+				writer.Write(shapes[i].MaterialId);
 				shapes[i].Save(writer);
 			}
 		}
@@ -74,7 +75,8 @@ namespace ObjectManagement
 			int count = version <= 0 ? -version : reader.ReadInt();
 			for (int i = 0; i < count; i++) {
 				int shapeId = version > 0 ? reader.ReadInt() : 0;
-				Shape instance = shapeFactory.Get(shapeId);
+				int materialId = version > 0 ? reader.ReadInt() : 0;
+				Shape instance = shapeFactory.Get(shapeId, materialId);
 				instance.Load(reader);
 				shapes.Add(instance);
 			}

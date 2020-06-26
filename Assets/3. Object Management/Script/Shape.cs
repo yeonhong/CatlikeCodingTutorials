@@ -17,5 +17,12 @@ namespace ObjectManagement
 		}
 
 		private int shapeId = int.MinValue;
+
+		public int MaterialId { get; private set; }
+
+		public void SetMaterial(Material material, int materialId) {
+			GetComponent<MeshRenderer>().material = material;
+			MaterialId = materialId;
+		}
 	}
 }
