@@ -16,10 +16,13 @@ namespace ObjectManagement
 		public KeyCode saveKey = KeyCode.S;
 		public KeyCode loadKey = KeyCode.L;
 		public KeyCode destroyKey = KeyCode.X;
+		public int levelCount = 2;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
-		float creationProgress, destructionProgress;
+
+		private float creationProgress, destructionProgress;
+		private int loadedLevelBuildIndex;
 
 		private List<Shape> shapes = null;
 
@@ -27,14 +30,17 @@ namespace ObjectManagement
 			shapes = new List<Shape>();
 
 			if (Application.isEditor) {
-				Scene loadedLevel = SceneManager.GetSceneByName("Level 1");
-				if (loadedLevel.isLoaded) {
-					SceneManager.SetActiveScene(loadedLevel);
-					return;
+				for (int i = 0; i < SceneManager.sceneCount; i++) {
+					Scene loadedScene = SceneManager.GetSceneAt(i);
+					if (loadedScene.name.Contains("Level ")) {
+						SceneManager.SetActiveScene(loadedScene);
+						loadedLevelBuildIndex = loadedScene.buildIndex;
+						return;
+					}
 				}
 			}
 
-			StartCoroutine(LoadLevel());
+			StartCoroutine(LoadLevel(1));
 		}
 
 		private void Update() {
@@ -58,6 +64,15 @@ namespace ObjectManagement
 			else if (Input.GetKeyDown(destroyKey)) {
 				DestroyShape();
 				Debug.Log($"key - {destroyKey}");
+			}
+			else {
+				for (int i = 1; i <= levelCount; i++) {
+					if (Input.GetKeyDown(KeyCode.Alpha0 + i)) {
+						BeginNewGame();
+						StartCoroutine(LoadLevel(i));
+						return;
+					}
+				}
 			}
 
 			creationProgress += Time.deltaTime * CreationSpeed;
@@ -132,12 +147,18 @@ namespace ObjectManagement
 			}
 		}
 
-		IEnumerator LoadLevel() {
+		private IEnumerator LoadLevel(int levelBuildIndex) {
 			enabled = false;
+			if (loadedLevelBuildIndex > 0) {
+				yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
+			}
 			yield return SceneManager.LoadSceneAsync(
-				"Level 1", LoadSceneMode.Additive
+				levelBuildIndex, LoadSceneMode.Additive
 			);
-			SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
+			SceneManager.SetActiveScene(
+				SceneManager.GetSceneByBuildIndex(levelBuildIndex)
+			);
+			loadedLevelBuildIndex = levelBuildIndex;
 			enabled = true;
 		}
 	}
