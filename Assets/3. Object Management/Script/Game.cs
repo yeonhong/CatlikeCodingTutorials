@@ -9,18 +9,20 @@ namespace ObjectManagement
 	{
 		private const int saveVersion = 2;
 
-		public ShapeFactory shapeFactory = null;
-		public PersistentStorage storage = null;
-		public KeyCode createKey = KeyCode.C;
-		public KeyCode newGameKey = KeyCode.N;
-		public KeyCode saveKey = KeyCode.S;
-		public KeyCode loadKey = KeyCode.L;
-		public KeyCode destroyKey = KeyCode.X;
-		public int levelCount = 2;
-		public SpawnZone spawnZone;
+		public static Game Instance { get; private set; }
+
+		[SerializeField] private ShapeFactory shapeFactory = null;
+		[SerializeField] private PersistentStorage storage = null;
+		[SerializeField] private KeyCode createKey = KeyCode.C;
+		[SerializeField] private KeyCode newGameKey = KeyCode.N;
+		[SerializeField] private KeyCode saveKey = KeyCode.S;
+		[SerializeField] private KeyCode loadKey = KeyCode.L;
+		[SerializeField] private KeyCode destroyKey = KeyCode.X;
+		[SerializeField] private int levelCount = 2;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
+		public SpawnZone SpawnZoneOfLevel { get; set; }
 
 		private float creationProgress, destructionProgress;
 		private int loadedLevelBuildIndex;
@@ -28,6 +30,7 @@ namespace ObjectManagement
 		private List<Shape> shapes = null;
 
 		private void Start() {
+			Instance = this;
 			shapes = new List<Shape>();
 
 			if (Application.isEditor) {
@@ -48,25 +51,20 @@ namespace ObjectManagement
 			if (Input.GetKeyDown(createKey)) {
 				CreateShape();
 				Debug.Log($"key - {createKey}");
-			}
-			else if (Input.GetKey(newGameKey)) {
+			} else if (Input.GetKey(newGameKey)) {
 				BeginNewGame();
 				Debug.Log($"key - {newGameKey}");
-			}
-			else if (Input.GetKeyDown(saveKey)) {
+			} else if (Input.GetKeyDown(saveKey)) {
 				storage.Save(this, saveVersion);
 				Debug.Log($"key - {saveKey}");
-			}
-			else if (Input.GetKeyDown(loadKey)) {
+			} else if (Input.GetKeyDown(loadKey)) {
 				BeginNewGame();
 				storage.Load(this);
 				Debug.Log($"key - {loadKey}");
-			}
-			else if (Input.GetKeyDown(destroyKey)) {
+			} else if (Input.GetKeyDown(destroyKey)) {
 				DestroyShape();
 				Debug.Log($"key - {destroyKey}");
-			}
-			else {
+			} else {
 				for (int i = 1; i <= levelCount; i++) {
 					if (Input.GetKeyDown(KeyCode.Alpha0 + i)) {
 						BeginNewGame();
@@ -99,7 +97,7 @@ namespace ObjectManagement
 		private void CreateShape() {
 			Shape instance = shapeFactory.GetRandom();
 			Transform t = instance.transform;
-			t.localPosition = spawnZone.SpawnPoint;
+			t.localPosition = SpawnZoneOfLevel.SpawnPoint;
 			t.localRotation = Random.rotation;
 			t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 			instance.SetColor(Random.ColorHSV(
