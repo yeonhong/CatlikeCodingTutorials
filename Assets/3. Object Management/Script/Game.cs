@@ -17,6 +17,7 @@ namespace ObjectManagement
 		public KeyCode loadKey = KeyCode.L;
 		public KeyCode destroyKey = KeyCode.X;
 		public int levelCount = 2;
+		public SpawnZone spawnZone;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
@@ -98,7 +99,7 @@ namespace ObjectManagement
 		private void CreateShape() {
 			Shape instance = shapeFactory.GetRandom();
 			Transform t = instance.transform;
-			t.localPosition = Random.insideUnitSphere * 5f;
+			t.localPosition = spawnZone.SpawnPoint;
 			t.localRotation = Random.rotation;
 			t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 			instance.SetColor(Random.ColorHSV(

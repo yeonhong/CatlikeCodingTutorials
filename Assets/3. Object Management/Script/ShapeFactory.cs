@@ -9,7 +9,7 @@ namespace ObjectManagement
 	{
 		[SerializeField] private Shape[] prefabs = null;
 		[SerializeField] private Material[] materials = null;
-		[SerializeField] private bool recycle;
+		[SerializeField] private bool recycle = true;
 
 		private List<Shape>[] pools;
 
