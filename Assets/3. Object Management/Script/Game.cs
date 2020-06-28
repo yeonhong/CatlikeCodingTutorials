@@ -9,8 +9,6 @@ namespace ObjectManagement
 	{
 		private const int saveVersion = 3;
 
-		public static Game Instance { get; private set; }
-
 		[SerializeField] private ShapeFactory shapeFactory = null;
 		[SerializeField] private PersistentStorage storage = null;
 		[SerializeField] private KeyCode createKey = KeyCode.C;
@@ -23,7 +21,6 @@ namespace ObjectManagement
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
-		public SpawnZone SpawnZoneOfLevel { get; set; }
 
 		private float creationProgress, destructionProgress;
 		private int loadedLevelBuildIndex;
@@ -33,7 +30,6 @@ namespace ObjectManagement
 
 		private void Start() {
 			mainRandomState = Random.state;
-			Instance = this;
 			shapes = new List<Shape>();
 
 			if (Application.isEditor) {
@@ -106,7 +102,7 @@ namespace ObjectManagement
 		private void CreateShape() {
 			Shape instance = shapeFactory.GetRandom();
 			Transform t = instance.transform;
-			t.localPosition = SpawnZoneOfLevel.SpawnPoint;
+			t.localPosition = GameLevel.Current.SpawnPoint;
 			t.localRotation = Random.rotation;
 			t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 			instance.SetColor(Random.ColorHSV(
@@ -134,6 +130,7 @@ namespace ObjectManagement
 			writer.Write(shapes.Count);
 			writer.Write(Random.state);
 			writer.Write(loadedLevelBuildIndex);
+			GameLevel.Current.Save(writer);
 			for (int i = 0; i < shapes.Count; i++) {
 				writer.Write(shapes[i].ShapeId);
 				writer.Write(shapes[i].MaterialId);
@@ -147,14 +144,27 @@ namespace ObjectManagement
 				Debug.LogError("Unsupported future save version " + version);
 				return;
 			}
+
+			StartCoroutine(LoadGame(reader));
+		}
+
+		IEnumerator LoadGame(GameDataReader reader) {
+			int version = reader.Version;
+
 			int count = version <= 0 ? -version : reader.ReadInt();
+
 			if (version >= 3) {
 				Random.State state = reader.ReadRandomState();
 				if (!reseedOnLoad) {
 					Random.state = state;
 				}
 			}
-			StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
+
+			yield return LoadLevel(version < 2 ? 1 : reader.ReadInt());
+			if (version >= 3) {
+				GameLevel.Current.Load(reader);
+			}
+
 			for (int i = 0; i < count; i++) {
 				int shapeId = version > 0 ? reader.ReadInt() : 0;
 				int materialId = version > 0 ? reader.ReadInt() : 0;
