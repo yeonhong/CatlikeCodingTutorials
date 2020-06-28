@@ -7,7 +7,7 @@ namespace ObjectManagement
 {
 	public class Game : PersistableObject
 	{
-		private const int saveVersion = 2;
+		private const int saveVersion = 3;
 
 		public static Game Instance { get; private set; }
 
@@ -19,6 +19,7 @@ namespace ObjectManagement
 		[SerializeField] private KeyCode loadKey = KeyCode.L;
 		[SerializeField] private KeyCode destroyKey = KeyCode.X;
 		[SerializeField] private int levelCount = 2;
+		[SerializeField] private bool reseedOnLoad = false;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
@@ -26,10 +27,12 @@ namespace ObjectManagement
 
 		private float creationProgress, destructionProgress;
 		private int loadedLevelBuildIndex;
+		private Random.State mainRandomState;
 
 		private List<Shape> shapes = null;
 
 		private void Start() {
+			mainRandomState = Random.state;
 			Instance = this;
 			shapes = new List<Shape>();
 
@@ -44,6 +47,7 @@ namespace ObjectManagement
 				}
 			}
 
+			BeginNewGame();
 			StartCoroutine(LoadLevel(1));
 		}
 
@@ -88,6 +92,11 @@ namespace ObjectManagement
 		}
 
 		private void BeginNewGame() {
+			Random.state = mainRandomState;
+			int seed = Random.Range(0, int.MaxValue) ^ (int)Time.unscaledTime;
+			mainRandomState = Random.state;
+			Random.InitState(seed);
+
 			for (int i = 0; i < shapes.Count; i++) {
 				shapeFactory.Reclaim(shapes[i]);
 			}
@@ -123,6 +132,7 @@ namespace ObjectManagement
 
 		public override void Save(GameDataWriter writer) {
 			writer.Write(shapes.Count);
+			writer.Write(Random.state);
 			writer.Write(loadedLevelBuildIndex);
 			for (int i = 0; i < shapes.Count; i++) {
 				writer.Write(shapes[i].ShapeId);
@@ -138,6 +148,12 @@ namespace ObjectManagement
 				return;
 			}
 			int count = version <= 0 ? -version : reader.ReadInt();
+			if (version >= 3) {
+				Random.State state = reader.ReadRandomState();
+				if (!reseedOnLoad) {
+					Random.state = state;
+				}
+			}
 			StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
 			for (int i = 0; i < count; i++) {
 				int shapeId = version > 0 ? reader.ReadInt() : 0;
