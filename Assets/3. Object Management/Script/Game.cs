@@ -25,7 +25,7 @@ namespace ObjectManagement
 		private float creationProgress, destructionProgress;
 		private int loadedLevelBuildIndex;
 		private Random.State mainRandomState;
-
+		
 		private List<Shape> shapes = null;
 
 		private void Start() {
@@ -53,6 +53,7 @@ namespace ObjectManagement
 				Debug.Log($"key - {createKey}");
 			} else if (Input.GetKey(newGameKey)) {
 				BeginNewGame();
+				StartCoroutine(LoadLevel(loadedLevelBuildIndex));
 				Debug.Log($"key - {newGameKey}");
 			} else if (Input.GetKeyDown(saveKey)) {
 				storage.Save(this, saveVersion);
@@ -148,7 +149,7 @@ namespace ObjectManagement
 			StartCoroutine(LoadGame(reader));
 		}
 
-		IEnumerator LoadGame(GameDataReader reader) {
+		private IEnumerator LoadGame(GameDataReader reader) {
 			int version = reader.Version;
 
 			int count = version <= 0 ? -version : reader.ReadInt();
