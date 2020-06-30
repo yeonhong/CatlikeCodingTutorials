@@ -8,7 +8,7 @@ namespace ObjectManagement
 {
 	public class Game : PersistableObject
 	{
-		private const int saveVersion = 3;
+		private const int saveVersion = 4;
 
 		[SerializeField] private ShapeFactory shapeFactory = null;
 		[SerializeField] private PersistentStorage storage = null;
@@ -80,6 +80,10 @@ namespace ObjectManagement
 		}
 
 		private void FixedUpdate() {
+			for (int i = 0; i < shapes.Count; i++) {
+				shapes[i].GameUpdate();
+			}
+
 			creationProgress += Time.deltaTime * CreationSpeed;
 			while (creationProgress >= 1f) {
 				creationProgress -= 1f;
@@ -120,6 +124,7 @@ namespace ObjectManagement
 				valueMin: 0.25f, valueMax: 1f,
 				alphaMin: 1f, alphaMax: 1f
 			));
+			instance.AngularVelocity = Random.onUnitSphere * 50f;
 			shapes.Add(instance);
 		}
 
