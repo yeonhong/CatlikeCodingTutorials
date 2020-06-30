@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace ObjectManagement
 {
@@ -18,6 +19,8 @@ namespace ObjectManagement
 		[SerializeField] private KeyCode destroyKey = KeyCode.X;
 		[SerializeField] private int levelCount = 2;
 		[SerializeField] private bool reseedOnLoad = false;
+		[SerializeField] Slider creationSpeedSlider;
+		[SerializeField] Slider destructionSpeedSlider;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
@@ -74,7 +77,9 @@ namespace ObjectManagement
 					}
 				}
 			}
+		}
 
+		private void FixedUpdate() {
 			creationProgress += Time.deltaTime * CreationSpeed;
 			while (creationProgress >= 1f) {
 				creationProgress -= 1f;
@@ -93,6 +98,9 @@ namespace ObjectManagement
 			int seed = Random.Range(0, int.MaxValue) ^ (int)Time.unscaledTime;
 			mainRandomState = Random.state;
 			Random.InitState(seed);
+
+			creationSpeedSlider.value = CreationSpeed = 0;
+			destructionSpeedSlider.value = DestructionSpeed = 0;
 
 			for (int i = 0; i < shapes.Count; i++) {
 				shapeFactory.Reclaim(shapes[i]);
@@ -130,6 +138,10 @@ namespace ObjectManagement
 		public override void Save(GameDataWriter writer) {
 			writer.Write(shapes.Count);
 			writer.Write(Random.state);
+			writer.Write(CreationSpeed);
+			writer.Write(creationProgress);
+			writer.Write(DestructionSpeed);
+			writer.Write(destructionProgress);
 			writer.Write(loadedLevelBuildIndex);
 			GameLevel.Current.Save(writer);
 			for (int i = 0; i < shapes.Count; i++) {
@@ -159,6 +171,10 @@ namespace ObjectManagement
 				if (!reseedOnLoad) {
 					Random.state = state;
 				}
+				CreationSpeed = creationSpeedSlider.value = reader.ReadFloat();
+				creationProgress = reader.ReadFloat();
+				DestructionSpeed = destructionSpeedSlider.value = reader.ReadFloat();
+				destructionProgress = reader.ReadFloat();
 			}
 
 			yield return LoadLevel(version < 2 ? 1 : reader.ReadInt());

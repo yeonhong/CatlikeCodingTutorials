@@ -6,7 +6,7 @@ namespace ObjectManagement
 	{
 		[SerializeField] private Vector3 angularVelocity = Vector3.zero;
 
-		private void Update() {
+		private void FixedUpdate() {
 			transform.Rotate(angularVelocity * Time.deltaTime);
 		}
 	}
