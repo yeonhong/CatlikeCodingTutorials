@@ -6,6 +6,7 @@ namespace ObjectManagement
 	{
 		[SerializeField] private SpawnZone[] spawnZones = null;
 		[SerializeField] private bool sequential = true;
+		[SerializeField] private bool overrideConfig;
 		private int nextSequentialIndex;
 
 		public override Vector3 SpawnPoint {
@@ -16,7 +17,8 @@ namespace ObjectManagement
 					if (nextSequentialIndex >= spawnZones.Length) {
 						nextSequentialIndex = 0;
 					}
-				} else {
+				}
+				else {
 					index = Random.Range(0, spawnZones.Length);
 				}
 				return spawnZones[index].SpawnPoint;
@@ -32,17 +34,22 @@ namespace ObjectManagement
 		}
 
 		public override void ConfigureSpawn(Shape shape) {
-			int index;
-			if (sequential) {
-				index = nextSequentialIndex++;
-				if (nextSequentialIndex >= spawnZones.Length) {
-					nextSequentialIndex = 0;
-				}
+			if (overrideConfig) {
+				base.ConfigureSpawn(shape);
 			}
 			else {
-				index = Random.Range(0, spawnZones.Length);
+				int index;
+				if (sequential) {
+					index = nextSequentialIndex++;
+					if (nextSequentialIndex >= spawnZones.Length) {
+						nextSequentialIndex = 0;
+					}
+				}
+				else {
+					index = Random.Range(0, spawnZones.Length);
+				}
+				spawnZones[index].ConfigureSpawn(shape);
 			}
-			spawnZones[index].ConfigureSpawn(shape);
 		}
 	}
 }

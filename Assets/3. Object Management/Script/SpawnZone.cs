@@ -4,6 +4,24 @@ namespace ObjectManagement
 {
 	public abstract class SpawnZone : PersistableObject
 	{
+		[System.Serializable]
+		public struct SpawnConfiguration
+		{
+			public enum MovementDirection
+			{
+				Forward,
+				Upward,
+				Outward,
+				Random
+			}
+
+			public MovementDirection movementDirection;
+
+			public FloatRange speed;
+		}
+
+		[SerializeField] private SpawnConfiguration spawnConfig;
+
 		public abstract Vector3 SpawnPoint { get; }
 
 		public virtual void ConfigureSpawn(Shape shape) {
@@ -18,7 +36,23 @@ namespace ObjectManagement
 				alphaMin: 1f, alphaMax: 1f
 			));
 			shape.AngularVelocity = Random.onUnitSphere * Random.Range(0f, 90f);
-			shape.Velocity = transform.forward * Random.Range(0f, 2f);
+
+			Vector3 direction;
+			switch (spawnConfig.movementDirection) {
+				case SpawnConfiguration.MovementDirection.Upward:
+					direction = transform.up;
+					break;
+				case SpawnConfiguration.MovementDirection.Outward:
+					direction = (t.localPosition - transform.position).normalized;
+					break;
+				case SpawnConfiguration.MovementDirection.Random:
+					direction = Random.onUnitSphere;
+					break;
+				default:
+					direction = transform.forward;
+					break;
+			}
+			shape.Velocity = direction * spawnConfig.speed.RandomValueInRange;
 		}
 	}
 }
