@@ -30,5 +30,19 @@ namespace ObjectManagement
 		public override void Load(GameDataReader reader) {
 			nextSequentialIndex = reader.ReadInt();
 		}
+
+		public override void ConfigureSpawn(Shape shape) {
+			int index;
+			if (sequential) {
+				index = nextSequentialIndex++;
+				if (nextSequentialIndex >= spawnZones.Length) {
+					nextSequentialIndex = 0;
+				}
+			}
+			else {
+				index = Random.Range(0, spawnZones.Length);
+			}
+			spawnZones[index].ConfigureSpawn(shape);
+		}
 	}
 }

@@ -9,10 +9,8 @@ namespace ObjectManagement
 		[SerializeField] private SpawnZone spawnZone = null;
 		[SerializeField] private PersistableObject[] persistentObjects;
 
-		public Vector3 SpawnPoint {
-			get {
-				return spawnZone.SpawnPoint;
-			}
+		public void ConfigureSpawn(Shape shape) {
+			spawnZone.ConfigureSpawn(shape);
 		}
 
 		private void OnEnable() {
