@@ -15,6 +15,7 @@ namespace ObjectManagement
 				Random
 			}
 
+			public ShapeFactory[] factories;
 			public MovementDirection movementDirection;
 			public FloatRange speed;
 			public FloatRange angularSpeed;
@@ -26,8 +27,10 @@ namespace ObjectManagement
 		[SerializeField] private SpawnConfiguration spawnConfig;
 
 		public abstract Vector3 SpawnPoint { get; }
-
-		public virtual void ConfigureSpawn(Shape shape) {
+		
+		public virtual Shape SpawnShape() {
+			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
+			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
 			Transform t = shape.transform;
 			t.localPosition = SpawnPoint;
 			t.localRotation = Random.rotation;
@@ -59,6 +62,7 @@ namespace ObjectManagement
 					break;
 			}
 			shape.Velocity = direction * spawnConfig.speed.RandomValueInRange;
+			return shape;
 		}
 	}
 }

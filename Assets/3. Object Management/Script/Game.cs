@@ -10,7 +10,7 @@ namespace ObjectManagement
 	{
 		private const int saveVersion = 5;
 
-		[SerializeField] private ShapeFactory shapeFactory = null;
+		[SerializeField] private ShapeFactory[] shapeFactories = null;
 		[SerializeField] private PersistentStorage storage = null;
 		[SerializeField] private KeyCode createKey = KeyCode.C;
 		[SerializeField] private KeyCode newGameKey = KeyCode.N;
@@ -19,8 +19,8 @@ namespace ObjectManagement
 		[SerializeField] private KeyCode destroyKey = KeyCode.X;
 		[SerializeField] private int levelCount = 2;
 		[SerializeField] private bool reseedOnLoad = false;
-		[SerializeField] Slider creationSpeedSlider = null;
-		[SerializeField] Slider destructionSpeedSlider = null;
+		[SerializeField] private Slider creationSpeedSlider = null;
+		[SerializeField] private Slider destructionSpeedSlider = null;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
@@ -28,7 +28,7 @@ namespace ObjectManagement
 		private float creationProgress, destructionProgress;
 		private int loadedLevelBuildIndex;
 		private Random.State mainRandomState;
-		
+
 		private List<Shape> shapes = null;
 
 		private void Start() {
@@ -50,25 +50,38 @@ namespace ObjectManagement
 			StartCoroutine(LoadLevel(1));
 		}
 
+		private void OnEnable() {
+			if (shapeFactories[0].FactoryId != 0) {
+				for (int i = 0; i < shapeFactories.Length; i++) {
+					shapeFactories[i].FactoryId = i;
+				}
+			}
+		}
+
 		private void Update() {
 			if (Input.GetKeyDown(createKey)) {
 				CreateShape();
 				Debug.Log($"key - {createKey}");
-			} else if (Input.GetKey(newGameKey)) {
+			}
+			else if (Input.GetKey(newGameKey)) {
 				BeginNewGame();
 				StartCoroutine(LoadLevel(loadedLevelBuildIndex));
 				Debug.Log($"key - {newGameKey}");
-			} else if (Input.GetKeyDown(saveKey)) {
+			}
+			else if (Input.GetKeyDown(saveKey)) {
 				storage.Save(this, saveVersion);
 				Debug.Log($"key - {saveKey}");
-			} else if (Input.GetKeyDown(loadKey)) {
+			}
+			else if (Input.GetKeyDown(loadKey)) {
 				BeginNewGame();
 				storage.Load(this);
 				Debug.Log($"key - {loadKey}");
-			} else if (Input.GetKeyDown(destroyKey)) {
+			}
+			else if (Input.GetKeyDown(destroyKey)) {
 				DestroyShape();
 				Debug.Log($"key - {destroyKey}");
-			} else {
+			}
+			else {
 				for (int i = 1; i <= levelCount; i++) {
 					if (Input.GetKeyDown(KeyCode.Alpha0 + i)) {
 						BeginNewGame();
@@ -107,21 +120,19 @@ namespace ObjectManagement
 			destructionSpeedSlider.value = DestructionSpeed = 0;
 
 			for (int i = 0; i < shapes.Count; i++) {
-				shapeFactory.Reclaim(shapes[i]);
+				shapes[i].Recycle();
 			}
 			shapes.Clear();
 		}
 
 		private void CreateShape() {
-			Shape instance = shapeFactory.GetRandom();
-			GameLevel.Current.ConfigureSpawn(instance);
-			shapes.Add(instance);
+			shapes.Add(GameLevel.Current.SpawnShape());
 		}
 
 		private void DestroyShape() {
 			if (shapes.Count > 0) {
 				int index = Random.Range(0, shapes.Count);
-				shapeFactory.Reclaim(shapes[index]);
+				shapes[index].Recycle();
 
 				// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
 				int lastIndex = shapes.Count - 1;
@@ -140,6 +151,7 @@ namespace ObjectManagement
 			writer.Write(loadedLevelBuildIndex);
 			GameLevel.Current.Save(writer);
 			for (int i = 0; i < shapes.Count; i++) {
+				writer.Write(shapes[i].OriginFactory.FactoryId);
 				writer.Write(shapes[i].ShapeId);
 				writer.Write(shapes[i].MaterialId);
 				shapes[i].Save(writer);
@@ -178,9 +190,10 @@ namespace ObjectManagement
 			}
 
 			for (int i = 0; i < count; i++) {
+				int factoryId = version >= 5 ? reader.ReadInt() : 0;
 				int shapeId = version > 0 ? reader.ReadInt() : 0;
 				int materialId = version > 0 ? reader.ReadInt() : 0;
-				Shape instance = shapeFactory.Get(shapeId, materialId);
+				Shape instance = shapeFactories[factoryId].Get(shapeId, materialId);
 				instance.Load(reader);
 				shapes.Add(instance);
 			}

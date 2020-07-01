@@ -31,6 +31,20 @@ namespace ObjectManagement
 		private Color[] colors;
 		public int ColorCount => colors.Length;
 
+		public ShapeFactory OriginFactory {
+			get => originFactory;
+			set {
+				if (originFactory == null) {
+					originFactory = value;
+				}
+				else {
+					Debug.LogError("Not allowed to change origin factory.");
+				}
+			}
+		}
+
+		private ShapeFactory originFactory;
+
 		private void Awake() {
 			colors = new Color[meshRenderers.Length];
 		}
@@ -107,6 +121,10 @@ namespace ObjectManagement
 					SetColor(Color.white, i);
 				}
 			}
+		}
+
+		public void Recycle() {
+			OriginFactory.Reclaim(this);
 		}
 	}
 }

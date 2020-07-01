@@ -13,6 +13,21 @@ namespace ObjectManagement
 
 		private List<Shape>[] pools;
 
+		public int FactoryId {
+			get => factoryId;
+			set {
+				if (factoryId == int.MinValue && value != int.MinValue) {
+					factoryId = value;
+				}
+				else {
+					Debug.Log("Not allowed to change factoryId.");
+				}
+			}
+		}
+
+		// Unity doesn't save private fields of scriptable objects that aren't marked as serialized
+		[System.NonSerialized] private int factoryId = int.MinValue;
+
 		/*
 		 * Shape가 변경 될 때 게임 성능에 부정적인 영향을 줄 수 있습니다.
 		 * 객체의 활성 또는 변환 상태가 변경 될 때마다 모든 상위 객체에 변경 사항이 통보됩니다.
@@ -36,6 +51,7 @@ namespace ObjectManagement
 				}
 				else {
 					instance = Instantiate(prefabs[shapeId]);
+					instance.OriginFactory = this;
 					instance.ShapeId = shapeId;
 					SceneManager.MoveGameObjectToScene(instance.gameObject, poolScene);
 				}
@@ -50,6 +66,11 @@ namespace ObjectManagement
 		}
 
 		public void Reclaim(Shape shapeToRecycle) {
+			if (shapeToRecycle.OriginFactory != this) {
+				Debug.LogError("Tried to reclaim shape with wrong factory.");
+				return;
+			}
+
 			if (recycle) {
 				if (pools == null) {
 					CreatePools();
