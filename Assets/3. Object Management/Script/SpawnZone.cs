@@ -20,6 +20,7 @@ namespace ObjectManagement
 			public FloatRange angularSpeed;
 			public FloatRange scale;
 			public ColorRangeHSV color;
+			public bool uniformColor;
 		}
 
 		[SerializeField] private SpawnConfiguration spawnConfig;
@@ -31,7 +32,14 @@ namespace ObjectManagement
 			t.localPosition = SpawnPoint;
 			t.localRotation = Random.rotation;
 			t.localScale = Vector3.one * spawnConfig.scale.RandomValueInRange;
-			shape.SetColor(spawnConfig.color.RandomInRange);
+			if (spawnConfig.uniformColor) {
+				shape.SetColor(spawnConfig.color.RandomInRange);
+			}
+			else {
+				for (int i = 0; i < shape.ColorCount; i++) {
+					shape.SetColor(spawnConfig.color.RandomInRange, i);
+				}
+			}
 			shape.AngularVelocity =
 				Random.onUnitSphere * spawnConfig.angularSpeed.RandomValueInRange;
 

@@ -8,7 +8,7 @@ namespace ObjectManagement
 {
 	public class Game : PersistableObject
 	{
-		private const int saveVersion = 4;
+		private const int saveVersion = 5;
 
 		[SerializeField] private ShapeFactory shapeFactory = null;
 		[SerializeField] private PersistentStorage storage = null;
@@ -19,8 +19,8 @@ namespace ObjectManagement
 		[SerializeField] private KeyCode destroyKey = KeyCode.X;
 		[SerializeField] private int levelCount = 2;
 		[SerializeField] private bool reseedOnLoad = false;
-		[SerializeField] Slider creationSpeedSlider;
-		[SerializeField] Slider destructionSpeedSlider;
+		[SerializeField] Slider creationSpeedSlider = null;
+		[SerializeField] Slider destructionSpeedSlider = null;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
