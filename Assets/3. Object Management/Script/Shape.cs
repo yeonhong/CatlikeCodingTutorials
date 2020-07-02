@@ -138,7 +138,10 @@ namespace ObjectManagement
 		public void GameUpdate() {
 			Age += Time.deltaTime;
 			for (int i = 0; i < behaviorList.Count; i++) {
-				behaviorList[i].GameUpdate(this);
+				if (!behaviorList[i].GameUpdate(this)) {
+					behaviorList[i].Recycle();
+					behaviorList.RemoveAt(i--);
+				}
 			}
 		}
 

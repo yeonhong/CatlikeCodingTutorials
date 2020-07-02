@@ -9,14 +9,21 @@ namespace ObjectManagement
 		private float frequency;
 		private Vector3 cosOffset, sinOffset;
 		private ShapeInstance focalShape;
+		private Vector3 previousPosition;
 
-		public override void GameUpdate(Shape shape) {
+		public override bool GameUpdate(Shape shape) {
 			if (focalShape.IsValid) {
 				float t = 2f * Mathf.PI * frequency * shape.Age;
+				previousPosition = shape.transform.localPosition;
 				shape.transform.localPosition =
 					focalShape.Shape.transform.localPosition +
 					cosOffset * Mathf.Cos(t) + sinOffset * Mathf.Sin(t);
+				return true;
 			}
+
+			shape.AddBehavior<MovementShapeBehavior>().Velocity =
+				(shape.transform.localPosition - previousPosition) / Time.deltaTime;
+			return false;
 		}
 
 		public override void Save(GameDataWriter writer) { }
@@ -44,6 +51,7 @@ namespace ObjectManagement
 				shape.transform.InverseTransformDirection(orbitAxis);
 
 			GameUpdate(shape);
+			previousPosition = shape.transform.localPosition;
 		}
 	}
 }

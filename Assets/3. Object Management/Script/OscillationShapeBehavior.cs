@@ -10,11 +10,12 @@ namespace ObjectManagement
 
 		private float previousOscillation;
 
-		public override void GameUpdate(Shape shape) {
+		public override bool GameUpdate(Shape shape) {
 			float oscillation = Mathf.Sin(2f * Mathf.PI * Frequency * shape.Age);
 			shape.transform.localPosition +=
 				(oscillation - previousOscillation) * Offset;
 			previousOscillation = oscillation;
+			return true;
 		}
 
 		public override void Save(GameDataWriter writer) {

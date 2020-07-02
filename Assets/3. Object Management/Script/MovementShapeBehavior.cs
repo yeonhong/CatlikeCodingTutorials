@@ -12,8 +12,9 @@ namespace ObjectManagement
 			}
 		}
 
-		public override void GameUpdate(Shape shape) {
+		public override bool GameUpdate(Shape shape) {
 			shape.transform.localPosition += Velocity * Time.deltaTime;
+			return true;
 		}
 
 		public override void Save(GameDataWriter writer) {
