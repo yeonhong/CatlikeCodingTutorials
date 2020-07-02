@@ -43,25 +43,35 @@ namespace ObjectManagement
 					shape.SetColor(spawnConfig.color.RandomInRange, i);
 				}
 			}
-			shape.AngularVelocity =
-				Random.onUnitSphere * spawnConfig.angularSpeed.RandomValueInRange;
 
-			Vector3 direction;
-			switch (spawnConfig.movementDirection) {
-				case SpawnConfiguration.MovementDirection.Upward:
-					direction = transform.up;
-					break;
-				case SpawnConfiguration.MovementDirection.Outward:
-					direction = (t.localPosition - transform.position).normalized;
-					break;
-				case SpawnConfiguration.MovementDirection.Random:
-					direction = Random.onUnitSphere;
-					break;
-				default:
-					direction = transform.forward;
-					break;
+			float angularSpeed = spawnConfig.angularSpeed.RandomValueInRange;
+			if (angularSpeed != 0f) {
+				var rotation = shape.AddBehavior<RotationShapeBehavior>();
+				rotation.AngularVelocity = Random.onUnitSphere * angularSpeed;
 			}
-			shape.Velocity = direction * spawnConfig.speed.RandomValueInRange;
+
+			float speed = spawnConfig.speed.RandomValueInRange;
+			if (speed != 0f) {
+				Vector3 direction;
+				switch (spawnConfig.movementDirection) {
+					case SpawnConfiguration.MovementDirection.Upward:
+						direction = transform.up;
+						break;
+					case SpawnConfiguration.MovementDirection.Outward:
+						direction = (t.localPosition - transform.position).normalized;
+						break;
+					case SpawnConfiguration.MovementDirection.Random:
+						direction = Random.onUnitSphere;
+						break;
+					default:
+						direction = transform.forward;
+						break;
+				}
+
+				var movement = shape.AddBehavior<MovementShapeBehavior>();
+				movement.Velocity = direction * speed;
+			}
+
 			return shape;
 		}
 	}

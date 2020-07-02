@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace ObjectManagement
 {
@@ -11,8 +12,7 @@ namespace ObjectManagement
 		private static int colorPropertyId = Shader.PropertyToID("_Color");
 		private static MaterialPropertyBlock sharedPropertyBlock;
 
-		public Vector3 AngularVelocity { get; set; }
-		public Vector3 Velocity { get; set; }
+		private List<ShapeBehavior> behaviorList = new List<ShapeBehavior>();
 
 		public int ShapeId {
 			get => shapeId;
@@ -82,8 +82,11 @@ namespace ObjectManagement
 			for (int i = 0; i < colors.Length; i++) {
 				writer.Write(colors[i]);
 			}
-			writer.Write(AngularVelocity);
-			writer.Write(Velocity);
+			writer.Write(behaviorList.Count);
+			for (int i = 0; i < behaviorList.Count; i++) {
+				writer.Write((int)behaviorList[i].BehaviorType);
+				behaviorList[i].Save(writer);
+			}
 		}
 
 		public override void Load(GameDataReader reader) {
@@ -94,13 +97,24 @@ namespace ObjectManagement
 			else {
 				SetColor(reader.Version > 0 ? reader.ReadColor() : Color.white);
 			}
-			AngularVelocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
-			Velocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
+
+			if (reader.Version >= 6) {
+				int behaviorCount = reader.ReadInt();
+				for (int i = 0; i < behaviorCount; i++) {
+					AddBehavior((ShapeBehaviorType)reader.ReadInt()).Load(reader);
+				}
+			}
+			else if (reader.Version >= 4) {
+				AddBehavior<RotationShapeBehavior>().AngularVelocity =
+					reader.ReadVector3();
+				AddBehavior<MovementShapeBehavior>().Velocity = reader.ReadVector3();
+			}
 		}
 
 		public void GameUpdate() {
-			transform.Rotate(AngularVelocity * Time.deltaTime);
-			transform.localPosition += Velocity * Time.deltaTime;
+			for (int i = 0; i < behaviorList.Count; i++) {
+				behaviorList[i].GameUpdate(this);
+			}
 		}
 
 		private void LoadColors(GameDataReader reader) {
@@ -124,7 +138,28 @@ namespace ObjectManagement
 		}
 
 		public void Recycle() {
+			for (int i = 0; i < behaviorList.Count; i++) {
+				Destroy(behaviorList[i]);
+			}
+			behaviorList.Clear();
 			OriginFactory.Reclaim(this);
+		}
+
+		public T AddBehavior<T>() where T : ShapeBehavior {
+			T behavior = gameObject.AddComponent<T>();
+			behaviorList.Add(behavior);
+			return behavior;
+		}
+
+		private ShapeBehavior AddBehavior(ShapeBehaviorType type) {
+			switch (type) {
+				case ShapeBehaviorType.Movement:
+					return AddBehavior<MovementShapeBehavior>();
+				case ShapeBehaviorType.Rotation:
+					return AddBehavior<RotationShapeBehavior>();
+			}
+			Debug.LogError("Forgot to support " + type);
+			return null;
 		}
 	}
 }
