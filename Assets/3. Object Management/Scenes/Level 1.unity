@@ -284,6 +284,9 @@ MonoBehaviour:
       orbitFrequency:
         min: 0.25
         max: 0.5
+      amount:
+        min: 0
+        max: 3
   surfaceOnly: 1
 --- !u!4 &1654597922
 Transform:

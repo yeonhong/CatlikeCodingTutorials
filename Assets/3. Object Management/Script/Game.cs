@@ -111,6 +111,13 @@ namespace ObjectManagement
 				destructionProgress -= 1f;
 				DestroyShape();
 			}
+
+			int limit = GameLevel.Current.PopulationLimit;
+			if (limit > 0) {
+				while (shapes.Count > limit) {
+					DestroyShape();
+				}
+			}
 		}
 
 		private void BeginNewGame() {

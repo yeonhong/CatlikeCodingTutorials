@@ -33,6 +33,7 @@ namespace ObjectManagement
 				[FloatRangeSlider(0.1f, 1f)] public FloatRange relativeScale;
 				public FloatRange orbitRadius;
 				public FloatRange orbitFrequency;
+				public IntRange amount;
 			}
 
 			public SatelliteConfiguration satellite;
@@ -65,7 +66,11 @@ namespace ObjectManagement
 			}
 
 			SetupOscillation(shape);
-			CreateSatelliteFor(shape);
+
+			int satelliteCount = spawnConfig.satellite.amount.RandomValueInRange;
+			for (int i = 0; i < satelliteCount; i++) {
+				CreateSatelliteFor(shape);
+			}
 		}
 
 		private void SetupColor(Shape shape) {

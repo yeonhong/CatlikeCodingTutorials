@@ -8,6 +8,9 @@ namespace ObjectManagement
 
 		[SerializeField] private SpawnZone spawnZone = null;
 		[SerializeField] private PersistableObject[] persistentObjects;
+		[SerializeField] private int populationLimit = 100;
+
+		public int PopulationLimit => populationLimit;
 
 		public void SpawnShapes() {
 			spawnZone.SpawnShapes();
