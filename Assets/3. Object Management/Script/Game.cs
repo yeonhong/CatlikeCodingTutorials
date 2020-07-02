@@ -129,7 +129,12 @@ namespace ObjectManagement
 		}
 
 		public void AddShape(Shape shape) {
+			shape.SaveIndex = shapes.Count;
 			shapes.Add(shape);
+		}
+
+		public Shape GetShape(int index) {
+			return shapes[index];
 		}
 
 		private void DestroyShape() {
@@ -139,6 +144,7 @@ namespace ObjectManagement
 
 				// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
 				int lastIndex = shapes.Count - 1;
+				shapes[lastIndex].SaveIndex = index;
 				shapes[index] = shapes[lastIndex];
 				shapes.RemoveAt(lastIndex);
 			}
@@ -198,6 +204,10 @@ namespace ObjectManagement
 				int materialId = version > 0 ? reader.ReadInt() : 0;
 				Shape instance = shapeFactories[factoryId].Get(shapeId, materialId);
 				instance.Load(reader);
+			}
+
+			for (int i = 0; i < shapes.Count; i++) {
+				shapes[i].ResolveShapeInstances();
 			}
 		}
 

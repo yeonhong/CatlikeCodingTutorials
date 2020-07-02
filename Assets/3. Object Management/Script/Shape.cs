@@ -7,14 +7,26 @@ namespace ObjectManagement
 	public struct ShapeInstance
 	{
 		public Shape Shape { get; private set; }
-		private int instanceId;
+		private int instanceIdOrSaveIndex;
+
+		public ShapeInstance(int saveIndex) {
+			Shape = null;
+			instanceIdOrSaveIndex = saveIndex;
+		}
 
 		public ShapeInstance(Shape shape) {
 			Shape = shape;
-			instanceId = shape.InstanceId;
+			instanceIdOrSaveIndex = shape.InstanceId;
 		}
 
-		public bool IsValid => Shape && instanceId == Shape.InstanceId;
+		public bool IsValid => Shape && instanceIdOrSaveIndex == Shape.InstanceId;
+
+		public void Resolve() {
+			if (instanceIdOrSaveIndex >= 0) {
+				Shape = Game.Instance.GetShape(instanceIdOrSaveIndex);
+				instanceIdOrSaveIndex = Shape.InstanceId;
+			}
+		}
 	}
 
 	public class Shape : PersistableObject
@@ -44,6 +56,7 @@ namespace ObjectManagement
 
 		public float Age { get; private set; }
 		public int InstanceId { get; private set; }
+		public int SaveIndex { get; set; }
 
 		private Color[] colors;
 		public int ColorCount => colors.Length;
@@ -180,6 +193,12 @@ namespace ObjectManagement
 			T behavior = ShapeBehaviorPool<T>.Get();
 			behaviorList.Add(behavior);
 			return behavior;
+		}
+
+		public void ResolveShapeInstances() {
+			for (int i = 0; i < behaviorList.Count; i++) {
+				behaviorList[i].ResolveShapeInstances();
+			}
 		}
 	}
 }

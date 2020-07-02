@@ -43,6 +43,7 @@ namespace ObjectManagement
 		}
 #endif
 
+		public virtual void ResolveShapeInstances() { }
 		public abstract ShapeBehaviorType BehaviorType { get; }
 		public abstract bool GameUpdate(Shape shape);
 		public abstract void Save(GameDataWriter writer);

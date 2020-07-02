@@ -26,12 +26,28 @@ namespace ObjectManagement
 			return false;
 		}
 
-		public override void Save(GameDataWriter writer) { }
+		public override void Save(GameDataWriter writer) {
+			writer.Write(focalShape);
+			writer.Write(frequency);
+			writer.Write(cosOffset);
+			writer.Write(sinOffset);
+			writer.Write(previousPosition);
+		}
 
-		public override void Load(GameDataReader reader) { }
+		public override void Load(GameDataReader reader) {
+			focalShape = reader.ReadShapeInstance();
+			frequency = reader.ReadFloat();
+			cosOffset = reader.ReadVector3();
+			sinOffset = reader.ReadVector3();
+			previousPosition = reader.ReadVector3();
+		}
 
 		public override void Recycle() {
 			ShapeBehaviorPool<SatelliteShapeBehavior>.Reclaim(this);
+		}
+
+		public override void ResolveShapeInstances() {
+			focalShape.Resolve();
 		}
 
 		public void Initialize(Shape shape, Shape focalShape, float radius, float frequency) {
