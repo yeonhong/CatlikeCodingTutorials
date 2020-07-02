@@ -3,6 +3,20 @@ using UnityEngine;
 
 namespace ObjectManagement
 {
+	[System.Serializable]
+	public struct ShapeInstance
+	{
+		public Shape Shape { get; private set; }
+		private int instanceId;
+
+		public ShapeInstance(Shape shape) {
+			Shape = shape;
+			instanceId = shape.InstanceId;
+		}
+
+		public bool IsValid => Shape && instanceId == Shape.InstanceId;
+	}
+
 	public class Shape : PersistableObject
 	{
 		private int shapeId = int.MinValue;
@@ -29,6 +43,8 @@ namespace ObjectManagement
 		[SerializeField] private MeshRenderer[] meshRenderers = null;
 
 		public float Age { get; private set; }
+		public int InstanceId { get; private set; }
+
 		private Color[] colors;
 		public int ColorCount => colors.Length;
 
@@ -43,6 +59,10 @@ namespace ObjectManagement
 					Debug.LogError("Not allowed to change origin factory.");
 				}
 			}
+		}
+
+		public static implicit operator ShapeInstance(Shape shape) {
+			return new ShapeInstance(shape);
 		}
 
 		private void Awake() {
@@ -144,6 +164,8 @@ namespace ObjectManagement
 
 		public void Recycle() {
 			Age = 0f;
+			InstanceId++;
+
 			for (int i = 0; i < behaviorList.Count; i++) {
 				behaviorList[i].Recycle();
 			}

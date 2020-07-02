@@ -6,15 +6,17 @@ namespace ObjectManagement
 	{
 		public override ShapeBehaviorType BehaviorType => ShapeBehaviorType.Satellite;
 
-		private Shape focalShape;
 		private float frequency;
 		private Vector3 cosOffset, sinOffset;
+		private ShapeInstance focalShape;
 
 		public override void GameUpdate(Shape shape) {
-			float t = 2f * Mathf.PI * frequency * shape.Age;
-			shape.transform.localPosition =
-				focalShape.transform.localPosition +
-				cosOffset * Mathf.Cos(t) + sinOffset * Mathf.Sin(t);
+			if (focalShape.IsValid) {
+				float t = 2f * Mathf.PI * frequency * shape.Age;
+				shape.transform.localPosition =
+					focalShape.Shape.transform.localPosition +
+					cosOffset * Mathf.Cos(t) + sinOffset * Mathf.Sin(t);
+			}
 		}
 
 		public override void Save(GameDataWriter writer) { }
