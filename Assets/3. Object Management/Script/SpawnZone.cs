@@ -32,21 +32,15 @@ namespace ObjectManagement
 
 		public abstract Vector3 SpawnPoint { get; }
 
-		public virtual Shape SpawnShape() {
+		public virtual void SpawnShapes() {
 			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
 			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
 			Transform t = shape.transform;
 			t.localPosition = SpawnPoint;
 			t.localRotation = Random.rotation;
 			t.localScale = Vector3.one * spawnConfig.scale.RandomValueInRange;
-			if (spawnConfig.uniformColor) {
-				shape.SetColor(spawnConfig.color.RandomInRange);
-			}
-			else {
-				for (int i = 0; i < shape.ColorCount; i++) {
-					shape.SetColor(spawnConfig.color.RandomInRange, i);
-				}
-			}
+
+			SetupColor(shape);
 
 			float angularSpeed = spawnConfig.angularSpeed.RandomValueInRange;
 			if (angularSpeed != 0f) {
@@ -57,12 +51,22 @@ namespace ObjectManagement
 			float speed = spawnConfig.speed.RandomValueInRange;
 			if (speed != 0f) {
 				var movement = shape.AddBehavior<MovementShapeBehavior>();
-				movement.Velocity =	GetDirectionVector(spawnConfig.movementDirection, t) * speed;
+				movement.Velocity = GetDirectionVector(spawnConfig.movementDirection, t) * speed;
 			}
 
 			SetupOscillation(shape);
+			CreateSatelliteFor(shape);
+		}
 
-			return shape;
+		private void SetupColor(Shape shape) {
+			if (spawnConfig.uniformColor) {
+				shape.SetColor(spawnConfig.color.RandomInRange);
+			}
+			else {
+				for (int i = 0; i < shape.ColorCount; i++) {
+					shape.SetColor(spawnConfig.color.RandomInRange, i);
+				}
+			}
 		}
 
 		private Vector3 GetDirectionVector(SpawnConfiguration.MovementDirection direction, Transform t) {
@@ -78,7 +82,7 @@ namespace ObjectManagement
 			}
 		}
 
-		void SetupOscillation(Shape shape) {
+		private void SetupOscillation(Shape shape) {
 			float amplitude = spawnConfig.oscillationAmplitude.RandomValueInRange;
 			float frequency = spawnConfig.oscillationFrequency.RandomValueInRange;
 			if (amplitude == 0f || frequency == 0f) {
@@ -89,6 +93,18 @@ namespace ObjectManagement
 				spawnConfig.oscillationDirection, shape.transform
 			) * amplitude;
 			oscillation.Frequency = frequency;
+		}
+
+		private void CreateSatelliteFor(Shape focalShape) {
+			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
+			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
+			Transform t = shape.transform;
+			t.localRotation = Random.rotation;
+			t.localScale = focalShape.transform.localScale * 0.5f;
+			t.localPosition = focalShape.transform.localPosition + Vector3.up;
+			shape.AddBehavior<MovementShapeBehavior>().Velocity = Vector3.up;
+
+			SetupColor(shape);
 		}
 	}
 }

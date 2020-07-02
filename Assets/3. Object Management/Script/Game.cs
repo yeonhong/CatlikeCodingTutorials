@@ -9,6 +9,7 @@ namespace ObjectManagement
 	public class Game : PersistableObject
 	{
 		private const int saveVersion = 6;
+		public static Game Instance { get; private set; }
 
 		[SerializeField] private ShapeFactory[] shapeFactories = null;
 		[SerializeField] private PersistentStorage storage = null;
@@ -51,6 +52,8 @@ namespace ObjectManagement
 		}
 
 		private void OnEnable() {
+			Instance = this;
+
 			if (shapeFactories[0].FactoryId != 0) {
 				for (int i = 0; i < shapeFactories.Length; i++) {
 					shapeFactories[i].FactoryId = i;
@@ -60,7 +63,7 @@ namespace ObjectManagement
 
 		private void Update() {
 			if (Input.GetKeyDown(createKey)) {
-				CreateShape();
+				GameLevel.Current.SpawnShapes();
 				Debug.Log($"key - {createKey}");
 			}
 			else if (Input.GetKey(newGameKey)) {
@@ -100,7 +103,7 @@ namespace ObjectManagement
 			creationProgress += Time.deltaTime * CreationSpeed;
 			while (creationProgress >= 1f) {
 				creationProgress -= 1f;
-				CreateShape();
+				GameLevel.Current.SpawnShapes();
 			}
 
 			destructionProgress += Time.deltaTime * DestructionSpeed;
@@ -125,8 +128,8 @@ namespace ObjectManagement
 			shapes.Clear();
 		}
 
-		private void CreateShape() {
-			shapes.Add(GameLevel.Current.SpawnShape());
+		public void AddShape(Shape shape) {
+			shapes.Add(shape);
 		}
 
 		private void DestroyShape() {
@@ -195,7 +198,6 @@ namespace ObjectManagement
 				int materialId = version > 0 ? reader.ReadInt() : 0;
 				Shape instance = shapeFactories[factoryId].Get(shapeId, materialId);
 				instance.Load(reader);
-				shapes.Add(instance);
 			}
 		}
 
