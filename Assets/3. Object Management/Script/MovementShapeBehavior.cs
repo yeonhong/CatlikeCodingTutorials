@@ -2,7 +2,7 @@
 
 namespace ObjectManagement
 {
-	public class MovementShapeBehavior : ShapeBehavior
+	public sealed class MovementShapeBehavior : ShapeBehavior
 	{
 		public Vector3 Velocity { get; set; }
 
@@ -22,6 +22,10 @@ namespace ObjectManagement
 
 		public override void Load(GameDataReader reader) {
 			Velocity = reader.ReadVector3();
+		}
+
+		public override void Recycle() {
+			ShapeBehaviorPool<MovementShapeBehavior>.Reclaim(this);
 		}
 	}
 }

@@ -139,14 +139,14 @@ namespace ObjectManagement
 
 		public void Recycle() {
 			for (int i = 0; i < behaviorList.Count; i++) {
-				Destroy(behaviorList[i]);
+				behaviorList[i].Recycle();
 			}
 			behaviorList.Clear();
 			OriginFactory.Reclaim(this);
 		}
 
-		public T AddBehavior<T>() where T : ShapeBehavior {
-			T behavior = gameObject.AddComponent<T>();
+		public T AddBehavior<T>() where T : ShapeBehavior, new() {
+			T behavior = ShapeBehaviorPool<T>.Get();
 			behaviorList.Add(behavior);
 			return behavior;
 		}
