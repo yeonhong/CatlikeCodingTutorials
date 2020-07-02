@@ -267,6 +267,13 @@ MonoBehaviour:
         min: 0.30170316
         max: 1
     uniformColor: 0
+    oscillationDirection: 2
+    oscillationAmplitude:
+      min: 1
+      max: 2
+    oscillationFrequency:
+      min: 1
+      max: 2
   surfaceOnly: 1
 --- !u!4 &1654597922
 Transform:

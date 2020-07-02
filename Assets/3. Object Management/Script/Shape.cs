@@ -28,9 +28,11 @@ namespace ObjectManagement
 
 		[SerializeField] private MeshRenderer[] meshRenderers = null;
 
+		public float Age { get; private set; }
 		private Color[] colors;
 		public int ColorCount => colors.Length;
 
+		private ShapeFactory originFactory;
 		public ShapeFactory OriginFactory {
 			get => originFactory;
 			set {
@@ -42,8 +44,6 @@ namespace ObjectManagement
 				}
 			}
 		}
-
-		private ShapeFactory originFactory;
 
 		private void Awake() {
 			colors = new Color[meshRenderers.Length];
@@ -82,6 +82,7 @@ namespace ObjectManagement
 			for (int i = 0; i < colors.Length; i++) {
 				writer.Write(colors[i]);
 			}
+			writer.Write(Age);
 			writer.Write(behaviorList.Count);
 			for (int i = 0; i < behaviorList.Count; i++) {
 				writer.Write((int)behaviorList[i].BehaviorType);
@@ -99,9 +100,12 @@ namespace ObjectManagement
 			}
 
 			if (reader.Version >= 6) {
+				Age = reader.ReadFloat();
 				int behaviorCount = reader.ReadInt();
 				for (int i = 0; i < behaviorCount; i++) {
-					AddBehavior((ShapeBehaviorType)reader.ReadInt()).Load(reader);
+					ShapeBehavior behavior = ((ShapeBehaviorType)reader.ReadInt()).GetInstance();
+					behaviorList.Add(behavior);
+					behavior.Load(reader);
 				}
 			}
 			else if (reader.Version >= 4) {
@@ -112,6 +116,7 @@ namespace ObjectManagement
 		}
 
 		public void GameUpdate() {
+			Age += Time.deltaTime;
 			for (int i = 0; i < behaviorList.Count; i++) {
 				behaviorList[i].GameUpdate(this);
 			}
@@ -138,6 +143,7 @@ namespace ObjectManagement
 		}
 
 		public void Recycle() {
+			Age = 0f;
 			for (int i = 0; i < behaviorList.Count; i++) {
 				behaviorList[i].Recycle();
 			}
@@ -149,17 +155,6 @@ namespace ObjectManagement
 			T behavior = ShapeBehaviorPool<T>.Get();
 			behaviorList.Add(behavior);
 			return behavior;
-		}
-
-		private ShapeBehavior AddBehavior(ShapeBehaviorType type) {
-			switch (type) {
-				case ShapeBehaviorType.Movement:
-					return AddBehavior<MovementShapeBehavior>();
-				case ShapeBehaviorType.Rotation:
-					return AddBehavior<RotationShapeBehavior>();
-			}
-			Debug.LogError("Forgot to support " + type);
-			return null;
 		}
 	}
 }
