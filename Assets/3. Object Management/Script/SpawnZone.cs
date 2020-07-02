@@ -26,6 +26,16 @@ namespace ObjectManagement
 			public MovementDirection oscillationDirection;
 			public FloatRange oscillationAmplitude;
 			public FloatRange oscillationFrequency;
+
+			[System.Serializable]
+			public struct SatelliteConfiguration
+			{
+				[FloatRangeSlider(0.1f, 1f)] public FloatRange relativeScale;
+				public FloatRange orbitRadius;
+				public FloatRange orbitFrequency;
+			}
+
+			public SatelliteConfiguration satellite;
 		}
 
 		[SerializeField] private SpawnConfiguration spawnConfig;
@@ -100,11 +110,16 @@ namespace ObjectManagement
 			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
 			Transform t = shape.transform;
 			t.localRotation = Random.rotation;
-			t.localScale = focalShape.transform.localScale * 0.5f;
-			t.localPosition = focalShape.transform.localPosition + Vector3.up;
-			shape.AddBehavior<MovementShapeBehavior>().Velocity = Vector3.up;
+
+			t.localScale = focalShape.transform.localScale * spawnConfig.satellite.relativeScale.RandomValueInRange;
 
 			SetupColor(shape);
+
+			shape.AddBehavior<SatelliteShapeBehavior>().Initialize(
+					shape, focalShape,
+				spawnConfig.satellite.orbitRadius.RandomValueInRange,
+				spawnConfig.satellite.orbitFrequency.RandomValueInRange
+			);
 		}
 	}
 }
