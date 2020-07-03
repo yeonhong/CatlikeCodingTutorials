@@ -42,6 +42,12 @@ namespace ObjectManagement
 			public struct LifecycleConfiguration
 			{
 				[FloatRangeSlider(0f, 2f)] public FloatRange growingDuration;
+				[FloatRangeSlider(0f, 2f)] public FloatRange dyingDuration;
+
+				public Vector2 RandomDurations => new Vector2(
+							growingDuration.RandomValueInRange,
+							dyingDuration.RandomValueInRange
+						);
 			}
 
 			public LifecycleConfiguration lifecycle;
@@ -75,13 +81,13 @@ namespace ObjectManagement
 
 			SetupOscillation(shape);
 
-			float growingDuration = spawnConfig.lifecycle.growingDuration.RandomValueInRange;
+			Vector2 lifecycleDurations = spawnConfig.lifecycle.RandomDurations;
 			int satelliteCount = spawnConfig.satellite.amount.RandomValueInRange;
 			for (int i = 0; i < satelliteCount; i++) {
-				CreateSatelliteFor(shape, growingDuration);
+				CreateSatelliteFor(shape, lifecycleDurations);
 			}
 
-			SetupLifecycle(shape, growingDuration);
+			SetupLifecycle(shape, lifecycleDurations);
 		}
 
 		private void SetupColor(Shape shape) {
@@ -121,7 +127,7 @@ namespace ObjectManagement
 			oscillation.Frequency = frequency;
 		}
 
-		private void CreateSatelliteFor(Shape focalShape, float growingDuration) {
+		private void CreateSatelliteFor(Shape focalShape, Vector2 lifecycleDurations) {
 			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
 			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
 			Transform t = shape.transform;
@@ -137,13 +143,18 @@ namespace ObjectManagement
 				spawnConfig.satellite.orbitFrequency.RandomValueInRange
 			);
 
-			SetupLifecycle(shape, growingDuration);
+			SetupLifecycle(shape, lifecycleDurations);
 		}
 
-		private void SetupLifecycle(Shape shape, float growingDuration) {
-			if (growingDuration > 0f) {
+		private void SetupLifecycle(Shape shape, Vector2 durations) {
+			if (durations.x > 0f) {
 				shape.AddBehavior<GrowingShapeBehavior>().Initialize(
-					shape, growingDuration
+					shape, durations.x
+				);
+			}
+			else if (durations.y > 0f) {
+				shape.AddBehavior<DyingShapeBehavior>().Initialize(
+					shape, durations.y
 				);
 			}
 		}

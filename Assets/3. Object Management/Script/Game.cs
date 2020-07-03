@@ -30,11 +30,14 @@ namespace ObjectManagement
 		private int loadedLevelBuildIndex;
 		private Random.State mainRandomState;
 
+		private bool inGameUpdateLoop = false;
 		private List<Shape> shapes = null;
+		private List<ShapeInstance> killList = null;
 
 		private void Start() {
 			mainRandomState = Random.state;
 			shapes = new List<Shape>();
+			killList = new List<ShapeInstance>();
 
 			if (Application.isEditor) {
 				for (int i = 0; i < SceneManager.sceneCount; i++) {
@@ -118,6 +121,15 @@ namespace ObjectManagement
 					DestroyShape();
 				}
 			}
+
+			if (killList.Count > 0) {
+				for (int i = 0; i < killList.Count; i++) {
+					if (killList[i].IsValid) { // 위에서 이미 제거한걸 중복해서 제거할 가능성이 있음.
+						KillImmediately(killList[i].Shape);
+					}
+				}
+				killList.Clear();
+			}
 		}
 
 		private void BeginNewGame() {
@@ -146,14 +158,8 @@ namespace ObjectManagement
 
 		private void DestroyShape() {
 			if (shapes.Count > 0) {
-				int index = Random.Range(0, shapes.Count);
-				shapes[index].Recycle();
-
-				// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
-				int lastIndex = shapes.Count - 1;
-				shapes[lastIndex].SaveIndex = index;
-				shapes[index] = shapes[lastIndex];
-				shapes.RemoveAt(lastIndex);
+				Shape shape = shapes[Random.Range(0, shapes.Count)];
+				KillImmediately(shape);
 			}
 		}
 
@@ -231,6 +237,26 @@ namespace ObjectManagement
 			);
 			loadedLevelBuildIndex = levelBuildIndex;
 			enabled = true;
+		}
+
+		public void Kill(Shape shape) {
+			if (inGameUpdateLoop) {
+				killList.Add(shape);
+			}
+			else {
+				KillImmediately(shape);
+			}
+		}
+
+		private void KillImmediately(Shape shape) {
+			int index = shape.SaveIndex;
+			shape.Recycle();
+
+			// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
+			int lastIndex = shapes.Count - 1;
+			shapes[lastIndex].SaveIndex = index;
+			shapes[index] = shapes[lastIndex];
+			shapes.RemoveAt(lastIndex);
 		}
 	}
 }

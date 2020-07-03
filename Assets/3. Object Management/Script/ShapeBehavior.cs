@@ -8,7 +8,8 @@ namespace ObjectManagement
 		Rotation,
 		Oscillation,
 		Satellite,
-		Growing
+		Growing,
+		Dying,
 	}
 
 	public static class ShapeBehaviorTypeMethods
@@ -25,6 +26,8 @@ namespace ObjectManagement
 					return ShapeBehaviorPool<SatelliteShapeBehavior>.Get();
 				case ShapeBehaviorType.Growing:
 					return ShapeBehaviorPool<GrowingShapeBehavior>.Get();
+				case ShapeBehaviorType.Dying:
+					return ShapeBehaviorPool<DyingShapeBehavior>.Get();
 			}
 			UnityEngine.Debug.Log("Forgot to support " + type);
 			return null;

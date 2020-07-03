@@ -200,5 +200,9 @@ namespace ObjectManagement
 				behaviorList[i].ResolveShapeInstances();
 			}
 		}
+
+		public void Die() {
+			Game.Instance.Kill(this);
+		}
 	}
 }
