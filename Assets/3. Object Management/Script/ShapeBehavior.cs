@@ -10,6 +10,7 @@ namespace ObjectManagement
 		Satellite,
 		Growing,
 		Dying,
+		LifeCycle,
 	}
 
 	public static class ShapeBehaviorTypeMethods
@@ -28,6 +29,8 @@ namespace ObjectManagement
 					return ShapeBehaviorPool<GrowingShapeBehavior>.Get();
 				case ShapeBehaviorType.Dying:
 					return ShapeBehaviorPool<DyingShapeBehavior>.Get();
+				case ShapeBehaviorType.LifeCycle:
+					return ShapeBehaviorPool<LifecycleShapeBehavior>.Get();
 			}
 			UnityEngine.Debug.Log("Forgot to support " + type);
 			return null;

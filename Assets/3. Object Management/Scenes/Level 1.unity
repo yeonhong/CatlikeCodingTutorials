@@ -289,8 +289,11 @@ MonoBehaviour:
         max: 3
     lifecycle:
       growingDuration:
-        min: 0
-        max: 0
+        min: 1
+        max: 2
+      adultDuration:
+        min: 1
+        max: 5
       dyingDuration:
         min: 1
         max: 2
