@@ -37,6 +37,14 @@ namespace ObjectManagement
 			}
 
 			public SatelliteConfiguration satellite;
+
+			[System.Serializable]
+			public struct LifecycleConfiguration
+			{
+				[FloatRangeSlider(0f, 2f)] public FloatRange growingDuration;
+			}
+
+			public LifecycleConfiguration lifecycle;
 		}
 
 		[SerializeField] private SpawnConfiguration spawnConfig;
@@ -67,10 +75,13 @@ namespace ObjectManagement
 
 			SetupOscillation(shape);
 
+			float growingDuration = spawnConfig.lifecycle.growingDuration.RandomValueInRange;
 			int satelliteCount = spawnConfig.satellite.amount.RandomValueInRange;
 			for (int i = 0; i < satelliteCount; i++) {
-				CreateSatelliteFor(shape);
+				CreateSatelliteFor(shape, growingDuration);
 			}
+
+			SetupLifecycle(shape, growingDuration);
 		}
 
 		private void SetupColor(Shape shape) {
@@ -110,7 +121,7 @@ namespace ObjectManagement
 			oscillation.Frequency = frequency;
 		}
 
-		private void CreateSatelliteFor(Shape focalShape) {
+		private void CreateSatelliteFor(Shape focalShape, float growingDuration) {
 			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
 			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
 			Transform t = shape.transform;
@@ -125,6 +136,16 @@ namespace ObjectManagement
 				spawnConfig.satellite.orbitRadius.RandomValueInRange,
 				spawnConfig.satellite.orbitFrequency.RandomValueInRange
 			);
+
+			SetupLifecycle(shape, growingDuration);
+		}
+
+		private void SetupLifecycle(Shape shape, float growingDuration) {
+			if (growingDuration > 0f) {
+				shape.AddBehavior<GrowingShapeBehavior>().Initialize(
+					shape, growingDuration
+				);
+			}
 		}
 	}
 }

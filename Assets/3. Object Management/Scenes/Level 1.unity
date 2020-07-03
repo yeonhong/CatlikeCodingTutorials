@@ -246,7 +246,7 @@ MonoBehaviour:
   spawnConfig:
     factories:
     - {fileID: 11400000, guid: 6b5b55f72c22e244b87602b1eb820e9f, type: 2}
-    movementDirection: 3
+    movementDirection: 2
     speed:
       min: 1.5
       max: 2
@@ -254,7 +254,7 @@ MonoBehaviour:
       min: 1.5
       max: 2
     scale:
-      min: 1.5
+      min: 1
       max: 2
     color:
       hue:
@@ -269,11 +269,11 @@ MonoBehaviour:
     uniformColor: 0
     oscillationDirection: 3
     oscillationAmplitude:
-      min: 1
-      max: 2
+      min: 0
+      max: 0
     oscillationFrequency:
-      min: 1
-      max: 2
+      min: 0
+      max: 0
     satellite:
       relativeScale:
         min: 0.25
@@ -287,6 +287,10 @@ MonoBehaviour:
       amount:
         min: 0
         max: 3
+    lifecycle:
+      growingDuration:
+        min: 1
+        max: 2
   surfaceOnly: 1
 --- !u!4 &1654597922
 Transform:
@@ -334,6 +338,7 @@ MonoBehaviour:
   spawnZone: {fileID: 1654597921}
   persistentObjects:
   - {fileID: 1654597921}
+  populationLimit: 100
 --- !u!4 &1910253917
 Transform:
   m_ObjectHideFlags: 0
