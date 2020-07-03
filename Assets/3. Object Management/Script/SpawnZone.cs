@@ -82,6 +82,7 @@ namespace ObjectManagement
 		public virtual void SpawnShapes() {
 			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
 			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
+			shape.gameObject.layer = gameObject.layer;
 			Transform t = shape.transform;
 			t.localPosition = SpawnPoint;
 			t.localRotation = Random.rotation;
@@ -155,6 +156,7 @@ namespace ObjectManagement
 		private void CreateSatelliteFor(Shape focalShape, Vector3 lifecycleDurations) {
 			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
 			Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
+			shape.gameObject.layer = gameObject.layer;
 			Transform t = shape.transform;
 			t.localRotation = Random.rotation;
 
