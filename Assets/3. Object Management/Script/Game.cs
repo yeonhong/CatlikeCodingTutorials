@@ -106,6 +106,7 @@ namespace ObjectManagement
 			for (int i = 0; i < shapes.Count; i++) {
 				shapes[i].GameUpdate();
 			}
+			GameLevel.Current.GameUpdate();
 
 			creationProgress += Time.deltaTime * CreationSpeed;
 			while (creationProgress >= 1f) {

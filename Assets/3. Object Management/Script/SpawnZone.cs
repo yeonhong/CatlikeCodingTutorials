@@ -2,7 +2,7 @@
 
 namespace ObjectManagement
 {
-	public abstract class SpawnZone : PersistableObject
+	public abstract class SpawnZone : GameLevelObject
 	{
 		[System.Serializable]
 		public struct SpawnConfiguration
@@ -63,7 +63,7 @@ namespace ObjectManagement
 
 		private float spawnProgress;
 
-		private void FixedUpdate() {
+		public override void GameUpdate() {
 			spawnProgress += Time.deltaTime * spawnSpeed;
 			while (spawnProgress >= 1f) {
 				spawnProgress -= 1f;

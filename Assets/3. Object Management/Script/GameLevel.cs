@@ -7,7 +7,10 @@ namespace ObjectManagement
 		public static GameLevel Current { get; private set; }
 
 		[SerializeField] private SpawnZone spawnZone = null;
-		[SerializeField] private PersistableObject[] persistentObjects;
+
+		// 이름변경으로 인한 링크깨지는것을 막아준다.
+		[UnityEngine.Serialization.FormerlySerializedAs("persistentObjects")]
+		[SerializeField] private GameLevelObject[] levelObjects;
 		[SerializeField] private int populationLimit = 100;
 
 		public int PopulationLimit => populationLimit;
@@ -18,22 +21,28 @@ namespace ObjectManagement
 
 		private void OnEnable() {
 			Current = this;
-			if (persistentObjects == null) {
-				persistentObjects = new PersistableObject[0];
+			if (levelObjects == null) {
+				levelObjects = new GameLevelObject[0];
 			}
 		}
 
 		public override void Save(GameDataWriter writer) {
-			writer.Write(persistentObjects.Length);
-			for (int i = 0; i < persistentObjects.Length; i++) {
-				persistentObjects[i].Save(writer);
+			writer.Write(levelObjects.Length);
+			for (int i = 0; i < levelObjects.Length; i++) {
+				levelObjects[i].Save(writer);
 			}
 		}
 
 		public override void Load(GameDataReader reader) {
 			int savedCount = reader.ReadInt();
 			for (int i = 0; i < savedCount; i++) {
-				persistentObjects[i].Load(reader);
+				levelObjects[i].Load(reader);
+			}
+		}
+
+		public void GameUpdate() {
+			for (int i = 0; i < levelObjects.Length; i++) {
+				levelObjects[i].GameUpdate();
 			}
 		}
 	}
