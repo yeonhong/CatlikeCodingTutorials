@@ -8,7 +8,7 @@ namespace ObjectManagement
 {
 	public class Game : PersistableObject
 	{
-		private const int saveVersion = 6;
+		private const int saveVersion = 7;
 		public static Game Instance { get; private set; }
 
 		[SerializeField] private ShapeFactory[] shapeFactories = null;

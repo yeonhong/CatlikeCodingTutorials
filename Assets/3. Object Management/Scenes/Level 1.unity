@@ -298,6 +298,7 @@ MonoBehaviour:
       dyingDuration:
         min: 1
         max: 2
+  spawnSpeed: 50
   surfaceOnly: 1
 --- !u!4 &1654597922
 Transform:
@@ -345,7 +346,7 @@ MonoBehaviour:
   spawnZone: {fileID: 1654597921}
   persistentObjects:
   - {fileID: 1654597921}
-  populationLimit: 20
+  populationLimit: 100
 --- !u!4 &1910253917
 Transform:
   m_ObjectHideFlags: 0

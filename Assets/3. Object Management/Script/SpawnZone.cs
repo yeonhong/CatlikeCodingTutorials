@@ -46,23 +46,38 @@ namespace ObjectManagement
 				[FloatRangeSlider(0f, 100f)] public FloatRange adultDuration;
 				[FloatRangeSlider(0f, 2f)] public FloatRange dyingDuration;
 
-				public Vector3 RandomDurations {
-					get {
-						return new Vector3(
+				public Vector3 RandomDurations => new Vector3(
 							growingDuration.RandomValueInRange,
 							adultDuration.RandomValueInRange,
 							dyingDuration.RandomValueInRange
 						);
-					}
-				}
 			}
 
 			public LifecycleConfiguration lifecycle;
 		}
 
 		[SerializeField] private SpawnConfiguration spawnConfig;
+		[SerializeField, Range(0f, 50f)] private float spawnSpeed;
 
 		public abstract Vector3 SpawnPoint { get; }
+
+		private float spawnProgress;
+
+		private void FixedUpdate() {
+			spawnProgress += Time.deltaTime * spawnSpeed;
+			while (spawnProgress >= 1f) {
+				spawnProgress -= 1f;
+				SpawnShapes();
+			}
+		}
+
+		public override void Save(GameDataWriter writer) {
+			writer.Write(spawnProgress);
+		}
+
+		public override void Load(GameDataReader reader) {
+			spawnProgress = reader.ReadFloat();
+		}
 
 		public virtual void SpawnShapes() {
 			int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
@@ -91,7 +106,7 @@ namespace ObjectManagement
 			var lifecycleDurations = spawnConfig.lifecycle.RandomDurations;
 			int satelliteCount = spawnConfig.satellite.amount.RandomValueInRange;
 			for (int i = 0; i < satelliteCount; i++) {
-				CreateSatelliteFor(shape, 
+				CreateSatelliteFor(shape,
 					spawnConfig.satellite.uniformLifecycles ?
 					lifecycleDurations : spawnConfig.lifecycle.RandomDurations
 				);
