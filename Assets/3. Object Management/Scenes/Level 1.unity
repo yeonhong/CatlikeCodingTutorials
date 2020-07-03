@@ -287,6 +287,7 @@ MonoBehaviour:
       amount:
         min: 0
         max: 3
+      uniformLifecycles: 0
     lifecycle:
       growingDuration:
         min: 1
@@ -344,7 +345,7 @@ MonoBehaviour:
   spawnZone: {fileID: 1654597921}
   persistentObjects:
   - {fileID: 1654597921}
-  populationLimit: 100
+  populationLimit: 20
 --- !u!4 &1910253917
 Transform:
   m_ObjectHideFlags: 0

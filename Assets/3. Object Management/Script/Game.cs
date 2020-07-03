@@ -22,6 +22,7 @@ namespace ObjectManagement
 		[SerializeField] private bool reseedOnLoad = false;
 		[SerializeField] private Slider creationSpeedSlider = null;
 		[SerializeField] private Slider destructionSpeedSlider = null;
+		[SerializeField] private float destroyDuration = 1f;
 
 		public float CreationSpeed { get; set; }
 		public float DestructionSpeed { get; set; }
@@ -32,12 +33,15 @@ namespace ObjectManagement
 
 		private bool inGameUpdateLoop = false;
 		private List<Shape> shapes = null;
-		private List<ShapeInstance> killList = null;
+
+		private List<ShapeInstance> killList, markAsDyingList;
+		private int dyingShapeCount;
 
 		private void Start() {
 			mainRandomState = Random.state;
 			shapes = new List<Shape>();
 			killList = new List<ShapeInstance>();
+			markAsDyingList = new List<ShapeInstance>();
 
 			if (Application.isEditor) {
 				for (int i = 0; i < SceneManager.sceneCount; i++) {
@@ -117,7 +121,7 @@ namespace ObjectManagement
 
 			int limit = GameLevel.Current.PopulationLimit;
 			if (limit > 0) {
-				while (shapes.Count > limit) {
+				while (shapes.Count - dyingShapeCount > limit) {
 					DestroyShape();
 				}
 			}
@@ -129,6 +133,15 @@ namespace ObjectManagement
 					}
 				}
 				killList.Clear();
+			}
+
+			if (markAsDyingList.Count > 0) {
+				for (int i = 0; i < markAsDyingList.Count; i++) {
+					if (markAsDyingList[i].IsValid) {
+						MarkAsDyingImmediately(markAsDyingList[i].Shape);
+					}
+				}
+				markAsDyingList.Clear();
 			}
 		}
 
@@ -145,6 +158,7 @@ namespace ObjectManagement
 				shapes[i].Recycle();
 			}
 			shapes.Clear();
+			dyingShapeCount = 0;
 		}
 
 		public void AddShape(Shape shape) {
@@ -157,9 +171,16 @@ namespace ObjectManagement
 		}
 
 		private void DestroyShape() {
-			if (shapes.Count > 0) {
-				Shape shape = shapes[Random.Range(0, shapes.Count)];
-				KillImmediately(shape);
+			if (shapes.Count - dyingShapeCount > 0) {
+				Shape shape = shapes[Random.Range(dyingShapeCount, shapes.Count)];
+				if (destroyDuration <= 0f) {
+					KillImmediately(shape);
+				}
+				else {
+					shape.AddBehavior<DyingShapeBehavior>().Initialize(
+						shape, destroyDuration
+					);
+				}
 			}
 		}
 
@@ -252,11 +273,46 @@ namespace ObjectManagement
 			int index = shape.SaveIndex;
 			shape.Recycle();
 
+			if (index < dyingShapeCount) {
+				dyingShapeCount--;
+				if (index < dyingShapeCount) {
+					shapes[dyingShapeCount].SaveIndex = index;
+					shapes[index] = shapes[dyingShapeCount];
+					index = dyingShapeCount;
+				}
+			}
+
 			// list 삭제 최적화. list는 배열로 구현되어 있어 내부적으로 단순히 사용하면 오래걸림.
 			int lastIndex = shapes.Count - 1;
-			shapes[lastIndex].SaveIndex = index;
-			shapes[index] = shapes[lastIndex];
+			if (index < lastIndex) {
+				shapes[lastIndex].SaveIndex = index;
+				shapes[index] = shapes[lastIndex];
+			}
 			shapes.RemoveAt(lastIndex);
+		}
+
+		private void MarkAsDyingImmediately(Shape shape) {
+			int index = shape.SaveIndex;
+			if (index < dyingShapeCount) {
+				return;
+			}
+			shapes[dyingShapeCount].SaveIndex = index;
+			shapes[index] = shapes[dyingShapeCount];
+			shape.SaveIndex = dyingShapeCount;
+			shapes[dyingShapeCount++] = shape;
+		}
+
+		public void MarkAsDying(Shape shape) {
+			if (inGameUpdateLoop) {
+				markAsDyingList.Add(shape);
+			}
+			else {
+				MarkAsDyingImmediately(shape);
+			}
+		}
+
+		public bool IsMarkedAsDying(Shape shape) {
+			return shape.SaveIndex < dyingShapeCount;
 		}
 	}
 }

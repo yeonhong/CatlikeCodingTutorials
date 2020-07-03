@@ -204,5 +204,15 @@ namespace ObjectManagement
 		public void Die() {
 			Game.Instance.Kill(this);
 		}
+
+		public void MarkAsDying() {
+			Game.Instance.MarkAsDying(this);
+		}
+
+		public bool IsMarkedAsDying {
+			get {
+				return Game.Instance.IsMarkedAsDying(this);
+			}
+		}
 	}
 }
