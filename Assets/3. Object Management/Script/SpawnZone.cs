@@ -57,7 +57,7 @@ namespace ObjectManagement
 		}
 
 		[SerializeField] private SpawnConfiguration spawnConfig;
-		[SerializeField, Range(0f, 50f)] private float spawnSpeed;
+		[SerializeField, Range(0f, 50f)] private float spawnSpeed = 0f;
 
 		public abstract Vector3 SpawnPoint { get; }
 

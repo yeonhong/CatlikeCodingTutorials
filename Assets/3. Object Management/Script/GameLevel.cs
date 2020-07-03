@@ -2,7 +2,7 @@
 
 namespace ObjectManagement
 {
-	public class GameLevel : PersistableObject
+	public partial class GameLevel : PersistableObject
 	{
 		public static GameLevel Current { get; private set; }
 

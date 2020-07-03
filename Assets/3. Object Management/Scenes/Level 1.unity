@@ -508,8 +508,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnZone: {fileID: 1654597921}
-  persistentObjects:
+  levelObjects:
   - {fileID: 1654597921}
+  - {fileID: 447748472}
   populationLimit: 100
 --- !u!4 &1910253917
 Transform:
