@@ -25,6 +25,13 @@ namespace TowerDefense
 					tile.transform.localPosition = new Vector3(
 						x - offset.x, 0f, y - offset.y
 					);
+
+					if (x > 0) {
+						GameTile.MakeEastWestNeighbors(tile, tiles[i - 1]);
+					}
+					if (y > 0) {
+						GameTile.MakeNorthSouthNeighbors(tile, tiles[i - size.x]);
+					}
 				}
 			}
 		}
