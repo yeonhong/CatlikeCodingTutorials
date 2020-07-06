@@ -42,7 +42,11 @@ namespace TowerDefense
 		void HandleAlternativeTouch() {
 			GameTile tile = board.GetTile(TouchRay);
 			if (tile != null) {
-				board.ToggleDestination(tile);
+				if (Input.GetKey(KeyCode.LeftShift)) {
+					board.ToggleDestination(tile);
+				} else {
+					board.ToggleSpawnPoint(tile);
+				}
 			}
 		}
 
