@@ -13,6 +13,19 @@ namespace TowerDefense
 		public GameTile GrowPathSouth() => GrowPathTo(south);
 		public GameTile GrowPathWest() => GrowPathTo(west);
 
+		private GameTileContent content;
+		public GameTileContent Content {
+			get => content;
+			set {
+				Debug.Assert(value != null, "Null assigned to content!");
+				if (content != null) {
+					content.Recycle();
+				}
+				content = value;
+				content.transform.localPosition = transform.localPosition;
+			}
+		}
+
 		public bool IsAlternative { get; set; }
 
 		private static Quaternion

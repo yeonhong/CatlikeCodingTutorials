@@ -338,6 +338,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardSize: {x: 11, y: 11}
   board: {fileID: 1728085550}
+  tileContentFactory: {fileID: 11400000, guid: 168d31450d9d21c48a78eb6e5bc80f81, type: 2}
 --- !u!4 &1475870184
 Transform:
   m_ObjectHideFlags: 0
