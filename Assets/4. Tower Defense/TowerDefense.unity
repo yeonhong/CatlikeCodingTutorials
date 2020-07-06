@@ -400,6 +400,7 @@ MonoBehaviour:
   ground: {fileID: 614607003}
   tilePrefab: {fileID: 2822690808833776486, guid: cec6b5ada9346d74cb11be314e07a4f7,
     type: 3}
+  gridTexture: {fileID: 2800000, guid: 61edb371e6cd4dc44a10e799a0603d60, type: 3}
 --- !u!1 &2053190571
 GameObject:
   m_ObjectHideFlags: 0
