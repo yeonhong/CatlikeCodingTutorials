@@ -48,6 +48,8 @@ namespace TowerDefense
 			}
 
 			enemies.GameUpdate();
+			Physics.SyncTransforms(); //물리위치Sync
+			board.GameUpdate();
 		}
 
 		private void SpawnEnemy() {

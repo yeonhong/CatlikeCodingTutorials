@@ -15,6 +15,7 @@ namespace TowerDefense
 		private float directionAngleFrom, directionAngleTo;
 		private float pathOffset;
 		private float speed;
+		public float Scale { get; private set; }
 
 		public EnemyFactory OriginFactory {
 			get => originFactory;
@@ -25,6 +26,7 @@ namespace TowerDefense
 		}
 
 		public void Initialize(float scale, float speed, float pathOffset) {
+			Scale = scale;
 			model.localScale = new Vector3(scale, scale, scale);
 			this.speed = speed;
 			this.pathOffset = pathOffset;

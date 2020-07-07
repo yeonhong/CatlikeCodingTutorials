@@ -7,6 +7,7 @@ namespace TowerDefense
 		Empty, Destination, Wall, SpawnPoint, Tower
 	}
 
+	[SelectionBase]
 	public class GameTileContent : MonoBehaviour
 	{
 		[SerializeField] private GameTileContentType type = default;
@@ -27,5 +28,7 @@ namespace TowerDefense
 		public void Recycle() {
 			originFactory.Reclaim(this);
 		}
+
+		public virtual void GameUpdate() { }
 	}
 }
