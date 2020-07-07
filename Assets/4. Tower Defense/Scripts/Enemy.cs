@@ -13,5 +13,9 @@ namespace TowerDefense
 				originFactory = value;
 			}
 		}
+
+		public void SpawnOn(GameTile tile) {
+			transform.localPosition = tile.transform.localPosition;
+		}
 	}
 }
