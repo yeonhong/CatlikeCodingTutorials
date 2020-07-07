@@ -10,6 +10,7 @@ namespace TowerDefense
 		[SerializeField] private EnemyFactory enemyFactory = default;
 		[SerializeField, Range(0.1f, 10f)] private float spawnSpeed = 4f;
 
+		private EnemyCollection enemies = new EnemyCollection();
 		private Ray TouchRay => Camera.main.ScreenPointToRay(Input.mousePosition);
 		private float spawnProgress;
 
@@ -45,6 +46,8 @@ namespace TowerDefense
 				spawnProgress -= 1f;
 				SpawnEnemy();
 			}
+
+			enemies.GameUpdate();
 		}
 
 		private void SpawnEnemy() {
@@ -52,6 +55,7 @@ namespace TowerDefense
 				board.GetSpawnPoint(Random.Range(0, board.SpawnPointCount));
 			Enemy enemy = enemyFactory.Get();
 			enemy.SpawnOn(spawnPoint);
+			enemies.Add(enemy);
 		}
 
 		private void HandleAlternativeTouch() {

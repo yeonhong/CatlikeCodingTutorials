@@ -8,10 +8,13 @@ namespace TowerDefense
 		private GameTile north, east, south, west, nextOnPath;
 		private int distance;
 		public bool HasPath => distance != int.MaxValue;
-		public GameTile GrowPathNorth() => GrowPathTo(north);
-		public GameTile GrowPathEast() => GrowPathTo(east);
-		public GameTile GrowPathSouth() => GrowPathTo(south);
-		public GameTile GrowPathWest() => GrowPathTo(west);
+		public GameTile GrowPathNorth() => GrowPathTo(north, Direction.South);
+		public GameTile GrowPathEast() => GrowPathTo(east, Direction.West);
+		public GameTile GrowPathSouth() => GrowPathTo(south, Direction.North);
+		public GameTile GrowPathWest() => GrowPathTo(west, Direction.East);
+		public GameTile NextTileOnPath => nextOnPath;
+		public Vector3 ExitPoint { get; private set; }
+		public Direction PathDirection { get; private set; }
 
 		private GameTileContent content;
 		public GameTileContent Content {
@@ -58,14 +61,17 @@ namespace TowerDefense
 		public void BecomeDestination() {
 			distance = 0;
 			nextOnPath = null;
+			ExitPoint = transform.localPosition;
 		}
 
-		private GameTile GrowPathTo(GameTile neighbor) {
+		private GameTile GrowPathTo(GameTile neighbor, Direction direction) {
 			if (!HasPath || neighbor == null || neighbor.HasPath) {
 				return null;
 			}
 			neighbor.distance = distance + 1;
 			neighbor.nextOnPath = this;
+			neighbor.PathDirection = direction;
+			neighbor.ExitPoint = neighbor.transform.localPosition + direction.GetHalfVector();
 			return neighbor.Content.Type != GameTileContentType.Wall ? neighbor : null;
 		}
 
