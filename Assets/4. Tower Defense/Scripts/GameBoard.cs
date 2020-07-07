@@ -173,6 +173,19 @@ namespace TowerDefense
 			}
 		}
 
+		public void ToggleTower(GameTile tile) {
+			if (tile.Content.Type == GameTileContentType.Tower) {
+				tile.Content = contentFactory.Get(GameTileContentType.Empty);
+				FindPaths();
+			} else if (tile.Content.Type == GameTileContentType.Empty) {
+				tile.Content = contentFactory.Get(GameTileContentType.Tower);
+				if (!FindPaths()) {
+					tile.Content = contentFactory.Get(GameTileContentType.Empty);
+					FindPaths();
+				}
+			}
+		}
+
 		public void ToggleSpawnPoint(GameTile tile) {
 			if (tile.Content.Type == GameTileContentType.SpawnPoint) {
 				if (spawnPoints.Count > 1) {

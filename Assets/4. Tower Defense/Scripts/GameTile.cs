@@ -72,7 +72,7 @@ namespace TowerDefense
 			neighbor.nextOnPath = this;
 			neighbor.PathDirection = direction;
 			neighbor.ExitPoint = neighbor.transform.localPosition + direction.GetHalfVector();
-			return neighbor.Content.Type != GameTileContentType.Wall ? neighbor : null;
+			return neighbor.Content.BlocksPath ? null : neighbor;
 		}
 
 		public void ShowPath() {

@@ -93,7 +93,7 @@ namespace TowerDefense
 			directionAngleFrom = directionAngleTo = direction.GetAngle();
 			model.localPosition = new Vector3(pathOffset, 0f);
 			transform.localRotation = direction.GetRotation();
-			progressFactor = 2f;
+			progressFactor = 2f * speed;
 		}
 
 		private void PrepareOutro() {
@@ -102,7 +102,7 @@ namespace TowerDefense
 			directionAngleTo = direction.GetAngle();
 			model.localPosition = new Vector3(pathOffset, 0f);
 			transform.localRotation = direction.GetRotation();
-			progressFactor = 2f;
+			progressFactor = 2f * speed;
 		}
 
 		private void PrepareForward() {
