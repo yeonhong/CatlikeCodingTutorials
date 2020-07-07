@@ -6,14 +6,39 @@ namespace TowerDefense
 	{
 		[SerializeField, Range(1.5f, 10.5f)]
 		private float targetingRange = 2.5f;
+		[SerializeField]
+		private Transform turret = default, laserBeam = default;
+		[SerializeField, Range(1f, 100f)]
+		private float damagePerSecond = 10f;
+
 		private TargetPoint target;
 		private const int enemyLayerMask = 1 << 11;
-		private static Collider[] targetsBuffer = new Collider[1];
+		private static Collider[] targetsBuffer = new Collider[100];
+		private Vector3 laserBeamScale;
+
+		private void Awake() {
+			laserBeamScale = laserBeam.localScale;
+		}
 
 		public override void GameUpdate() {
 			if (TrackTarget() || AcquireTarget()) {
-				Debug.Log("Locked on target!");
+				Shoot();
+			} else {
+				laserBeam.localScale = Vector3.zero;
 			}
+		}
+
+		private void Shoot() {
+			Vector3 point = target.Position;
+			turret.LookAt(point);
+			laserBeam.localRotation = turret.localRotation;
+
+			float d = Vector3.Distance(turret.position, point);
+			laserBeamScale.z = d;
+			laserBeam.localScale = laserBeamScale;
+			laserBeam.localPosition = turret.localPosition + 0.5f * d * laserBeam.forward;
+
+			target.Enemy.ApplyDamage(damagePerSecond * Time.deltaTime);
 		}
 
 		private bool TrackTarget() {
@@ -34,7 +59,7 @@ namespace TowerDefense
 			return true;
 		}
 
-		bool AcquireTarget() {
+		private bool AcquireTarget() {
 			Vector3 a = transform.localPosition;
 			Vector3 b = a;
 			b.y += 2f;
@@ -42,7 +67,7 @@ namespace TowerDefense
 				a, b, targetingRange, targetsBuffer, enemyLayerMask
 			);
 			if (hits > 0) {
-				target = targetsBuffer[0].GetComponent<TargetPoint>();
+				target = targetsBuffer[Random.Range(0, hits)].GetComponent<TargetPoint>();
 				Debug.Assert(target != null, "Targeted non-enemy!", targetsBuffer[0]);
 				return true;
 			}

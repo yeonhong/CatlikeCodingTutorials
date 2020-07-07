@@ -16,6 +16,7 @@ namespace TowerDefense
 		private float pathOffset;
 		private float speed;
 		public float Scale { get; private set; }
+		private float Health { get; set; }
 
 		public EnemyFactory OriginFactory {
 			get => originFactory;
@@ -30,6 +31,7 @@ namespace TowerDefense
 			model.localScale = new Vector3(scale, scale, scale);
 			this.speed = speed;
 			this.pathOffset = pathOffset;
+			Health = 100f * scale;
 		}
 
 		public void SpawnOn(GameTile tile) {
@@ -40,7 +42,17 @@ namespace TowerDefense
 			PrepareIntro();
 		}
 
+		public void ApplyDamage(float damage) {
+			Debug.Assert(damage >= 0f, "Negative damage applied.");
+			Health -= damage;
+		}
+
 		public bool GameUpdate() {
+			if (Health <= 0f) {
+				OriginFactory.Reclaim(this);
+				return false;
+			}
+
 			progress += Time.deltaTime * progressFactor;
 			while (progress >= 1f) {
 				if (tileTo == null) {
