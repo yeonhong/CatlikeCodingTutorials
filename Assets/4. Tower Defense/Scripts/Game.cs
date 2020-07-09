@@ -7,15 +7,15 @@ namespace TowerDefense
 		[SerializeField] private Vector2Int boardSize = new Vector2Int(11, 11);
 		[SerializeField] private GameBoard board = default;
 		[SerializeField] private GameTileContentFactory tileContentFactory = default;
-		[SerializeField] private EnemyFactory enemyFactory = default;
-		[SerializeField, Range(0.1f, 10f)] private float spawnSpeed = 4f;
 		[SerializeField] private WarFactory warFactory = default;
-
+		[SerializeField] private GameScenario scenario = default;
+		
 		private GameBehaviorCollection enemies = new GameBehaviorCollection();
 		private GameBehaviorCollection nonEnemies = new GameBehaviorCollection();
 		private Ray TouchRay => Camera.main.ScreenPointToRay(Input.mousePosition);
-		private float spawnProgress;
 		private TowerType selectedTowerType = TowerType.Laser;
+		private GameScenario.State activeScenario;
+
 		private static Game instance;
 
 		public static Shell SpawnShell() {
@@ -46,6 +46,7 @@ namespace TowerDefense
 		private void Awake() {
 			board.Initialize(boardSize, tileContentFactory);
 			board.ShowGrid = true;
+			activeScenario = scenario.Begin();
 		}
 
 		private void Update() {
@@ -65,25 +66,20 @@ namespace TowerDefense
 				selectedTowerType = TowerType.Mortar;
 			}
 
-
-			spawnProgress += spawnSpeed * Time.deltaTime;
-			while (spawnProgress >= 1f) {
-				spawnProgress -= 1f;
-				SpawnEnemy();
-			}
-
+			activeScenario.Progress();
 			enemies.GameUpdate();
 			Physics.SyncTransforms(); //물리위치Sync
 			board.GameUpdate();
 			nonEnemies.GameUpdate();
 		}
 
-		private void SpawnEnemy() {
-			GameTile spawnPoint =
-				board.GetSpawnPoint(Random.Range(0, board.SpawnPointCount));
-			Enemy enemy = enemyFactory.Get((EnemyType)(Random.Range(0, 3)));
+		public static void SpawnEnemy(EnemyFactory factory, EnemyType type) {
+			GameTile spawnPoint = instance.board.GetSpawnPoint(
+				Random.Range(0, instance.board.SpawnPointCount)
+			);
+			Enemy enemy = factory.Get(type);
 			enemy.SpawnOn(spawnPoint);
-			enemies.Add(enemy);
+			instance.enemies.Add(enemy);
 		}
 
 		private void HandleAlternativeTouch() {
