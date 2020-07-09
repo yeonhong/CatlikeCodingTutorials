@@ -14,7 +14,7 @@ namespace TowerDefense
 			}
 		}
 
-		public void Recycle() {
+		public override void Recycle() {
 			originFactory.Reclaim(this);
 		}
 	}

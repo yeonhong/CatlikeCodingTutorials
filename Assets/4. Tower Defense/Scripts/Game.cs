@@ -9,13 +9,17 @@ namespace TowerDefense
 		[SerializeField] private GameTileContentFactory tileContentFactory = default;
 		[SerializeField] private WarFactory warFactory = default;
 		[SerializeField] private GameScenario scenario = default;
-		
+		[SerializeField, Range(0, 100)] private int startingPlayerHealth = 10;
+		[SerializeField, Range(1f, 10f)] private float playSpeed = 1f;
+
 		private GameBehaviorCollection enemies = new GameBehaviorCollection();
 		private GameBehaviorCollection nonEnemies = new GameBehaviorCollection();
 		private Ray TouchRay => Camera.main.ScreenPointToRay(Input.mousePosition);
 		private TowerType selectedTowerType = TowerType.Laser;
 		private GameScenario.State activeScenario;
+		private int playerHealth;
 
+		private const float pausedTimeScale = 0f;
 		private static Game instance;
 
 		public static Shell SpawnShell() {
@@ -28,6 +32,10 @@ namespace TowerDefense
 			Explosion explosion = instance.warFactory.Explosion;
 			instance.nonEnemies.Add(explosion);
 			return explosion;
+		}
+
+		public static void EnemyReachedDestination() {
+			instance.playerHealth -= 1;
 		}
 
 		private void OnEnable() {
@@ -44,12 +52,20 @@ namespace TowerDefense
 		}
 
 		private void Awake() {
+			playerHealth = startingPlayerHealth;
 			board.Initialize(boardSize, tileContentFactory);
 			board.ShowGrid = true;
 			activeScenario = scenario.Begin();
 		}
 
 		private void Update() {
+			if (Input.GetKeyDown(KeyCode.Space)) {
+				Time.timeScale = 
+					Time.timeScale > pausedTimeScale ? pausedTimeScale : playSpeed;
+			} else if (Time.timeScale > pausedTimeScale) {
+				Time.timeScale = playSpeed;
+			}
+
 			if (Input.GetMouseButtonDown(0)) {
 				HandleTouch();
 			} else if (Input.GetMouseButtonDown(1)) {
@@ -64,6 +80,19 @@ namespace TowerDefense
 				selectedTowerType = TowerType.Laser;
 			} else if (Input.GetKeyDown(KeyCode.Alpha2)) {
 				selectedTowerType = TowerType.Mortar;
+			} else if (Input.GetKeyDown(KeyCode.B)) {
+				BeginNewGame();
+			}
+
+			if (playerHealth <= 0 && startingPlayerHealth > 0) {
+				Debug.Log("Defeat!");
+				BeginNewGame();
+			}
+
+			if (!activeScenario.Progress() && enemies.IsEmpty) {
+				Debug.Log("Victory!");
+				BeginNewGame();
+				activeScenario.Progress();
 			}
 
 			activeScenario.Progress();
@@ -71,6 +100,14 @@ namespace TowerDefense
 			Physics.SyncTransforms(); //물리위치Sync
 			board.GameUpdate();
 			nonEnemies.GameUpdate();
+		}
+
+		private void BeginNewGame() {
+			playerHealth = startingPlayerHealth;
+			enemies.Clear();
+			nonEnemies.Clear();
+			board.Clear();
+			activeScenario = scenario.Begin();
 		}
 
 		public static void SpawnEnemy(EnemyFactory factory, EnemyType type) {

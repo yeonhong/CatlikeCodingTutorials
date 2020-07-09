@@ -54,14 +54,15 @@ namespace TowerDefense
 
 		public override bool GameUpdate() {
 			if (Health <= 0f) {
-				OriginFactory.Reclaim(this);
+				Recycle();
 				return false;
 			}
 
 			progress += Time.deltaTime * progressFactor;
 			while (progress >= 1f) {
 				if (tileTo == null) {
-					OriginFactory.Reclaim(this);
+					Game.EnemyReachedDestination();
+					Recycle();
 					return false;
 				}
 				progress = (progress - 1f) / progressFactor;
@@ -80,6 +81,10 @@ namespace TowerDefense
 			}
 
 			return true;
+		}
+
+		public override void Recycle() {
+			OriginFactory.Reclaim(this);
 		}
 
 		private void PrepareNextState() {
