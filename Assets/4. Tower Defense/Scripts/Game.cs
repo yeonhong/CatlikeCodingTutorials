@@ -9,11 +9,30 @@ namespace TowerDefense
 		[SerializeField] private GameTileContentFactory tileContentFactory = default;
 		[SerializeField] private EnemyFactory enemyFactory = default;
 		[SerializeField, Range(0.1f, 10f)] private float spawnSpeed = 4f;
+		[SerializeField] private WarFactory warFactory = default;
 
-		private EnemyCollection enemies = new EnemyCollection();
+		private GameBehaviorCollection enemies = new GameBehaviorCollection();
+		private GameBehaviorCollection nonEnemies = new GameBehaviorCollection();
 		private Ray TouchRay => Camera.main.ScreenPointToRay(Input.mousePosition);
 		private float spawnProgress;
 		private TowerType selectedTowerType = TowerType.Laser;
+		private static Game instance;
+
+		public static Shell SpawnShell() {
+			Shell shell = instance.warFactory.Shell;
+			instance.nonEnemies.Add(shell);
+			return shell;
+		}
+
+		public static Explosion SpawnExplosion() {
+			Explosion explosion = instance.warFactory.Explosion;
+			instance.nonEnemies.Add(explosion);
+			return explosion;
+		}
+
+		private void OnEnable() {
+			instance = this;
+		}
 
 		private void OnValidate() {
 			if (boardSize.x < 2) {
@@ -56,6 +75,7 @@ namespace TowerDefense
 			enemies.GameUpdate();
 			Physics.SyncTransforms(); //물리위치Sync
 			board.GameUpdate();
+			nonEnemies.GameUpdate();
 		}
 
 		private void SpawnEnemy() {

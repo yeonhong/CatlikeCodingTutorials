@@ -172,6 +172,8 @@ MonoBehaviour:
   type: 4
   targetingRange: 3.5
   shotsPerSecond: 1
+  shellBlastRadius: 1.5
+  shellDamage: 15
   mortar: {fileID: 6001917782848062078}
 --- !u!1 &6759781632133663035
 GameObject:

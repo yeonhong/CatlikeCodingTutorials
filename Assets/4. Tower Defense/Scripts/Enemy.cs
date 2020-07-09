@@ -2,7 +2,7 @@
 
 namespace TowerDefense
 {
-	public class Enemy : MonoBehaviour
+	public class Enemy : GameBehavior
 	{
 		[SerializeField] private Transform model = default;
 
@@ -47,7 +47,7 @@ namespace TowerDefense
 			Health -= damage;
 		}
 
-		public bool GameUpdate() {
+		public override bool GameUpdate() {
 			if (Health <= 0f) {
 				OriginFactory.Reclaim(this);
 				return false;
