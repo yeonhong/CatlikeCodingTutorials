@@ -13,6 +13,7 @@ namespace TowerDefense
 		private EnemyCollection enemies = new EnemyCollection();
 		private Ray TouchRay => Camera.main.ScreenPointToRay(Input.mousePosition);
 		private float spawnProgress;
+		private TowerType selectedTowerType = TowerType.Laser;
 
 		private void OnValidate() {
 			if (boardSize.x < 2) {
@@ -39,7 +40,12 @@ namespace TowerDefense
 				board.ShowPaths = !board.ShowPaths;
 			} else if (Input.GetKeyDown(KeyCode.G)) {
 				board.ShowGrid = !board.ShowGrid;
+			} else if (Input.GetKeyDown(KeyCode.Alpha1)) {
+				selectedTowerType = TowerType.Laser;
+			} else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+				selectedTowerType = TowerType.Mortar;
 			}
+
 
 			spawnProgress += spawnSpeed * Time.deltaTime;
 			while (spawnProgress >= 1f) {
@@ -75,7 +81,7 @@ namespace TowerDefense
 			GameTile tile = board.GetTile(TouchRay);
 			if (tile != null) {
 				if (Input.GetKey(KeyCode.LeftShift)) {
-					board.ToggleTower(tile);
+					board.ToggleTower(tile, selectedTowerType);
 				} else {
 					board.ToggleWall(tile);
 				}

@@ -9,6 +9,8 @@ namespace TowerDefense
 		[SerializeField, Range(1.5f, 10.5f)]
 		protected float targetingRange = 2.5f;
 
+		public abstract TowerType TowerType { get; }
+
 		protected bool TrackTarget(ref TargetPoint target) {
 			if (target == null) {
 				return false;

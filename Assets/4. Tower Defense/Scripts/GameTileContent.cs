@@ -7,6 +7,11 @@ namespace TowerDefense
 		Empty, Destination, Wall, SpawnPoint, Tower
 	}
 
+	public enum TowerType
+	{
+		Laser, Mortar
+	}
+
 	[SelectionBase]
 	public class GameTileContent : MonoBehaviour
 	{
