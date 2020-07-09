@@ -2,6 +2,11 @@
 
 namespace TowerDefense
 {
+	public enum EnemyType
+	{
+		Small, Medium, Large
+	}
+
 	public class Enemy : GameBehavior
 	{
 		[SerializeField] private Transform model = default;
@@ -26,12 +31,12 @@ namespace TowerDefense
 			}
 		}
 
-		public void Initialize(float scale, float speed, float pathOffset) {
+		public void Initialize(float scale, float speed, float pathOffset, float health) {
 			Scale = scale;
 			model.localScale = new Vector3(scale, scale, scale);
 			this.speed = speed;
 			this.pathOffset = pathOffset;
-			Health = 100f * scale;
+			Health = health;
 		}
 
 		public void SpawnOn(GameTile tile) {

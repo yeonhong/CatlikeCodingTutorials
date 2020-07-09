@@ -12,13 +12,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: debaedb6af2f2854ebb6d6ca553da282, type: 3}
   m_Name: EnemyFactory
   m_EditorClassIdentifier: 
-  prefab: {fileID: 8961511924412283973, guid: c9360cf59d39b11438d006bf70048aa8, type: 3}
-  scale:
-    min: 0.5806711
-    max: 1
-  pathOffset:
-    min: -0.25
-    max: 0.125
-  speed:
-    min: 0.75
-    max: 1.5
+  small:
+    prefab: {fileID: 8961511924412283973, guid: c9360cf59d39b11438d006bf70048aa8,
+      type: 3}
+    scale:
+      min: 0.5
+      max: 0.6
+    speed:
+      min: 1.5
+      max: 2
+    pathOffset:
+      min: -0.3
+      max: 0.3
+    health:
+      min: 40
+      max: 50
+  medium:
+    prefab: {fileID: 8961511924412283973, guid: a449ede0f30210e488d7f09e8113bfa0,
+      type: 3}
+    scale:
+      min: 0.9
+      max: 1
+    speed:
+      min: 0.8
+      max: 1.2
+    pathOffset:
+      min: -0.2
+      max: 0.2
+    health:
+      min: 90
+      max: 120
+  large:
+    prefab: {fileID: 8961511924412283973, guid: b27c8ed0babfe09438f84b4f1dfc97b9,
+      type: 3}
+    scale:
+      min: 1.2
+      max: 1.4
+    speed:
+      min: 0.5
+      max: 0.6
+    pathOffset:
+      min: -0.1
+      max: 0.1
+    health:
+      min: 500
+      max: 600
