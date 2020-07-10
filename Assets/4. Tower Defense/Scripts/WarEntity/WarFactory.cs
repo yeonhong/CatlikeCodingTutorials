@@ -2,7 +2,7 @@
 
 namespace TowerDefense
 {
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "TowerDefense/WarFactory")]
 	public class WarFactory : GameObjectFactory
 	{
 		[SerializeField] private Explosion explosionPrefab = default;

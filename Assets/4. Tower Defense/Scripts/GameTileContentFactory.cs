@@ -2,7 +2,7 @@
 
 namespace TowerDefense
 {
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "TowerDefense/GameTileContentFactory")]
 	public class GameTileContentFactory : GameObjectFactory
 	{
 		[SerializeField] private GameTileContent destinationPrefab = default;

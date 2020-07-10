@@ -2,7 +2,7 @@
 
 namespace TowerDefense
 {
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "TowerDefense/EnemyFactory")]
 	public class EnemyFactory : GameObjectFactory
 	{
 		[System.Serializable]

@@ -2,7 +2,7 @@
 
 namespace TowerDefense
 {
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "TowerDefense/GameScenario")]
 	public class GameScenario : ScriptableObject
 	{
 		[SerializeField] private EnemyWave[] waves = { };

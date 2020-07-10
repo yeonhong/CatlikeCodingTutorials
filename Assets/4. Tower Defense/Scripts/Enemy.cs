@@ -9,7 +9,7 @@ namespace TowerDefense
 
 	public class Enemy : GameBehavior
 	{
-		[SerializeField] EnemyAnimationConfig animationConfig = default;
+		[SerializeField] private EnemyAnimationConfig animationConfig = default;
 		[SerializeField] private Transform model = default;
 
 		private EnemyFactory originFactory;
@@ -23,6 +23,7 @@ namespace TowerDefense
 		private float speed;
 		public float Scale { get; private set; }
 		private float Health { get; set; }
+		private EnemyAnimator animator;
 
 		public EnemyFactory OriginFactory {
 			get => originFactory;
@@ -32,12 +33,24 @@ namespace TowerDefense
 			}
 		}
 
+		private void Awake() {
+			animator.Configure(
+				model.GetChild(0).gameObject.AddComponent<Animator>(),
+				animationConfig
+			);
+		}
+
+		void OnDestroy() {
+			animator.Destroy();
+		}
+
 		public void Initialize(float scale, float speed, float pathOffset, float health) {
 			Scale = scale;
 			model.localScale = new Vector3(scale, scale, scale);
 			this.speed = speed;
 			this.pathOffset = pathOffset;
 			Health = health;
+			animator.Play(speed / scale);
 		}
 
 		public void SpawnOn(GameTile tile) {
@@ -85,6 +98,7 @@ namespace TowerDefense
 		}
 
 		public override void Recycle() {
+			animator.Stop();
 			OriginFactory.Reclaim(this);
 		}
 

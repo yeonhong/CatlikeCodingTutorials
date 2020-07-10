@@ -2,7 +2,7 @@
 
 namespace TowerDefense
 {
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "TowerDefense/EnemyAnimationConfig")]
 	public class EnemyAnimationConfig : ScriptableObject
 	{
 		[SerializeField] private AnimationClip move = default;

@@ -181,4 +181,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 035fa06c25f31bc45be85c001ad043d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animationConfig: {fileID: 11400000, guid: 3815a94f37a02174d86f2891b9b28b15, type: 2}
   model: {fileID: 288597547918093921}
