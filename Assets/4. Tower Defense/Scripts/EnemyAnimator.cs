@@ -8,11 +8,14 @@ namespace TowerDefense
 	public struct EnemyAnimator
 	{
 		public enum Clip { Move, Intro, Outro }
+		public Clip CurrentClip { get; private set; }
+		public bool IsDone => GetPlayable(CurrentClip).IsDone();
 
 		private PlayableGraph graph;
 		private AnimationMixerPlayable mixer;
-		public Clip CurrentClip { get; private set; }
-		public bool IsDone => GetPlayable(CurrentClip).IsDone();
+		private Clip previousClip;
+		private float transitionProgress;
+		private const float transitionSpeed = 5f;
 
 		public void Configure(Animator animator, EnemyAnimationConfig config) {
 			graph = PlayableGraph.Create();
@@ -40,22 +43,37 @@ namespace TowerDefense
 			SetWeight(Clip.Intro, 1f);
 			CurrentClip = Clip.Intro;
 			graph.Play();
+			transitionProgress = -1f;
 		}
 
 		public void PlayMove(float speed) {
-			SetWeight(CurrentClip, 0f);
-			SetWeight(Clip.Move, 1f);
-			var clip = GetPlayable(Clip.Move);
-			clip.SetSpeed(speed);
-			clip.Play();
-			CurrentClip = Clip.Move;
+			GetPlayable(Clip.Move).SetSpeed(speed);
+			BeginTransition(Clip.Move);
 		}
 
 		public void PlayOutro() {
-			SetWeight(CurrentClip, 0f);
-			SetWeight(Clip.Outro, 1f);
-			GetPlayable(Clip.Outro).Play();
-			CurrentClip = Clip.Outro;
+			BeginTransition(Clip.Outro);
+		}
+
+		private void BeginTransition(Clip nextClip) {
+			previousClip = CurrentClip;
+			CurrentClip = nextClip;
+			transitionProgress = 0f;
+			GetPlayable(nextClip).Play();
+		}
+
+		public void GameUpdate() {
+			if (transitionProgress >= 0f) {
+				transitionProgress += Time.deltaTime * transitionSpeed;
+				if (transitionProgress >= 1f) {
+					transitionProgress = -1f;
+					SetWeight(CurrentClip, 1f);
+					SetWeight(previousClip, 0f);
+				} else {
+					SetWeight(CurrentClip, transitionProgress);
+					SetWeight(previousClip, 1f - transitionProgress);
+				}
+			}
 		}
 
 		private void SetWeight(Clip clip, float weight) {
