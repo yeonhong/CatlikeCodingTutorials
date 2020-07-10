@@ -23,6 +23,7 @@ namespace TowerDefense
 		private float speed;
 		public float Scale { get; private set; }
 		private float Health { get; set; }
+
 		private EnemyAnimator animator;
 
 		public EnemyFactory OriginFactory {
@@ -40,7 +41,7 @@ namespace TowerDefense
 			);
 		}
 
-		void OnDestroy() {
+		private void OnDestroy() {
 			animator.Destroy();
 		}
 
@@ -50,7 +51,7 @@ namespace TowerDefense
 			this.speed = speed;
 			this.pathOffset = pathOffset;
 			Health = health;
-			animator.Play(speed / scale);
+			animator.PlayIntro();
 		}
 
 		public void SpawnOn(GameTile tile) {
@@ -67,6 +68,19 @@ namespace TowerDefense
 		}
 
 		public override bool GameUpdate() {
+			if (animator.CurrentClip == EnemyAnimator.Clip.Intro) {
+				if (!animator.IsDone) {
+					return true;
+				}
+				animator.PlayMove(speed / Scale);
+			} else if (animator.CurrentClip == EnemyAnimator.Clip.Outro) {
+				if (animator.IsDone) {
+					Recycle();
+					return false;
+				}
+				return true;
+			}
+
 			if (Health <= 0f) {
 				Recycle();
 				return false;
@@ -76,8 +90,8 @@ namespace TowerDefense
 			while (progress >= 1f) {
 				if (tileTo == null) {
 					Game.EnemyReachedDestination();
-					Recycle();
-					return false;
+					animator.PlayOutro();
+					return true;
 				}
 				progress = (progress - 1f) / progressFactor;
 				PrepareNextState();
@@ -126,6 +140,7 @@ namespace TowerDefense
 
 		private void PrepareIntro() {
 			positionFrom = tileFrom.transform.localPosition;
+			transform.localPosition = positionFrom;
 			positionTo = tileFrom.ExitPoint;
 			direction = tileFrom.PathDirection;
 			directionChange = DirectionChange.None;
