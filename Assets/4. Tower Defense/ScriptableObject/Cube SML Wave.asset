@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: Cube SML Wave
   m_EditorClassIdentifier: 
   spawnSequences:
-  - factory: {fileID: 11400000, guid: 604a68e7e40ab6648a63932caa0300c1, type: 2}
+  - factory: {fileID: 11400000, guid: 5d228a24d337bd64caa3c4b96ea87c03, type: 2}
     type: 0
     amount: 10
     cooldown: 0.5
-  - factory: {fileID: 11400000, guid: 604a68e7e40ab6648a63932caa0300c1, type: 2}
+  - factory: {fileID: 11400000, guid: 5d228a24d337bd64caa3c4b96ea87c03, type: 2}
     type: 1
     amount: 5
     cooldown: 1
-  - factory: {fileID: 11400000, guid: 604a68e7e40ab6648a63932caa0300c1, type: 2}
+  - factory: {fileID: 11400000, guid: 5d228a24d337bd64caa3c4b96ea87c03, type: 2}
     type: 2
     amount: 1
     cooldown: 5
