@@ -11,8 +11,7 @@ namespace TowerDefense
 	{
 		[SerializeField] private EnemyAnimationConfig animationConfig = default;
 		[SerializeField] private Transform model = default;
-
-		private EnemyFactory originFactory;
+		
 		private GameTile tileFrom, tileTo;
 		private Vector3 positionFrom, positionTo;
 		private float progress, progressFactor;
@@ -26,6 +25,7 @@ namespace TowerDefense
 
 		private EnemyAnimator animator;
 
+		private EnemyFactory originFactory;
 		public EnemyFactory OriginFactory {
 			get => originFactory;
 			set {
@@ -33,6 +33,18 @@ namespace TowerDefense
 				originFactory = value;
 			}
 		}
+
+		private Collider targetPointCollider;
+		public Collider TargetPointCollider {
+			set {
+				Debug.Assert(targetPointCollider == null, "Redefined collider!");
+				targetPointCollider = value;
+			}
+		}
+
+		public bool IsValidTarget =>
+			animator.CurrentClip == EnemyAnimator.Clip.Move ||
+			animator.CurrentClip == EnemyAnimator.Clip.Intro;
 
 		private void Awake() {
 			animator.Configure(
@@ -52,6 +64,7 @@ namespace TowerDefense
 			this.pathOffset = pathOffset;
 			Health = health;
 			animator.PlayIntro();
+			targetPointCollider.enabled = false;
 		}
 
 		public void SpawnOn(GameTile tile) {
@@ -74,7 +87,8 @@ namespace TowerDefense
 					return true;
 				}
 				animator.PlayMove(speed / Scale);
-			} else if (animator.CurrentClip == EnemyAnimator.Clip.Outro) {
+				targetPointCollider.enabled = true;
+			} else if (animator.CurrentClip >= EnemyAnimator.Clip.Outro) {
 				if (animator.IsDone) {
 					Recycle();
 					return false;
@@ -83,8 +97,9 @@ namespace TowerDefense
 			}
 
 			if (Health <= 0f) {
-				Recycle();
-				return false;
+				animator.PlayDying();
+				targetPointCollider.enabled = false;
+				return true;
 			}
 
 			progress += Time.deltaTime * progressFactor;
@@ -92,6 +107,7 @@ namespace TowerDefense
 				if (tileTo == null) {
 					Game.EnemyReachedDestination();
 					animator.PlayOutro();
+					targetPointCollider.enabled = false;
 					return true;
 				}
 				progress = (progress - 1f) / progressFactor;
