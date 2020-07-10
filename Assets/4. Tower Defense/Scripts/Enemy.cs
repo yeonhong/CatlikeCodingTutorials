@@ -9,6 +9,7 @@ namespace TowerDefense
 
 	public class Enemy : GameBehavior
 	{
+		[SerializeField] EnemyAnimationConfig animationConfig = default;
 		[SerializeField] private Transform model = default;
 
 		private EnemyFactory originFactory;
