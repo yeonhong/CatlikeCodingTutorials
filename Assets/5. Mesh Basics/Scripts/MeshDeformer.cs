@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MeshBasics
 {
@@ -18,6 +19,10 @@ namespace MeshBasics
 			}
 
 			vertexVelocities = new Vector3[originalVertices.Length];
+		}
+
+		public void AddDeformingForce(Vector3 point, float force) {
+			Debug.DrawLine(Camera.main.transform.position, point);
 		}
 	}
 }
