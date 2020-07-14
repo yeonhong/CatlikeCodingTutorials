@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Rendering
+namespace Rendering1
 {
 	public class RotationTransformation : Transformation
 	{
