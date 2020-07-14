@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
+#pragma warning disable CS0618
 
 namespace TowerDefense
 {
