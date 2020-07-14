@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace ObjectManagement
 {
-	[CreateAssetMenu]
+	[CreateAssetMenu(menuName = "ObjectManagement/ShapeFactory")]
 	public class ShapeFactory : ScriptableObject
 	{
 		[SerializeField] private Shape[] prefabs = null;
