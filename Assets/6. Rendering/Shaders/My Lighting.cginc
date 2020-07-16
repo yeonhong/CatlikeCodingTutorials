@@ -1,6 +1,7 @@
 #if !defined(MY_LIGHTING_INCLUDED)
 #define MY_LIGHTING_INCLUDED
 
+#include "AutoLight.cginc"
 #include "UnityPBSLighting.cginc"
 
 float4 _Tint;
@@ -33,12 +34,18 @@ Interpolators MyVertexProgram (VertexData v) {
 	return i;
 }
 
+UnityLight CreateLight (Interpolators i) {
+	UnityLight light;
+	light.dir = normalize(_WorldSpaceLightPos0.xyz - i.worldPos);
+	UNITY_LIGHT_ATTENUATION(attenuation, 0, i.worldPos); // ºû °¨¼è macro.
+	light.color = _LightColor0.rgb * attenuation;
+	light.ndotl = DotClamped(i.normal, light.dir);
+	return light;
+}
+
 float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	i.normal = normalize(i.normal);
-	float3 lightDir = _WorldSpaceLightPos0.xyz;
 	float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
-
-	float3 lightColor = _LightColor0.rgb;
 	float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;
 
 	float3 specularTint;
@@ -46,11 +53,6 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	albedo = DiffuseAndSpecularFromMetallic(
 		albedo, _Metallic, specularTint, oneMinusReflectivity
 	);
-				
-	UnityLight light;
-	light.color = lightColor;
-	light.dir = lightDir;
-	light.ndotl = DotClamped(i.normal, lightDir);
 				
 	UnityIndirect indirectLight;
 	indirectLight.diffuse = 0;
@@ -60,7 +62,7 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 		albedo, specularTint,
 		oneMinusReflectivity, _Smoothness,
 		i.normal, viewDir,
-		light, indirectLight
+		CreateLight(i), indirectLight
 	);
 }
 #endif
