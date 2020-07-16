@@ -34,7 +34,8 @@
 			CGPROGRAM
 
 			#pragma target 3.0
-			#pragma multi_compile_fwdadd
+			#pragma multi_compile VERTEXLIGHT_ON
+			//#pragma multi_compile_fwdadd
 			//#pragma multi_compile DIRECTIONAL DIRECTIONAL_COOKIE POINT SPOT
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
