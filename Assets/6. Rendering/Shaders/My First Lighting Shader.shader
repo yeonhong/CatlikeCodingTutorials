@@ -34,9 +34,9 @@
 			CGPROGRAM
 
 			#pragma target 3.0
+			#pragma multi_compile DIRECTIONAL POINT
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
-			#define POINT // 포인트라이트가 2번 적용되지 않도록.
 
 			#include "My Lighting.cginc"
 
