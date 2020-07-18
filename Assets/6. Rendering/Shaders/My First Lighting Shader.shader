@@ -67,6 +67,7 @@
 
 			#pragma target 3.0
 
+			#pragma multi_compile_shadowcaster
 			#pragma vertex MyShadowVertexProgram
 			#pragma fragment MyShadowFragmentProgram
 
