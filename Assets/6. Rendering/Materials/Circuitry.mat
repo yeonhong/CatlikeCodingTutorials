@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Circuitry
   m_Shader: {fileID: 4800000, guid: a8bcb3610e1169e40a92b3c15f7846ff, type: 3}
-  m_ShaderKeywords: _EMISSION_MAP _METALLIC_MAP _OCCLUSION_MAP
+  m_ShaderKeywords: _DETAIL_MASK _EMISSION_MAP _METALLIC_MAP _OCCLUSION_MAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -28,16 +28,16 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d77905e476f5f8247aec7480f6a41851, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: b3dc920ba56c7be43844073481c9ab9f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: b21c3651f56746546b0ba3254751354d, type: 3}
+        m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 2800000, guid: dfda595fd1342dc419dcdb7c8102d823, type: 3}
