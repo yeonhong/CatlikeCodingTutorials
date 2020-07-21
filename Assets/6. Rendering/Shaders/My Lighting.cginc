@@ -41,6 +41,16 @@ float GetMetallic (Interpolators i) {
 	#endif
 }
 
+float GetSmoothness (Interpolators i) {
+	float smoothness = 1;
+	#if defined(_SMOOTHNESS_ALBEDO)
+		smoothness = tex2D(_MainTex, i.uv.xy).a;
+	#elif defined(_SMOOTHNESS_METALLIC) && defined(_METALLIC_MAP)
+		smoothness = tex2D(_MetallicMap, i.uv.xy).a;
+	#endif
+	return smoothness * _Smoothness;
+}
+
 struct VertexData {
 	float4 vertex : POSITION;
 	float3 normal : NORMAL;
@@ -135,7 +145,7 @@ UnityIndirect CreateIndirectLight(Interpolators i, float3 viewDir) {
 
 	float3 reflectionDir = reflect(-viewDir, i.normal);
 	Unity_GlossyEnvironmentData envData;
-	envData.roughness = 1 - _Smoothness;
+	envData.roughness = 1 - GetSmoothness(i);
 	envData.reflUVW = BoxProjection(
 			reflectionDir, i.worldPos,
 			unity_SpecCube0_ProbePosition,
@@ -205,7 +215,7 @@ float4 MyFragmentProgram(Interpolators i) : SV_TARGET{
 
 	return UNITY_BRDF_PBS(
 		albedo, specularTint,
-		oneMinusReflectivity, _Smoothness,
+		oneMinusReflectivity, GetSmoothness(i),
 		i.normal, viewDir,
 		CreateLight(i), CreateIndirectLight(i, viewDir)
 	);
