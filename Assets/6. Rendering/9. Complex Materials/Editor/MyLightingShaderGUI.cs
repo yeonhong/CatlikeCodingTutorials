@@ -66,6 +66,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		DoMetallic();
 		DoSmoothness();
 		DoNormals();
+		DoEmission();
 
 		editor.TextureScaleOffsetProperty(mainTex);
 	}
@@ -135,5 +136,16 @@ public class MyLightingShaderGUI : ShaderGUI
 			MakeLabel(map), map,
 			map.textureValue ? FindProperty("_DetailBumpScale") : null
 		);
+	}
+
+	private void DoEmission() {
+		MaterialProperty map = FindProperty("_EmissionMap");
+		EditorGUI.BeginChangeCheck();
+		editor.TexturePropertyWithHDRColor(
+			MakeLabel("Emission (RGB)"), map, FindProperty("_Emission"), false
+		);
+		if (EditorGUI.EndChangeCheck()) {
+			SetKeyword("_EMISSION_MAP", map.textureValue);
+		}
 	}
 }
