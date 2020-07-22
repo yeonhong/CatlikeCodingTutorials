@@ -163,6 +163,7 @@ float3 BoxProjection (
 	#endif
 	return direction;
 }
+
 UnityIndirect CreateIndirectLight(Interpolators i, float3 viewDir) {
 	UnityIndirect indirectLight;
 	indirectLight.diffuse = 0;

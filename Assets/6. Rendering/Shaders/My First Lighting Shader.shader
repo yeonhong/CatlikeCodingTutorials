@@ -103,6 +103,9 @@
 
 			#pragma target 3.0
 
+			#pragma shader_feature _RENDERING_CUTOUT
+			#pragma shader_feature _SMOOTHNESS_ALBEDO
+
 			#pragma multi_compile_shadowcaster
 			#pragma vertex MyShadowVertexProgram
 			#pragma fragment MyShadowFragmentProgram
