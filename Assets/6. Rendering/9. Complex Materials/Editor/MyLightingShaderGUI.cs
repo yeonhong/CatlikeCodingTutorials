@@ -1,23 +1,55 @@
 ﻿using UnityEditor;
-using UnityEngine.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class MyLightingShaderGUI : ShaderGUI
 {
+	private enum RenderingMode
+	{
+		Opaque, Cutout, Fade
+	}
+
+	struct RenderingSettings
+	{
+		public RenderQueue queue;
+		public string renderType;
+		public BlendMode srcBlend, dstBlend;
+		public bool zWrite;
+
+		public static RenderingSettings[] modes = {
+			new RenderingSettings() {
+				queue = RenderQueue.Geometry,
+				renderType = "",
+				srcBlend = BlendMode.One,
+				dstBlend = BlendMode.Zero,
+				zWrite = true
+			},
+			new RenderingSettings() {
+				queue = RenderQueue.AlphaTest,
+				renderType = "TransparentCutout",
+				srcBlend = BlendMode.One,
+				dstBlend = BlendMode.Zero,
+				zWrite = true
+			},
+			new RenderingSettings() {
+				queue = RenderQueue.Transparent,
+				renderType = "Transparent",
+				srcBlend = BlendMode.SrcAlpha,
+				dstBlend = BlendMode.OneMinusSrcAlpha,
+				zWrite = false
+			}
+		};
+	}
+
 	private enum SmoothnessSource
 	{
 		Uniform, Albedo, Metallic
 	}
 
-	private enum RenderingMode
-	{
-		Opaque, Cutout
-	}
-
 	private Material target;
 	private MaterialEditor editor;
 	private MaterialProperty[] properties;
-	bool shouldShowAlphaCutoff;
+	private bool shouldShowAlphaCutoff;
 
 	public override void OnGUI(MaterialEditor editor, MaterialProperty[] properties) {
 		this.target = editor.target as Material;
@@ -75,6 +107,9 @@ public class MyLightingShaderGUI : ShaderGUI
 			mode = RenderingMode.Cutout;
 			shouldShowAlphaCutoff = true;
 		}
+		else if (IsKeywordEnabled("_RENDERING_FADE")) {
+			mode = RenderingMode.Fade;
+		}
 
 		EditorGUI.BeginChangeCheck();
 		mode = (RenderingMode)EditorGUILayout.EnumPopup(
@@ -83,14 +118,15 @@ public class MyLightingShaderGUI : ShaderGUI
 		if (EditorGUI.EndChangeCheck()) {
 			RecordAction("Rendering Mode");
 			SetKeyword("_RENDERING_CUTOUT", mode == RenderingMode.Cutout);
+			SetKeyword("_RENDERING_FADE", mode == RenderingMode.Fade);
 
-			RenderQueue queue = mode == RenderingMode.Opaque ?
-				RenderQueue.Geometry : RenderQueue.AlphaTest;
-			string renderType = mode == RenderingMode.Opaque ?
-				"" : "TransparentCutout";
+			RenderingSettings settings = RenderingSettings.modes[(int)mode];
 			foreach (Material m in editor.targets) {
-				m.renderQueue = (int)queue;
-				m.SetOverrideTag("RenderType", renderType);
+				m.renderQueue = (int)settings.queue;
+				m.SetOverrideTag("RenderType", settings.renderType);
+				m.SetInt("_SrcBlend", (int)settings.srcBlend);
+				m.SetInt("_DstBlend", (int)settings.dstBlend);
+				m.SetInt("_ZWrite", settings.zWrite ? 1 : 0);
 			}
 		}
 	}

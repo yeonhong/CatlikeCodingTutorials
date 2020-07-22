@@ -24,6 +24,9 @@
 		_OcclusionStrength("Occlusion Strength", Range(0, 1)) = 1
 
 		_AlphaCutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
+		[HideInInspector] _SrcBlend ( "_SrcBlend" , Float ) = 1
+		[HideInInspector] _DstBlend ( "_DstBlend" , Float ) = 0
+		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1
 	}
 
 	SubShader {
@@ -32,7 +35,8 @@
 			Tags {
 				"LightMode" = "ForwardBase"
 			}
-
+			Blend [_SrcBlend] [_DstBlend]
+			ZWrite [_ZWrite]
 			CGPROGRAM
 
 			#pragma target 3.0
@@ -45,7 +49,7 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
-			#pragma shader_feature _RENDERING_CUTOUT
+			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE
 
 			#pragma multi_compile _ SHADOWS_SCREEN
 			#pragma multi_compile _ VERTEXLIGHT_ON
@@ -64,7 +68,7 @@
 			Tags {
 				"LightMode" = "ForwardAdd"
 			}
-			Blend One One
+			Blend [_SrcBlend] One
 			ZWrite Off
 
 			CGPROGRAM
@@ -77,7 +81,7 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
-			#pragma shader_feature _RENDERING_CUTOUT
+			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE
 
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma vertex MyVertexProgram
