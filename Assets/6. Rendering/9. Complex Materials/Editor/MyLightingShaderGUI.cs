@@ -6,7 +6,7 @@ public class MyLightingShaderGUI : ShaderGUI
 {
 	private enum RenderingMode
 	{
-		Opaque, Cutout, Fade
+		Opaque, Cutout, Fade, Transparent
 	}
 
 	struct RenderingSettings
@@ -35,6 +35,13 @@ public class MyLightingShaderGUI : ShaderGUI
 				queue = RenderQueue.Transparent,
 				renderType = "Transparent",
 				srcBlend = BlendMode.SrcAlpha,
+				dstBlend = BlendMode.OneMinusSrcAlpha,
+				zWrite = false
+			},
+			new RenderingSettings() {
+				queue = RenderQueue.Transparent,
+				renderType = "Transparent",
+				srcBlend = BlendMode.One,
 				dstBlend = BlendMode.OneMinusSrcAlpha,
 				zWrite = false
 			}
@@ -110,6 +117,10 @@ public class MyLightingShaderGUI : ShaderGUI
 		else if (IsKeywordEnabled("_RENDERING_FADE")) {
 			mode = RenderingMode.Fade;
 		}
+		else if (IsKeywordEnabled("_RENDERING_TRANSPARENT")) {
+			mode = RenderingMode.Transparent;
+		}
+
 
 		EditorGUI.BeginChangeCheck();
 		mode = (RenderingMode)EditorGUILayout.EnumPopup(
@@ -119,6 +130,7 @@ public class MyLightingShaderGUI : ShaderGUI
 			RecordAction("Rendering Mode");
 			SetKeyword("_RENDERING_CUTOUT", mode == RenderingMode.Cutout);
 			SetKeyword("_RENDERING_FADE", mode == RenderingMode.Fade);
+			SetKeyword("_RENDERING_TRANSPARENT", mode == RenderingMode.Transparent);
 
 			RenderingSettings settings = RenderingSettings.modes[(int)mode];
 			foreach (Material m in editor.targets) {
