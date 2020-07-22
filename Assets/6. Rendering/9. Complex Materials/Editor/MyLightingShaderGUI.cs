@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine.Rendering;
 using UnityEngine;
 
 public class MyLightingShaderGUI : ShaderGUI
@@ -8,14 +9,22 @@ public class MyLightingShaderGUI : ShaderGUI
 		Uniform, Albedo, Metallic
 	}
 
+	private enum RenderingMode
+	{
+		Opaque, Cutout
+	}
+
 	private Material target;
 	private MaterialEditor editor;
 	private MaterialProperty[] properties;
+	bool shouldShowAlphaCutoff;
 
 	public override void OnGUI(MaterialEditor editor, MaterialProperty[] properties) {
 		this.target = editor.target as Material;
 		this.editor = editor;
 		this.properties = properties;
+
+		DoRenderingMode();
 		DoMain();
 		DoSecondary();
 	}
@@ -42,7 +51,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		return target.IsKeywordEnabled(keyword);
 	}
 
-	void SetKeyword(string keyword, bool state) {
+	private void SetKeyword(string keyword, bool state) {
 		if (state) {
 			foreach (Material m in editor.targets) {
 				m.EnableKeyword(keyword);
@@ -59,6 +68,33 @@ public class MyLightingShaderGUI : ShaderGUI
 		editor.RegisterPropertyChangeUndo(label);
 	}
 
+	private void DoRenderingMode() {
+		RenderingMode mode = RenderingMode.Opaque;
+		shouldShowAlphaCutoff = false;
+		if (IsKeywordEnabled("_RENDERING_CUTOUT")) {
+			mode = RenderingMode.Cutout;
+			shouldShowAlphaCutoff = true;
+		}
+
+		EditorGUI.BeginChangeCheck();
+		mode = (RenderingMode)EditorGUILayout.EnumPopup(
+			MakeLabel("Rendering Mode"), mode
+		);
+		if (EditorGUI.EndChangeCheck()) {
+			RecordAction("Rendering Mode");
+			SetKeyword("_RENDERING_CUTOUT", mode == RenderingMode.Cutout);
+
+			RenderQueue queue = mode == RenderingMode.Opaque ?
+				RenderQueue.Geometry : RenderQueue.AlphaTest;
+			string renderType = mode == RenderingMode.Opaque ?
+				"" : "TransparentCutout";
+			foreach (Material m in editor.targets) {
+				m.renderQueue = (int)queue;
+				m.SetOverrideTag("RenderType", renderType);
+			}
+		}
+	}
+
 	private void DoMain() {
 		GUILayout.Label("Main Maps", EditorStyles.boldLabel);
 
@@ -67,6 +103,9 @@ public class MyLightingShaderGUI : ShaderGUI
 			MakeLabel(mainTex, "Albedo (RGB)"), mainTex, FindProperty("_Tint")
 		);
 
+		if (shouldShowAlphaCutoff) {
+			DoAlphaCutoff();
+		}
 		DoMetallic();
 		DoSmoothness();
 		DoNormals();
@@ -117,7 +156,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		EditorGUI.indentLevel -= 3;
 	}
 
-	void DoNormals() {
+	private void DoNormals() {
 		MaterialProperty map = FindProperty("_NormalMap");
 		Texture tex = map.textureValue;
 		EditorGUI.BeginChangeCheck();
@@ -130,7 +169,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		}
 	}
 
-	void DoSecondary() {
+	private void DoSecondary() {
 		GUILayout.Label("Secondary Maps", EditorStyles.boldLabel);
 
 		MaterialProperty detailTex = FindProperty("_DetailTex");
@@ -146,7 +185,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		editor.TextureScaleOffsetProperty(detailTex);
 	}
 
-	void DoSecondaryNormals() {
+	private void DoSecondaryNormals() {
 		MaterialProperty map = FindProperty("_DetailNormalMap");
 		Texture tex = map.textureValue;
 		EditorGUI.BeginChangeCheck();
@@ -194,5 +233,12 @@ public class MyLightingShaderGUI : ShaderGUI
 		if (EditorGUI.EndChangeCheck() && tex != mask.textureValue) {
 			SetKeyword("_DETAIL_MASK", mask.textureValue);
 		}
+	}
+
+	private void DoAlphaCutoff() {
+		MaterialProperty slider = FindProperty("_AlphaCutoff");
+		EditorGUI.indentLevel += 2;
+		editor.ShaderProperty(slider, MakeLabel(slider));
+		EditorGUI.indentLevel -= 2;
 	}
 }

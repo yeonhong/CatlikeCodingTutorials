@@ -22,6 +22,8 @@
 
 		[NoScaleOffset] _OcclusionMap ("Occlusion", 2D) = "white" {}
 		_OcclusionStrength("Occlusion Strength", Range(0, 1)) = 1
+
+		_AlphaCutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
 	}
 
 	SubShader {
@@ -43,6 +45,7 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
+			#pragma shader_feature _RENDERING_CUTOUT
 
 			#pragma multi_compile _ SHADOWS_SCREEN
 			#pragma multi_compile _ VERTEXLIGHT_ON
@@ -74,6 +77,7 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
+			#pragma shader_feature _RENDERING_CUTOUT
 
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma vertex MyVertexProgram

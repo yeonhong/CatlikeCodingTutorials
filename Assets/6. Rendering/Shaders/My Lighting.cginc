@@ -16,6 +16,7 @@ sampler2D _EmissionMap;
 float3 _Emission;
 sampler2D _OcclusionMap;
 float _OcclusionStrength;
+float _AlphaCutoff;
 
 struct Interpolators {
 	float4 pos : SV_POSITION;
@@ -247,6 +248,14 @@ void InitializeFragmentNormal(inout Interpolators i) {
 		tangentSpaceNormal.z * i.normal);
 }
 
+float GetAlpha (Interpolators i) {
+	float alpha = _Tint.a;
+	#if !defined(_SMOOTHNESS_ALBEDO)
+		alpha *= tex2D(_MainTex, i.uv.xy).a;
+	#endif
+	return alpha;
+}
+
 float3 GetAlbedo(Interpolators i) {
 	float3 albedo = tex2D(_MainTex, i.uv.xy).rgb * _Tint.rgb;
 	#if defined (_DETAIL_ALBEDO_MAP)
@@ -257,6 +266,11 @@ float3 GetAlbedo(Interpolators i) {
 }
 
 float4 MyFragmentProgram(Interpolators i) : SV_TARGET{
+	float alpha = GetAlpha(i);
+	#if defined(_RENDERING_CUTOUT)
+		clip(alpha - _AlphaCutoff); // cutoff
+	#endif
+
 	InitializeFragmentNormal(i);
 	float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
 	float3 specularTint;
