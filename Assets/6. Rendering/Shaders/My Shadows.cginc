@@ -4,7 +4,11 @@
 #include "UnityCG.cginc"
 
 #if defined(_RENDERING_FADE) || defined(_RENDERING_TRANSPARENT)
-	#define SHADOWS_SEMITRANSPARENT 1
+	#if defined(_SEMITRANSPARENT_SHADOWS)
+		#define SHADOWS_SEMITRANSPARENT 1
+	#else
+		#define _RENDERING_CUTOUT
+	#endif
 #endif
 
 #if SHADOWS_SEMITRANSPARENT || defined(_RENDERING_CUTOUT)
