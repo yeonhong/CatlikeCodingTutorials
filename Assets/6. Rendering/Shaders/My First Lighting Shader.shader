@@ -53,10 +53,13 @@
 
 			#pragma multi_compile _ SHADOWS_SCREEN
 			#pragma multi_compile _ VERTEXLIGHT_ON
+			#pragma multi_compile_fog
+
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
 			
 			#define BINORMAL_PER_FRAGMENT
+			#define FOG_DISTANCE
 			#define FORWARD_BASE_PASS
 
 			#include "My Lighting.cginc"
@@ -116,10 +119,13 @@
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 
 			#pragma multi_compile_fwdadd_fullshadows
+			#pragma multi_compile_fog
+
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
 
 			#define BINORMAL_PER_FRAGMENT
+			#define FOG_DISTANCE
 
 			#include "My Lighting.cginc"
 
