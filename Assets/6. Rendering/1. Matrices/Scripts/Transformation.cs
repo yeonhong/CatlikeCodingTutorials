@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Rendering1
+namespace Rendering
 {
 	public abstract class Transformation : MonoBehaviour
 	{
