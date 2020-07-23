@@ -16,7 +16,13 @@ sampler2D _ShadowMapTexture;
 float4 _LightColor, _LightDir, _LightPos;
 float _LightAsQuad;
 
-sampler2D _LightTexture0, _LightTextureB0;
+#if defined(POINT_COOKIE)
+samplerCUBE _LightTexture0;
+#else
+sampler2D _LightTexture0;
+#endif
+
+sampler2D _LightTextureB0;
 float4x4 unity_WorldToLight;
 
 struct VertexData {
@@ -48,6 +54,7 @@ UnityLight CreateLight(float2 uv, float3 worldPos, float viewZ) {
 		shadowAttenuation = tex2D(_ShadowMapTexture, uv).r;
 	#endif
 #else
+
 	float3 lightVec = _LightPos.xyz - worldPos;
 	light.dir = normalize(lightVec);
 
@@ -56,24 +63,42 @@ UnityLight CreateLight(float2 uv, float3 worldPos, float viewZ) {
 		(dot(lightVec, lightVec) * _LightPos.w).rr
 	).UNITY_ATTEN_CHANNEL;
 
-	float4 uvCookie = mul(unity_WorldToLight, float4(worldPos, 1));
-	uvCookie.xy /= uvCookie.w;
-	attenuation *= tex2Dbias(_LightTexture0, float4(uvCookie.xy, 0, -8)).w;
+	#if defined(SPOT)
+		float4 uvCookie = mul(unity_WorldToLight, float4(worldPos, 1));
+		uvCookie.xy /= uvCookie.w;
+		attenuation *= tex2Dbias(_LightTexture0, float4(uvCookie.xy, 0, -8)).w;
+		attenuation *= uvCookie.w < 0;
 
-#if defined(SHADOWS_DEPTH)
-	shadowed = true;
-	shadowAttenuation = UnitySampleShadowmap(
-		mul(unity_WorldToShadow[0], float4(worldPos, 1))
-	);
-#endif
+		#if defined(SHADOWS_DEPTH)
+			shadowed = true;
+			shadowAttenuation = UnitySampleShadowmap(
+				mul(unity_WorldToShadow[0], float4(worldPos, 1))
+			);
+		#endif
+	#else
+		#if defined(POINT_COOKIE)
+			float3 uvCookie = mul(unity_WorldToLight, float4(worldPos, 1)).xyz;
+			attenuation *= texCUBEbias(_LightTexture0, float4(uvCookie, -8)).w;
+		#endif
 
-	attenuation *= uvCookie.w < 0;
+		#if defined(SHADOWS_CUBE)
+			shadowed = true;
+			shadowAttenuation = UnitySampleShadowmap(-lightVec);
+		#endif
+	#endif
 #endif
 
 	if (shadowed) {
 		float shadowFadeDistance = UnityComputeShadowFadeDistance(worldPos, viewZ);
 		float shadowFade = UnityComputeShadowFade(shadowFadeDistance);
 		shadowAttenuation = saturate(shadowAttenuation + shadowFade);
+
+	#if defined(UNITY_FAST_COHERENT_DYNAMIC_BRANCHING) && defined(SHADOWS_SOFT)
+		UNITY_BRANCH
+		if (shadowFade > 0.99) {
+			shadowAttenuation = 1;
+		}
+	#endif
 	}
 
 	light.color = _LightColor.rgb * (attenuation * shadowAttenuation);
