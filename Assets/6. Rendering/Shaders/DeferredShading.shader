@@ -10,6 +10,8 @@
 			Cull Off
 			ZTest Always
 			ZWrite Off
+
+			Blend[_SrcBlend][_DstBlend]
 			
 			CGPROGRAM
 
