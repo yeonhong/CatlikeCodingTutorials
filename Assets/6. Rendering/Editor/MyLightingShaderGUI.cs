@@ -286,8 +286,16 @@ public class MyLightingShaderGUI : ShaderGUI
 		editor.TexturePropertyWithHDRColor(
 			MakeLabel("Emission (RGB)"), map, FindProperty("_Emission"), false
 		);
-		if (EditorGUI.EndChangeCheck() && tex != map.textureValue) {
-			SetKeyword("_EMISSION_MAP", map.textureValue);
+
+		if (EditorGUI.EndChangeCheck()) {
+			if (tex != map.textureValue) {
+				SetKeyword("_EMISSION_MAP", map.textureValue);
+			}
+
+			foreach (Material m in editor.targets) {
+				m.globalIlluminationFlags =
+					MaterialGlobalIlluminationFlags.BakedEmissive;
+			}
 		}
 	}
 
@@ -304,7 +312,7 @@ public class MyLightingShaderGUI : ShaderGUI
 	}
 
 	private void DoAlphaCutoff() {
-		MaterialProperty slider = FindProperty("_AlphaCutoff");
+		MaterialProperty slider = FindProperty("_Cutoff");
 		EditorGUI.indentLevel += 2;
 		editor.ShaderProperty(slider, MakeLabel(slider));
 		EditorGUI.indentLevel -= 2;

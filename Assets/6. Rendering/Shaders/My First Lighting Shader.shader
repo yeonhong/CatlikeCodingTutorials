@@ -23,7 +23,7 @@
 		[NoScaleOffset] _OcclusionMap ("Occlusion", 2D) = "white" {}
 		_OcclusionStrength("Occlusion Strength", Range(0, 1)) = 1
 
-		_AlphaCutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
+		_Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
 		[HideInInspector] _SrcBlend ( "_SrcBlend" , Float ) = 1
 		[HideInInspector] _DstBlend ( "_DstBlend" , Float ) = 0
 		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1
@@ -151,6 +151,29 @@
 			#pragma fragment MyShadowFragmentProgram
 
 			#include "My Shadows.cginc"
+
+			ENDCG
+		}
+
+		Pass {
+			Tags {
+				"LightMode" = "Meta"
+			}
+
+			Cull Off
+
+			CGPROGRAM
+
+			#pragma shader_feature _METALLIC_MAP
+			#pragma shader_feature _ _SMOOTHNESS_ALBEDO _SMOOTHNESS_METALLIC
+			#pragma shader_feature _EMISSION_MAP
+			#pragma shader_feature _DETAIL_MASK
+			#pragma shader_feature _DETAIL_ALBEDO_MAP
+
+			#pragma vertex MyLightmappingVertexProgram
+			#pragma fragment MyLightmappingFragmentProgram
+
+			#include "My Lightmapping.cginc"
 
 			ENDCG
 		}

@@ -23,7 +23,7 @@ sampler2D _EmissionMap;
 float3 _Emission;
 sampler2D _OcclusionMap;
 float _OcclusionStrength;
-float _AlphaCutoff;
+float _Cutoff;
 
 struct Interpolators {
 	float4 pos : SV_POSITION;
@@ -336,7 +336,7 @@ struct FragmentOutput {
 FragmentOutput MyFragmentProgram (Interpolators i) {
 	float alpha = GetAlpha(i);
 	#if defined(_RENDERING_CUTOUT)
-		clip(alpha - _AlphaCutoff); // cutoff
+		clip(alpha - _Cutoff); // cutoff
 	#endif
 
 	InitializeFragmentNormal(i);
