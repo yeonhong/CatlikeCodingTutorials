@@ -17,6 +17,12 @@
 	#endif
 #endif
 
+#if defined(LIGHTMAP_ON) && defined(SHADOWS_SCREEN)
+	#if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK)
+		#define SUBTRACTIVE_LIGHTING 1
+	#endif
+#endif
+
 float4 _Color;
 sampler2D _MainTex, _DetailTex, _DetailMask;
 float4 _MainTex_ST, _DetailTex_ST;
@@ -184,7 +190,7 @@ float FadeShadows(Interpolators i, float attenuation) {
 UnityLight CreateLight(Interpolators i) {
 	UnityLight light;
 
-	#if defined(DEFERRED_PASS)
+	#if defined(DEFERRED_PASS) || SUBTRACTIVE_LIGHTING
 		light.dir = float3(0, 1, 0);
 		light.color = 0;
 	#else
@@ -218,6 +224,20 @@ float3 BoxProjection (
 	return direction;
 }
 
+void ApplySubtractiveLighting(Interpolators i, inout UnityIndirect indirectLight) {
+#if SUBTRACTIVE_LIGHTING
+	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
+	attenuation = FadeShadows(i, attenuation);
+	float ndotl = saturate(dot(i.normal, _WorldSpaceLightPos0.xyz));
+	float3 shadowedLightEstimate = ndotl * (1 - attenuation) * _LightColor0.rgb;
+	float3 subtractedLight = indirectLight.diffuse - shadowedLightEstimate;
+	subtractedLight = max(subtractedLight, unity_ShadowColor.rgb);
+	subtractedLight = lerp(subtractedLight, indirectLight.diffuse, _LightShadowData.x);
+	//indirectLight.diffuse = subtractedLight;
+	indirectLight.diffuse = min(subtractedLight, indirectLight.diffuse);
+#endif
+}
+
 UnityIndirect CreateIndirectLight(Interpolators i, float3 viewDir) {
 	UnityIndirect indirectLight;
 	indirectLight.diffuse = 0;
@@ -239,6 +259,9 @@ UnityIndirect CreateIndirectLight(Interpolators i, float3 viewDir) {
 				indirectLight.diffuse, lightmapDirection, i.normal
 			);
 		#endif
+
+		ApplySubtractiveLighting(i, indirectLight);
+
 	#else
 		indirectLight.diffuse += max(0, ShadeSH9(float4(i.normal, 1)));
 	#endif
