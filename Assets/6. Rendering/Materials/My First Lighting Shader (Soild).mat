@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: My First Lighting Shader (Soild) 1
+  m_Name: My First Lighting Shader (Soild)
   m_Shader: {fileID: 4800000, guid: a8bcb3610e1169e40a92b3c15f7846ff, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
