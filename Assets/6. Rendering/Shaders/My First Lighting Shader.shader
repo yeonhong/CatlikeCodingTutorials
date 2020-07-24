@@ -51,8 +51,7 @@
 			#pragma shader_feature _DETAIL_NORMAL_MAP
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 
-			#pragma multi_compile _ SHADOWS_SCREEN
-			#pragma multi_compile _ LIGHTMAP_ON VERTEXLIGHT_ON
+			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 
 			#pragma vertex MyVertexProgram
@@ -87,8 +86,7 @@
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
 
-			#pragma multi_compile _ UNITY_HDR_ON
-			#pragma multi_compile _ LIGHTMAP_ON
+			#pragma multi_compile_prepassfinal
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
