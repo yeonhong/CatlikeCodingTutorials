@@ -168,7 +168,7 @@ public class MyLightingShaderGUI : ShaderGUI
 
 		MaterialProperty mainTex = FindProperty("_MainTex");
 		editor.TexturePropertySingleLine(
-			MakeLabel(mainTex, "Albedo (RGB)"), mainTex, FindProperty("_Tint")
+			MakeLabel(mainTex, "Albedo (RGB)"), mainTex, FindProperty("_Color")
 		);
 
 		if (shouldShowAlphaCutoff) {

@@ -1,7 +1,7 @@
 ﻿Shader "Unlit/My First Lighting Shader"
 {
 	Properties {
-		_Tint ("Tint", Color) = (1, 1, 1, 1)
+		_Color("Tint", Color) = (1, 1, 1, 1)
 		_MainTex ("Albedo", 2D) = "white" {}
 		
 		[NoScaleOffset] _NormalMap ("Normals", 2D) = "bump" {}
@@ -52,7 +52,7 @@
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 
 			#pragma multi_compile _ SHADOWS_SCREEN
-			#pragma multi_compile _ VERTEXLIGHT_ON
+			#pragma multi_compile _ LIGHTMAP_ON VERTEXLIGHT_ON
 			#pragma multi_compile_fog
 
 			#pragma vertex MyVertexProgram
@@ -88,6 +88,7 @@
 			#pragma shader_feature _DETAIL_NORMAL_MAP
 
 			#pragma multi_compile _ UNITY_HDR_ON
+			#pragma multi_compile _ LIGHTMAP_ON
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
