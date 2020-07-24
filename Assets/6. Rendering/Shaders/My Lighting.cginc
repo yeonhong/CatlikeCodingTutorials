@@ -37,8 +37,45 @@ sampler2D _OcclusionMap;
 float _OcclusionStrength;
 float _Cutoff;
 
-struct Interpolators {
+struct InterpolatorsVertex {
 	float4 pos : SV_POSITION;
+	float4 uv : TEXCOORD0;
+	float3 normal : TEXCOORD1;
+#if defined(BINORMAL_PER_FRAGMENT)
+	float4 tangent : TEXCOORD2;
+#else
+	float3 tangent : TEXCOORD2;
+	float3 binormal : TEXCOORD3;
+#endif
+
+#if FOG_DEPTH
+	float4 worldPos : TEXCOORD4;
+#else
+	float3 worldPos : TEXCOORD4;
+#endif
+
+	UNITY_SHADOW_COORDS(5)
+
+#if defined(VERTEXLIGHT_ON)
+		float3 vertexLightColor : TEXCOORD6;
+#endif
+
+#if defined(LIGHTMAP_ON) || ADDITIONAL_MASKED_DIRECTIONAL_SHADOWS
+	float2 lightmapUV : TEXCOORD6;
+#endif
+
+#if defined(DYNAMICLIGHTMAP_ON)
+	float2 dynamicLightmapUV : TEXCOORD7;
+#endif
+};
+
+struct Interpolators {
+#if defined(LOD_FADE_CROSSFADE)
+	UNITY_VPOS_TYPE vpos : VPOS;
+#else
+	float4 pos : SV_POSITION;
+#endif
+
 	float4 uv : TEXCOORD0;
 	float3 normal : TEXCOORD1;
 #if defined(BINORMAL_PER_FRAGMENT)
@@ -140,8 +177,8 @@ float3 CreateBinormal(float3 normal, float3 tangent, float binormalSign) {
 		(binormalSign * unity_WorldTransformParams.w);
 }
 
-Interpolators MyVertexProgram(VertexData v) {
-	Interpolators i;
+InterpolatorsVertex MyVertexProgram(VertexData v) {
+	InterpolatorsVertex i;
 	UNITY_INITIALIZE_OUTPUT(Interpolators, i);
 
 	i.pos = UnityObjectToClipPos(v.vertex);
@@ -439,6 +476,10 @@ struct FragmentOutput {
 };
 
 FragmentOutput MyFragmentProgram (Interpolators i) {
+#if defined(LOD_FADE_CROSSFADE)
+	UnityApplyDitherCrossFade(i.vpos);
+#endif
+
 	float alpha = GetAlpha(i);
 	#if defined(_RENDERING_CUTOUT)
 		clip(alpha - _Cutoff); // cutoff
