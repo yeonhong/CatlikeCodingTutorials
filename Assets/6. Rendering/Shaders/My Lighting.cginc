@@ -63,6 +63,10 @@ struct Interpolators {
 #if defined(LIGHTMAP_ON) || ADDITIONAL_MASKED_DIRECTIONAL_SHADOWS
 	float2 lightmapUV : TEXCOORD6;
 #endif
+
+#if defined(DYNAMICLIGHTMAP_ON)
+	float2 dynamicLightmapUV : TEXCOORD7;
+#endif
 };
 
 struct VertexData {
@@ -71,6 +75,7 @@ struct VertexData {
 	float4 tangent : TANGENT;
 	float2 uv : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
+	float2 uv2 : TEXCOORD2;
 };
 
 float GetDetailMask (Interpolators i) {
@@ -158,6 +163,10 @@ Interpolators MyVertexProgram(VertexData v) {
 
 #if defined(LIGHTMAP_ON) || ADDITIONAL_MASKED_DIRECTIONAL_SHADOWS
 	i.lightmapUV = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
+#endif
+
+#if defined(DYNAMICLIGHTMAP_ON)
+	i.dynamicLightmapUV = v.uv2 * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
 #endif
 
 //#if defined(SHADOWS_SCREEN)
@@ -261,10 +270,29 @@ UnityIndirect CreateIndirectLight(Interpolators i, float3 viewDir) {
 		#endif
 
 		ApplySubtractiveLighting(i, indirectLight);
-
-	#else
-		indirectLight.diffuse += max(0, ShadeSH9(float4(i.normal, 1)));
 	#endif
+
+	#if defined(DYNAMICLIGHTMAP_ON)
+		float3 dynamicLightDiffuse = DecodeRealtimeLightmap(
+			UNITY_SAMPLE_TEX2D(unity_DynamicLightmap, i.dynamicLightmapUV)
+		);
+
+		#if defined(DIRLIGHTMAP_COMBINED)
+				float4 dynamicLightmapDirection = UNITY_SAMPLE_TEX2D_SAMPLER(
+					unity_DynamicDirectionality, unity_DynamicLightmap,
+					i.dynamicLightmapUV
+				);
+				indirectLight.diffuse += DecodeDirectionalLightmap(
+					dynamicLightDiffuse, dynamicLightmapDirection, i.normal
+				);
+		#else
+				indirectLight.diffuse += dynamicLightDiffuse;
+		#endif
+	#endif
+
+#if !defined(LIGHTMAP_ON) && !defined(DYNAMICLIGHTMAP_ON)
+		indirectLight.diffuse += max(0, ShadeSH9(float4(i.normal, 1)));
+#endif
 
 	float3 reflectionDir = reflect(-viewDir, i.normal);
 	Unity_GlossyEnvironmentData envData;
