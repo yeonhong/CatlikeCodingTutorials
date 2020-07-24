@@ -42,7 +42,7 @@ struct Interpolators {
 	float3 worldPos : TEXCOORD4;
 #endif
 
-	SHADOW_COORDS(5)
+	UNITY_SHADOW_COORDS(5)
 
 #if defined(VERTEXLIGHT_ON)
 		float3 vertexLightColor : TEXCOORD6;
@@ -125,6 +125,8 @@ float3 CreateBinormal(float3 normal, float3 tangent, float binormalSign) {
 
 Interpolators MyVertexProgram(VertexData v) {
 	Interpolators i;
+	UNITY_INITIALIZE_OUTPUT(Interpolators, i);
+
 	i.pos = UnityObjectToClipPos(v.vertex);
 	i.worldPos.xyz = mul(unity_ObjectToWorld, v.vertex);
 	#if FOG_DEPTH
@@ -151,10 +153,23 @@ Interpolators MyVertexProgram(VertexData v) {
 //	//i.shadowCoordinates.xy = (float2(i.position.x, -i.position.y) + i.position.w) * 0.5;
 //	//i.shadowCoordinates.zw = i.position.zw;
 //#endif
-	TRANSFER_SHADOW(i);
+	UNITY_TRANSFER_SHADOW(i, v.uv1);
 
 	ComputeVertexLightColor(i);
 	return i;
+}
+
+float FadeShadows(Interpolators i, float attenuation) {
+#if HANDLE_SHADOWS_BLENDING_IN_GI
+	// UNITY_LIGHT_ATTENUATION doesn't fade shadows for us.
+	float viewZ =
+		dot(_WorldSpaceCameraPos - i.worldPos, UNITY_MATRIX_V[2].xyz);
+	float shadowFadeDistance =
+		UnityComputeShadowFadeDistance(i.worldPos, viewZ);
+	float shadowFade = UnityComputeShadowFade(shadowFadeDistance);
+	attenuation = saturate(attenuation + shadowFade);
+#endif
+	return attenuation;
 }
 
 UnityLight CreateLight(Interpolators i) {
@@ -171,6 +186,7 @@ UnityLight CreateLight(Interpolators i) {
 		#endif
 
 		UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
+		attenuation = FadeShadows(i, attenuation);
 		light.color = _LightColor0.rgb * attenuation;
 	#endif //defined(DEFERRED_PASS)
 
