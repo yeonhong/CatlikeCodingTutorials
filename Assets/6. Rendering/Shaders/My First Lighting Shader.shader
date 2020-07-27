@@ -68,6 +68,14 @@
 			#define FOG_DISTANCE
 			#define FORWARD_BASE_PASS
 
+			#define PARALLAX_BIAS 0
+			//#define PARALLAX_OFFSET_LIMITING
+			#define PARALLAX_RAYMARCHING_STEPS 100
+			#define PARALLAX_RAYMARCHING_INTERPOLATE
+			#define PARALLAX_RAYMARCHING_SEARCH_STEPS 3
+			#define PARALLAX_FUNCTION ParallaxRaymarching
+			#define PARALLAX_SUPPORT_SCALED_DYNAMIC_BATCHING
+
 			#include "My Lighting.cginc"
 
 			ENDCG
@@ -102,6 +110,10 @@
 			#pragma fragment MyFragmentProgram
 
 			#define DEFERRED_PASS
+
+			#define PARALLAX_BIAS 0
+			//#define PARALLAX_OFFSET_LIMITING
+			#define PARALLAX_FUNCTION ParallaxRaymarching
 
 			#include "My Lighting.cginc"
 
@@ -138,8 +150,9 @@
 			#define BINORMAL_PER_FRAGMENT
 			#define FOG_DISTANCE
 
-			//	#define PARALLAX_BIAS 0
-			//	#define PARALLAX_OFFSET_LIMITING
+			#define PARALLAX_BIAS 0
+			//#define PARALLAX_OFFSET_LIMITING
+			#define PARALLAX_FUNCTION ParallaxRaymarching
 
 			#include "My Lighting.cginc"
 

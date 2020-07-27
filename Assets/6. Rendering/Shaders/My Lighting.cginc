@@ -238,6 +238,10 @@ InterpolatorsVertex MyVertexProgram(VertexData v) {
 	ComputeVertexLightColor(i);
 
 #if defined (_PARALLAX_MAP)
+	#if defined(PARALLAX_SUPPORT_SCALED_DYNAMIC_BATCHING)
+		v.tangent.xyz = normalize(v.tangent.xyz);
+		v.normal = normalize(v.normal);
+	#endif
 	float3x3 objectToTangent = float3x3(
 		v.tangent.xyz,
 		cross(v.normal, v.tangent.xyz) * v.tangent.w,
@@ -492,6 +496,70 @@ float4 ApplyFog (float4 color, Interpolators i) {
 	return color;
 }
 
+float GetParallaxHeight(float2 uv) {
+	return tex2D(_ParallaxMap, uv).g;
+}
+
+float2 ParallaxOffset(float2 uv, float2 viewDir) {
+	float height = GetParallaxHeight(uv);
+	height -= 0.5;
+	height *= _ParallaxStrength;
+	return viewDir * height;
+}
+
+float2 ParallaxRaymarching(float2 uv, float2 viewDir) {
+#if !defined(PARALLAX_RAYMARCHING_STEPS)
+	#define PARALLAX_RAYMARCHING_STEPS 10
+#endif
+	float2 uvOffset = 0;
+	float stepSize = 1.0 / PARALLAX_RAYMARCHING_STEPS;
+	float2 uvDelta = viewDir * (stepSize * _ParallaxStrength);
+
+	float stepHeight = 1;
+	float surfaceHeight = GetParallaxHeight(uv);
+	float2 prevUVOffset = uvOffset;
+	float prevStepHeight = stepHeight;
+	float prevSurfaceHeight = surfaceHeight;
+
+	for (int i = 1; i < PARALLAX_RAYMARCHING_STEPS && stepHeight > surfaceHeight; i++) {
+		prevUVOffset = uvOffset;
+		prevStepHeight = stepHeight;
+		prevSurfaceHeight = surfaceHeight;
+
+		uvOffset -= uvDelta;
+		stepHeight -= stepSize;
+		surfaceHeight = GetParallaxHeight(uv + uvOffset);
+	}
+
+#if !defined(PARALLAX_RAYMARCHING_SEARCH_STEPS)
+	#define PARALLAX_RAYMARCHING_SEARCH_STEPS 0
+#endif
+
+#if PARALLAX_RAYMARCHING_SEARCH_STEPS > 0
+	for (int f = 0; f < PARALLAX_RAYMARCHING_SEARCH_STEPS; f++) {
+		uvDelta *= 0.5;
+		stepSize *= 0.5;
+
+		if (stepHeight < surfaceHeight) {
+			uvOffset += uvDelta;
+			stepHeight += stepSize;
+		}
+		else {
+			uvOffset -= uvDelta;
+			stepHeight -= stepSize;
+		}
+		surfaceHeight = GetParallaxHeight(uv + uvOffset);
+	}
+#elif defined(PARALLAX_RAYMARCHING_INTERPOLATE)
+	float prevDifference = prevStepHeight - prevSurfaceHeight;
+	float difference = surfaceHeight - stepHeight;
+	float t = prevDifference / (prevDifference + difference);
+	uvOffset = lerp(prevUVOffset, uvOffset, t);
+#endif
+
+	return uvOffset;
+}
+
 void ApplyParallax(inout Interpolators i) {
 #if defined(_PARALLAX_MAP)
 	i.tangentViewDir = normalize(i.tangentViewDir);
@@ -501,10 +569,12 @@ void ApplyParallax(inout Interpolators i) {
 		#endif
 		i.tangentViewDir.xy /= (i.tangentViewDir.z + PARALLAX_BIAS);
 	#endif
-	float height = tex2D(_ParallaxMap, i.uv.xy).g;
-	height -= 0.5;
-	height *= _ParallaxStrength;
-	float2 uvOffset = i.tangentViewDir.xy * height;
+
+	#if !defined(PARALLAX_FUNCTION)
+		#define PARALLAX_FUNCTION ParallaxOffset
+	#endif
+
+	float2 uvOffset = PARALLAX_FUNCTION(i.uv.xy, i.tangentViewDir.xy);
 	i.uv.xy += uvOffset;
 	i.uv.zw += uvOffset * (_DetailTex_ST.xy / _MainTex_ST.xy);
 #endif
