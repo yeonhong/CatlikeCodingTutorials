@@ -40,6 +40,8 @@ sampler2D _NormalMap, _DetailNormalMap;
 float _BumpScale, _DetailBumpScale;
 sampler2D _EmissionMap;
 float3 _Emission;
+sampler2D _ParallaxMap;
+float _ParallaxStrength;
 sampler2D _OcclusionMap;
 float _OcclusionStrength;
 float _Cutoff;
@@ -74,6 +76,10 @@ struct InterpolatorsVertex {
 
 #if defined(DYNAMICLIGHTMAP_ON)
 	float2 dynamicLightmapUV : TEXCOORD7;
+#endif
+
+#if defined(_PARALLAX_MAP)
+	float3 tangentViewDir : TEXCOORD8;
 #endif
 };
 
@@ -112,6 +118,10 @@ struct Interpolators {
 
 #if defined(DYNAMICLIGHTMAP_ON)
 	float2 dynamicLightmapUV : TEXCOORD7;
+#endif
+
+#if defined(_PARALLAX_MAP)
+	float3 tangentViewDir : TEXCOORD8;
 #endif
 };
 
@@ -226,6 +236,16 @@ InterpolatorsVertex MyVertexProgram(VertexData v) {
 	UNITY_TRANSFER_SHADOW(i, v.uv1);
 
 	ComputeVertexLightColor(i);
+
+#if defined (_PARALLAX_MAP)
+	float3x3 objectToTangent = float3x3(
+		v.tangent.xyz,
+		cross(v.normal, v.tangent.xyz) * v.tangent.w,
+		v.normal
+		);
+	i.tangentViewDir = mul(objectToTangent, ObjSpaceViewDir(v.vertex));
+#endif
+
 	return i;
 }
 
@@ -472,6 +492,24 @@ float4 ApplyFog (float4 color, Interpolators i) {
 	return color;
 }
 
+void ApplyParallax(inout Interpolators i) {
+#if defined(_PARALLAX_MAP)
+	i.tangentViewDir = normalize(i.tangentViewDir);
+	#if !defined(PARALLAX_OFFSET_LIMITING)
+		#if !defined(PARALLAX_BIAS)
+			#define PARALLAX_BIAS 0.42
+		#endif
+		i.tangentViewDir.xy /= (i.tangentViewDir.z + PARALLAX_BIAS);
+	#endif
+	float height = tex2D(_ParallaxMap, i.uv.xy).g;
+	height -= 0.5;
+	height *= _ParallaxStrength;
+	float2 uvOffset = i.tangentViewDir.xy * height;
+	i.uv.xy += uvOffset;
+	i.uv.zw += uvOffset * (_DetailTex_ST.xy / _MainTex_ST.xy);
+#endif
+}
+
 struct FragmentOutput {
 	#if defined(DEFERRED_PASS)
 		float4 gBuffer0 : SV_Target0;
@@ -492,6 +530,8 @@ FragmentOutput MyFragmentProgram (Interpolators i) {
 #if defined(LOD_FADE_CROSSFADE)
 	UnityApplyDitherCrossFade(i.vpos);
 #endif
+
+	ApplyParallax(i);
 
 	float alpha = GetAlpha(i);
 	#if defined(_RENDERING_CUTOUT)

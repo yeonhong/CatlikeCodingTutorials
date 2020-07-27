@@ -20,6 +20,9 @@
 		[NoScaleOffset] _EmissionMap ("Emission", 2D) = "black" {}
 		_Emission ("Emission", Color) = (0, 0, 0)
 
+		[NoScaleOffset] _ParallaxMap("Parallax", 2D) = "black" {}
+		_ParallaxStrength("Parallax Strength", Range(0, 0.1)) = 0
+
 		[NoScaleOffset] _OcclusionMap ("Occlusion", 2D) = "white" {}
 		_OcclusionStrength("Occlusion Strength", Range(0, 1)) = 1
 
@@ -44,13 +47,14 @@
 			#pragma shader_feature _METALLIC_MAP
 			#pragma shader_feature _ _SMOOTHNESS_ALBEDO _SMOOTHNESS_METALLIC
 			#pragma shader_feature _NORMAL_MAP
+			#pragma shader_feature _PARALLAX_MAP
 			#pragma shader_feature _OCCLUSION_MAP
 			#pragma shader_feature _EMISSION_MAP
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
-			
+
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma multi_compile_instancing
@@ -83,6 +87,7 @@
 			#pragma shader_feature _METALLIC_MAP
 			#pragma shader_feature _ _SMOOTHNESS_ALBEDO _SMOOTHNESS_METALLIC
 			#pragma shader_feature _NORMAL_MAP
+			#pragma shader_feature _PARALLAX_MAP
 			#pragma shader_feature _OCCLUSION_MAP
 			#pragma shader_feature _EMISSION_MAP
 			#pragma shader_feature _DETAIL_MASK
@@ -117,6 +122,7 @@
 			#pragma shader_feature _METALLIC_MAP
 			#pragma shader_feature _ _SMOOTHNESS_ALBEDO _SMOOTHNESS_METALLIC
 			#pragma shader_feature _NORMAL_MAP
+			#pragma shader_feature _PARALLAX_MAP
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
@@ -131,6 +137,9 @@
 
 			#define BINORMAL_PER_FRAGMENT
 			#define FOG_DISTANCE
+
+			//	#define PARALLAX_BIAS 0
+			//	#define PARALLAX_OFFSET_LIMITING
 
 			#include "My Lighting.cginc"
 
