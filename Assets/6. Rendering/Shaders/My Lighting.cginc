@@ -1,3 +1,5 @@
+// Upgrade NOTE: upgraded instancing buffer 'InstanceProperties' to new syntax.
+
 #if !defined(MY_LIGHTING_INCLUDED)
 #define MY_LIGHTING_INCLUDED
 
@@ -23,7 +25,12 @@
 	#endif
 #endif
 
-float4 _Color;
+UNITY_INSTANCING_BUFFER_START(InstanceProperties)
+	//	float4 _Color;
+	UNITY_DEFINE_INSTANCED_PROP(float4, _Color)
+#define _Color_arr InstanceProperties
+UNITY_INSTANCING_BUFFER_END(InstanceProperties)
+
 sampler2D _MainTex, _DetailTex, _DetailMask;
 float4 _MainTex_ST, _DetailTex_ST;
 sampler2D _MetallicMap;
@@ -38,6 +45,7 @@ float _OcclusionStrength;
 float _Cutoff;
 
 struct InterpolatorsVertex {
+	UNITY_VERTEX_INPUT_INSTANCE_ID
 	float4 pos : SV_POSITION;
 	float4 uv : TEXCOORD0;
 	float3 normal : TEXCOORD1;
@@ -70,6 +78,7 @@ struct InterpolatorsVertex {
 };
 
 struct Interpolators {
+	UNITY_VERTEX_INPUT_INSTANCE_ID
 #if defined(LOD_FADE_CROSSFADE)
 	UNITY_VPOS_TYPE vpos : VPOS;
 #else
@@ -182,6 +191,7 @@ InterpolatorsVertex MyVertexProgram(VertexData v) {
 	InterpolatorsVertex i;
 	UNITY_INITIALIZE_OUTPUT(Interpolators, i);
 	UNITY_SETUP_INSTANCE_ID(v);
+	UNITY_TRANSFER_INSTANCE_ID(v, i);
 
 	i.pos = UnityObjectToClipPos(v.vertex);
 	i.worldPos.xyz = mul(unity_ObjectToWorld, v.vertex);
@@ -427,7 +437,7 @@ void InitializeFragmentNormal(inout Interpolators i) {
 }
 
 float GetAlpha (Interpolators i) {
-	float alpha = _Color.a;
+	float alpha = UNITY_ACCESS_INSTANCED_PROP(_Color_arr, _Color).a;
 	#if !defined(_SMOOTHNESS_ALBEDO)
 		alpha *= tex2D(_MainTex, i.uv.xy).a;
 	#endif
@@ -435,7 +445,7 @@ float GetAlpha (Interpolators i) {
 }
 
 float3 GetAlbedo(Interpolators i) {
-	float3 albedo = tex2D(_MainTex, i.uv.xy).rgb * _Color.rgb;
+	float3 albedo =	tex2D(_MainTex, i.uv.xy).rgb * UNITY_ACCESS_INSTANCED_PROP(_Color_arr, _Color).rgb;
 	#if defined (_DETAIL_ALBEDO_MAP)
 		float3 details = tex2D(_DetailTex, i.uv.zw) * unity_ColorSpaceDouble;
 		albedo = lerp(albedo, albedo * details, GetDetailMask(i));
@@ -478,6 +488,7 @@ struct FragmentOutput {
 };
 
 FragmentOutput MyFragmentProgram (Interpolators i) {
+	UNITY_SETUP_INSTANCE_ID(i);
 #if defined(LOD_FADE_CROSSFADE)
 	UnityApplyDitherCrossFade(i.vpos);
 #endif

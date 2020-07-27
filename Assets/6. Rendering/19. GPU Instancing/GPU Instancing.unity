@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba625ad1c570b1d4d9fbc4289735a4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 8898692213254261005, guid: 21b225434ae8c9242bf22d0ec1337699, type: 3}
+  prefab: {fileID: 114200608467058892, guid: 7e8a1fcbecba0a3438ea9a0eb45587b0, type: 3}
   instances: 5000
   radius: 50
 --- !u!4 &800164819

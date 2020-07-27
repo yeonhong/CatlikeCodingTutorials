@@ -54,6 +54,7 @@
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma multi_compile_instancing
+			#pragma instancing_options lodfade
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma vertex MyVertexProgram
@@ -90,6 +91,7 @@
 
 			#pragma multi_compile_prepassfinal
 			#pragma multi_compile_instancing
+			#pragma instancing_options lodfade
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
@@ -150,6 +152,7 @@
 
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile_instancing
+			#pragma instancing_options lodfade
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma vertex MyShadowVertexProgram
