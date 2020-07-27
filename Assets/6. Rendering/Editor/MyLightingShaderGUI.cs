@@ -66,6 +66,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		DoRenderingMode();
 		DoMain();
 		DoSecondary();
+		DoAdvanced();
 	}
 
 	private MaterialProperty FindProperty(string name) {
@@ -316,5 +317,10 @@ public class MyLightingShaderGUI : ShaderGUI
 		EditorGUI.indentLevel += 2;
 		editor.ShaderProperty(slider, MakeLabel(slider));
 		EditorGUI.indentLevel -= 2;
+	}
+
+	private void DoAdvanced() {
+		GUILayout.Label("Advanced Options", EditorStyles.boldLabel);
+		editor.EnableInstancingField();
 	}
 }
