@@ -15,7 +15,10 @@ namespace CustomRP
 
 		private static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 
-		public void Render(ScriptableRenderContext context, Camera camera) {
+		public void Render(
+			ScriptableRenderContext context, Camera camera,
+			bool useDynamicBatching, bool useGPUInstancing
+		) {
 			this.context = context;
 			this.camera = camera;
 
@@ -26,7 +29,7 @@ namespace CustomRP
 			}
 
 			Setup();
-			DrawVisibleGeometry();
+			DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
 			DrawUnsupportedShaders();
 			DrawGizmos();
 			Submit();
@@ -51,14 +54,16 @@ namespace CustomRP
 			ExecuteBuffer();
 		}
 
-		private void DrawVisibleGeometry() {
+		private void DrawVisibleGeometry(bool useDynamicBatching, bool useGPUInstancing) {
 			// draw opaque
 			var sortingSettings = new SortingSettings(camera) {
 				criteria = SortingCriteria.CommonOpaque
 			};
-			var drawingSettings = new DrawingSettings(
-				unlitShaderTagId, sortingSettings
-			);
+			var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings) {
+				enableDynamicBatching = useDynamicBatching,
+				enableInstancing = useGPUInstancing
+			};
+
 			var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 			context.DrawRenderers(
 				cullingResults, ref drawingSettings, ref filteringSettings

@@ -17,7 +17,7 @@
 //	return mul(unity_MatrixVP, float4(positionWS, 1.0));
 //}
 
-
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
 
 #endif
