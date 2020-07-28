@@ -3,7 +3,7 @@ using UnityEngine.Rendering;
 
 namespace CustomRP
 {
-	public class CameraRenderer
+	public partial class CameraRenderer
 	{
 		private ScriptableRenderContext context;
 		private Camera camera;
@@ -12,18 +12,22 @@ namespace CustomRP
 			name = bufferName
 		};
 		private CullingResults cullingResults;
-		static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+
+		private static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 
 		public void Render(ScriptableRenderContext context, Camera camera) {
 			this.context = context;
 			this.camera = camera;
 
+			PrepareForSceneWindow(); // draw ugui
 			if (!Cull()) {
 				return;
 			}
 
 			Setup();
 			DrawVisibleGeometry();
+			DrawUnsupportedShaders();
+			DrawGizmos();
 			Submit();
 		}
 
