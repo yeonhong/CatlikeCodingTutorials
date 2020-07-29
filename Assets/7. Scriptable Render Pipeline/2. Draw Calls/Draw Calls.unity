@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 1, g: 1, b: 1, a: 1}
+  cutoff: 0.5
 --- !u!23 &21129676
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -229,7 +230,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &220368631
 Transform:
   m_ObjectHideFlags: 0
@@ -352,6 +353,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.048089504, g: 0, b: 1, a: 1}
+  cutoff: 0.5
 --- !u!1 &403016082
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,7 +370,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &403016083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,6 +492,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.3562467, g: 1, b: 0, a: 1}
+  cutoff: 0.5
 --- !u!1 &804168295
 GameObject:
   m_ObjectHideFlags: 0
@@ -675,6 +678,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.6351238, g: 0.7735849, b: 0.5582948, a: 1}
+  cutoff: 0.5
 --- !u!1 &1165228548
 GameObject:
   m_ObjectHideFlags: 0
@@ -768,6 +772,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.6274842, g: 0.6320754, b: 0.37864897, a: 1}
+  cutoff: 0.5
 --- !u!1 &1171952016
 GameObject:
   m_ObjectHideFlags: 0
@@ -861,6 +866,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0, g: 1, b: 0.6615553, a: 1}
+  cutoff: 0.5
 --- !u!1 &1186466105
 GameObject:
   m_ObjectHideFlags: 0
@@ -954,6 +960,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.29169634, g: 0.6509434, b: 0.47038105, a: 1}
+  cutoff: 0.5
 --- !u!1 &1209719564
 GameObject:
   m_ObjectHideFlags: 0
@@ -1047,6 +1054,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.45936382, g: 0.754717, b: 0.29547882, a: 1}
+  cutoff: 0.5
 --- !u!1 &1704926412
 GameObject:
   m_ObjectHideFlags: 0
@@ -1223,6 +1231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0, g: 0.9263358, b: 1, a: 1}
+  cutoff: 0.5
 --- !u!1 &1710239108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1316,6 +1325,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0, g: 0.4413116, b: 1, a: 1}
+  cutoff: 0.5
 --- !u!1 &1850904399
 GameObject:
   m_ObjectHideFlags: 0
@@ -1409,6 +1419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.3226237, g: 0.5168958, b: 0.5471698, a: 1}
+  cutoff: 0.5
 --- !u!1 &1874897835
 GameObject:
   m_ObjectHideFlags: 0
@@ -1501,7 +1512,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 279b4c21727320849ab65753d54d94ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseColor: {r: 0.7075472, g: 0.42083547, b: 0.31706125, a: 1}
+  baseColor: {r: 0.7075472, g: 0.42083547, b: 0.31706125, a: 0.5803922}
+  cutoff: 0.5
 --- !u!1 &1972418640
 GameObject:
   m_ObjectHideFlags: 0
@@ -1595,6 +1607,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.6037736, g: 0.20220721, b: 0.20220721, a: 1}
+  cutoff: 0.5
 --- !u!1 &2053086730
 GameObject:
   m_ObjectHideFlags: 0
@@ -1688,6 +1701,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.13756847, g: 0, b: 1, a: 1}
+  cutoff: 0.5
 --- !u!1 &2132564593
 GameObject:
   m_ObjectHideFlags: 0
@@ -1781,3 +1795,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseColor: {r: 0.20991352, g: 0.3962264, b: 0.106532566, a: 1}
+  cutoff: 0.5
