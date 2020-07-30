@@ -19,3 +19,7 @@ MonoBehaviour:
     maxDistance: 20
     directional:
       atlasSize: 512
+      cascadeCount: 4
+      cascadeRatio1: 0.716
+      cascadeRatio2: 0.206
+      cascadeRatio3: 0.157
