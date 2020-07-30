@@ -23,14 +23,23 @@ namespace CustomRP
 			dirLightDirections = new Vector4[maxDirLightCount];
 
 		private CullingResults cullingResults;
+		private Shadows shadows = new Shadows();
 
-		public void Setup(ScriptableRenderContext context, CullingResults cullingResults) {
+		public void Setup(ScriptableRenderContext context, CullingResults cullingResults,
+			ShadowSettings shadowSettings) {
+
 			this.cullingResults = cullingResults;
 			buffer.BeginSample(bufferName);
+			shadows.Setup(context, cullingResults, shadowSettings);
 			SetupLights();
+			shadows.Render();
 			buffer.EndSample(bufferName);
 			context.ExecuteCommandBuffer(buffer);
 			buffer.Clear();
+		}
+
+		public void Cleanup() {
+			shadows.Cleanup();
 		}
 
 		private void SetupLights() {
@@ -55,6 +64,7 @@ namespace CustomRP
 		private void SetupDirectionalLight(int index, ref VisibleLight visibleLight) {
 			dirLightColors[index] = visibleLight.finalColor;
 			dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
+			shadows.ReserveDirectionalShadows(visibleLight.light, index);
 		}
 	}
 }
