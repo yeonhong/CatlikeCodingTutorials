@@ -36,7 +36,6 @@ namespace CustomRP
 			ExecuteBuffer();
 			lighting.Setup(context, cullingResults, shadowSettings);
 			buffer.EndSample(SampleName);
-
 			Setup();
 			DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
 			DrawUnsupportedShaders();

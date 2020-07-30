@@ -7,20 +7,22 @@ namespace CustomRP
 	public class Lighting
 	{
 		private const string bufferName = "Lighting";
+		private const int maxDirLightCount = 4;
+
 		private CommandBuffer buffer = new CommandBuffer {
 			name = bufferName
 		};
-		private const int maxDirLightCount = 4;
+		
 		private static int
-			//dirLightColorId = Shader.PropertyToID("_DirectionalLightColor"),
-			//dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection");
 			dirLightCountId = Shader.PropertyToID("_DirectionalLightCount"),
 			dirLightColorsId = Shader.PropertyToID("_DirectionalLightColors"),
-			dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirections");
+			dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirections"),
+			dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
 
 		private static Vector4[]
 			dirLightColors = new Vector4[maxDirLightCount],
-			dirLightDirections = new Vector4[maxDirLightCount];
+			dirLightDirections = new Vector4[maxDirLightCount],
+			dirLightShadowData = new Vector4[maxDirLightCount];
 
 		private CullingResults cullingResults;
 		private Shadows shadows = new Shadows();
@@ -59,12 +61,13 @@ namespace CustomRP
 			buffer.SetGlobalInt(dirLightCountId, visibleLights.Length);
 			buffer.SetGlobalVectorArray(dirLightColorsId, dirLightColors);
 			buffer.SetGlobalVectorArray(dirLightDirectionsId, dirLightDirections);
+			buffer.SetGlobalVectorArray(dirLightShadowDataId, dirLightShadowData);
 		}
 
 		private void SetupDirectionalLight(int index, ref VisibleLight visibleLight) {
 			dirLightColors[index] = visibleLight.finalColor;
 			dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
-			shadows.ReserveDirectionalShadows(visibleLight.light, index);
+			dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
 		}
 	}
 }
