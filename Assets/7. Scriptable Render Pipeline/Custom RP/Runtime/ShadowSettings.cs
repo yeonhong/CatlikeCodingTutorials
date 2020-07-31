@@ -11,7 +11,11 @@ namespace CustomRP
 			_2048 = 2048, _4096 = 4096, _8192 = 8192
 		}
 
-		[Min(0f)] public float maxDistance = 100f;
+		[Min(0.001f)]
+		public float maxDistance = 100f;
+
+		[Range(0.001f, 1f)]
+		public float distanceFade = 0.1f;
 
 		[System.Serializable]
 		public struct Directional
@@ -21,6 +25,8 @@ namespace CustomRP
 			public int cascadeCount;
 			[Range(0f, 1f)]
 			public float cascadeRatio1, cascadeRatio2, cascadeRatio3;
+			[Range(0.001f, 1f)]
+			public float cascadeFade;
 
 			public Vector3 CascadeRatios =>	new Vector3(cascadeRatio1, cascadeRatio2, cascadeRatio3);
 		}
@@ -30,7 +36,8 @@ namespace CustomRP
 			cascadeCount = 4,
 			cascadeRatio1 = 0.1f,
 			cascadeRatio2 = 0.25f,
-			cascadeRatio3 = 0.5f
+			cascadeRatio3 = 0.5f,
+			cascadeFade = 0.1f
 		};
 	} 
 }
