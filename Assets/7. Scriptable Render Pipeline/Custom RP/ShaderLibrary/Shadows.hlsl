@@ -4,30 +4,30 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
 
 #if defined(_DIRECTIONAL_PCF3)
-	#define DIRECTIONAL_FILTER_SAMPLES 4
-	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_3x3
+#define DIRECTIONAL_FILTER_SAMPLES 4
+#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_3x3
 #elif defined(_DIRECTIONAL_PCF5)
-	#define DIRECTIONAL_FILTER_SAMPLES 9
-	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_5x5
+#define DIRECTIONAL_FILTER_SAMPLES 9
+#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_5x5
 #elif defined(_DIRECTIONAL_PCF7)
-	#define DIRECTIONAL_FILTER_SAMPLES 16
-	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_7x7
+#define DIRECTIONAL_FILTER_SAMPLES 16
+#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_7x7
 #endif
 
 #define MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT 4
 #define MAX_CASCADE_COUNT 4
 
 TEXTURE2D_SHADOW(_DirectionalShadowAtlas);
-	#define SHADOW_SAMPLER sampler_linear_clamp_compare
+#define SHADOW_SAMPLER sampler_linear_clamp_compare
 SAMPLER_CMP(SHADOW_SAMPLER);
 
 CBUFFER_START(_CustomShadows)
-	int _CascadeCount;
-	float4 _CascadeCullingSpheres[MAX_CASCADE_COUNT];
-	float4 _CascadeData[MAX_CASCADE_COUNT];
-	float4x4 _DirectionalShadowMatrices[MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT * MAX_CASCADE_COUNT];
-	float4 _ShadowAtlasSize;
-	float4 _ShadowDistanceFade;
+int _CascadeCount;
+float4 _CascadeCullingSpheres[MAX_CASCADE_COUNT];
+float4 _CascadeData[MAX_CASCADE_COUNT];
+float4x4 _DirectionalShadowMatrices[MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT * MAX_CASCADE_COUNT];
+float4 _ShadowAtlasSize;
+float4 _ShadowDistanceFade;
 CBUFFER_END
 
 struct DirectionalShadowData {
@@ -108,18 +108,20 @@ float FilterDirectionalShadow(float3 positionSTS) {
 #endif
 }
 
-float GetDirectionalShadowAttenuation(
-	DirectionalShadowData directional, ShadowData global, Surface surfaceWS
-) {
+float GetDirectionalShadowAttenuation(DirectionalShadowData directional, ShadowData global, Surface surfaceWS) {
+#if !defined(_RECEIVE_SHADOWS)
+	return 1.0;
+#endif
 	if (directional.strength <= 0.0) {
 		return 1.0;
 	}
+
 	float3 normalBias = surfaceWS.normal * (directional.normalBias * _CascadeData[global.cascadeIndex].y);
 	float3 positionSTS = mul(
 		_DirectionalShadowMatrices[directional.tileIndex],
 		float4(surfaceWS.position + normalBias, 1.0)
 	).xyz;
-	
+
 	float shadow = FilterDirectionalShadow(positionSTS);
 	if (global.cascadeBlend < 1.0) {
 		normalBias = surfaceWS.normal *

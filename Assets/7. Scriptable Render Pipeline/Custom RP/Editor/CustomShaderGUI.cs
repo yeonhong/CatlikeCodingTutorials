@@ -40,10 +40,25 @@ namespace CustomRP
 			}
 		}
 
+		enum ShadowMode
+		{
+			On, Clip, Dither, Off
+		}
+
+		ShadowMode Shadows {
+			set {
+				if (SetProperty("_Shadows", (float)value)) {
+					SetKeyword("_SHADOWS_CLIP", value == ShadowMode.Clip);
+					SetKeyword("_SHADOWS_DITHER", value == ShadowMode.Dither);
+				}
+			}
+		}
+
 		bool HasProperty(string name) => FindProperty(name, properties, false) != null;
 		bool HasPremultiplyAlpha => HasProperty("_PremulAlpha");
 
 		public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties) {
+			EditorGUI.BeginChangeCheck();
 			base.OnGUI(materialEditor, properties);
 
 			editor = materialEditor;
@@ -57,6 +72,10 @@ namespace CustomRP
 				ClipPreset();
 				FadePreset();
 				TransparentPreset();
+			}
+
+			if (EditorGUI.EndChangeCheck()) {
+				SetShadowCasterPass();
 			}
 		}
 
@@ -94,6 +113,17 @@ namespace CustomRP
 				return true;
 			}
 			return false;
+		}
+
+		void SetShadowCasterPass() {
+			MaterialProperty shadows = FindProperty("_Shadows", properties, false);
+			if (shadows == null || shadows.hasMixedValue) {
+				return;
+			}
+			bool enabled = shadows.floatValue < (float)ShadowMode.Off;
+			foreach (Material m in materials) {
+				m.SetShaderPassEnabled("ShadowCaster", enabled);
+			}
 		}
 
 		private void OpaquePreset() {
