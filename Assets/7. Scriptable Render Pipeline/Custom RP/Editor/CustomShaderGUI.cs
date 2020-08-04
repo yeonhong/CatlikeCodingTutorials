@@ -40,12 +40,12 @@ namespace CustomRP
 			}
 		}
 
-		enum ShadowMode
+		private enum ShadowMode
 		{
 			On, Clip, Dither, Off
 		}
 
-		ShadowMode Shadows {
+		private ShadowMode Shadows {
 			set {
 				if (SetProperty("_Shadows", (float)value)) {
 					SetKeyword("_SHADOWS_CLIP", value == ShadowMode.Clip);
@@ -54,8 +54,11 @@ namespace CustomRP
 			}
 		}
 
-		bool HasProperty(string name) => FindProperty(name, properties, false) != null;
-		bool HasPremultiplyAlpha => HasProperty("_PremulAlpha");
+		private bool HasProperty(string name) {
+			return FindProperty(name, properties, false) != null;
+		}
+
+		private bool HasPremultiplyAlpha => HasProperty("_PremulAlpha");
 
 		public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties) {
 			EditorGUI.BeginChangeCheck();
@@ -64,6 +67,8 @@ namespace CustomRP
 			editor = materialEditor;
 			materials = materialEditor.targets;
 			this.properties = properties;
+
+			BakedEmission();
 
 			EditorGUILayout.Space();
 			showPresets = EditorGUILayout.Foldout(showPresets, "Presets", true);
@@ -79,7 +84,18 @@ namespace CustomRP
 			}
 		}
 
-		void SetProperty(string name, string keyword, bool value) {
+		void BakedEmission() {
+			EditorGUI.BeginChangeCheck();
+			editor.LightmapEmissionProperty();
+			if (EditorGUI.EndChangeCheck()) {
+				foreach (Material m in editor.targets) {
+					m.globalIlluminationFlags &=
+						~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+				}
+			}
+		}
+
+		private void SetProperty(string name, string keyword, bool value) {
 			if (SetProperty(name, value ? 1f : 0f)) {
 				SetKeyword(keyword, value);
 			}
@@ -115,7 +131,7 @@ namespace CustomRP
 			return false;
 		}
 
-		void SetShadowCasterPass() {
+		private void SetShadowCasterPass() {
 			MaterialProperty shadows = FindProperty("_Shadows", properties, false);
 			if (shadows == null || shadows.hasMixedValue) {
 				return;

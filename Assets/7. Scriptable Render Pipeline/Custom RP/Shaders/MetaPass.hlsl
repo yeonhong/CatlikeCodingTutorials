@@ -40,10 +40,13 @@ float4 MetaPassFragment(Varyings input) : SV_TARGET{
 	BRDF brdf = GetBRDF(surface);
 
 	float4 meta = 0.0;
-	if (unity_MetaFragmentControl.x) {
+	if (unity_MetaFragmentControl.x) { // env light.
 		meta = float4(brdf.diffuse, 1.0);
 		meta.rgb += brdf.specular * brdf.roughness * 0.5;
 		meta.rgb = min(PositivePow(meta.rgb, unity_OneOverOutputBoost), unity_MaxOutputValue);
+	}
+	else if (unity_MetaFragmentControl.y) { //emissive light.
+		meta = float4(GetEmission(input.baseUV), 1.0);
 	}
 	return meta;
 }
