@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CustomRP
 {
@@ -12,6 +13,8 @@ namespace CustomRP
 		[SerializeField] private Mesh mesh = default;
 
 		[SerializeField] private Material material = default;
+
+		[SerializeField] LightProbeProxyVolume lightProbeVolume = null;
 
 		private Matrix4x4[] matrices = new Matrix4x4[1023];
 		private Vector4[] baseColors = new Vector4[1023];
@@ -46,8 +49,26 @@ namespace CustomRP
 				block.SetVectorArray(baseColorId, baseColors);
 				block.SetFloatArray(metallicId, metallic);
 				block.SetFloatArray(smoothnessId, smoothness);
+
+				if (!lightProbeVolume) {
+					var positions = new Vector3[1023];
+					for (int i = 0; i < matrices.Length; i++) {
+						positions[i] = matrices[i].GetColumn(3);
+					}
+
+					var lightProbes = new SphericalHarmonicsL2[1023];
+					LightProbes.CalculateInterpolatedLightAndOcclusionProbes(
+						positions, lightProbes, null
+					);
+					block.CopySHCoefficientArraysFrom(lightProbes);
+				}
 			}
-			Graphics.DrawMeshInstanced(mesh, 0, material, matrices, 1023, block);
+			Graphics.DrawMeshInstanced(
+				mesh, 0, material, matrices, 1023, block,
+				ShadowCastingMode.On, true, 0, null,
+				lightProbeVolume ? 
+				LightProbeUsage.UseProxyVolume : LightProbeUsage.CustomProvided,	lightProbeVolume
+			);
 		}
 	}
 }
