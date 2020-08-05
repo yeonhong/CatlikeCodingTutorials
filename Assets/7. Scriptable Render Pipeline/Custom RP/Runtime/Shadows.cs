@@ -33,14 +33,13 @@ namespace CustomRP
 			cascadeDataId = Shader.PropertyToID("_CascadeData"),
 			shadowAtlastSizeId = Shader.PropertyToID("_ShadowAtlasSize"),
 			shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
-		
+
 		private static string[] directionalFilterKeywords = {
 			"_DIRECTIONAL_PCF3",
 			"_DIRECTIONAL_PCF5",
 			"_DIRECTIONAL_PCF7",
 		};
-
-		static string[] cascadeBlendKeywords = {
+		private static string[] cascadeBlendKeywords = {
 			"_CASCADE_BLEND_SOFT",
 			"_CASCADE_BLEND_DITHER"
 		};
@@ -52,14 +51,21 @@ namespace CustomRP
 			cascadeCullingSpheres = new Vector4[maxCascades],
 			cascadeData = new Vector4[maxCascades];
 
+		private static string[] shadowMaskKeywords = {
+			"_SHADOW_MASK_DISTANCE"
+		};
+		bool useShadowMask;
+
+
 		public void Setup(
 			ScriptableRenderContext context, CullingResults cullingResults,
-			ShadowSettings settings
-		) {
+			ShadowSettings settings) {
+
 			this.context = context;
 			this.cullingResults = cullingResults;
 			this.settings = settings;
 			ShadowedDirectionalLightCount = 0;
+			useShadowMask = false;
 		}
 
 		public void Cleanup() {
@@ -75,6 +81,13 @@ namespace CustomRP
 				light.shadows != LightShadows.None && light.shadowStrength > 0f &&
 				cullingResults.GetShadowCasterBounds(visibleLightIndex, out Bounds b)
 			) {
+
+				LightBakingOutput lightBaking = light.bakingOutput;
+				if (lightBaking.lightmapBakeType == LightmapBakeType.Mixed &&
+					lightBaking.mixedLightingMode == MixedLightingMode.Shadowmask) {
+					useShadowMask = true;
+				}
+
 				shadowedDirectionalLights[ShadowedDirectionalLightCount] =
 					new ShadowedDirectionalLight {
 						visibleLightIndex = visibleLightIndex,
@@ -95,6 +108,11 @@ namespace CustomRP
 			if (ShadowedDirectionalLightCount > 0) {
 				RenderDirectionalShadows();
 			}
+
+			buffer.BeginSample(bufferName);
+			SetKeywords(shadowMaskKeywords, useShadowMask ? 0 : -1);
+			buffer.EndSample(bufferName);
+			ExecuteBuffer();
 		}
 
 		private void RenderDirectionalShadows() {
@@ -182,7 +200,7 @@ namespace CustomRP
 			);
 		}
 
-		void SetKeywords(string[] keywords, int enabledIndex) {
+		private void SetKeywords(string[] keywords, int enabledIndex) {
 			for (int i = 0; i < keywords.Length; i++) {
 				if (i == enabledIndex) {
 					buffer.EnableShaderKeyword(keywords[i]);

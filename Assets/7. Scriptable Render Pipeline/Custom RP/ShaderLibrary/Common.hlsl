@@ -18,6 +18,10 @@
 //	return mul(unity_MatrixVP, float4(positionWS, 1.0));
 //}
 
+#if defined(_SHADOW_MASK_DISTANCE)
+	#define SHADOWS_SHADOWMASK
+#endif
+
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
 
