@@ -71,7 +71,8 @@ namespace CustomRP
 			var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings) {
 				enableDynamicBatching = useDynamicBatching,
 				enableInstancing = useGPUInstancing,
-				perObjectData = PerObjectData.Lightmaps |
+				perObjectData = PerObjectData.ReflectionProbes | 
+								PerObjectData.Lightmaps |
 								PerObjectData.ShadowMask |
 								PerObjectData.LightProbe |
 								PerObjectData.OcclusionProbe |
