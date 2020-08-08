@@ -25,6 +25,7 @@ Varyings ShadowCasterPassVertex(Attributes input) {
 
 void ShadowCasterPassFragment(Varyings input) {
 	UNITY_SETUP_INSTANCE_ID(input);
+	ClipLOD(input.positionCS.xy, unity_LODFade.x);
 	float4 base = GetBase(input.baseUV);
 
 #if defined(_CLIPPING)
