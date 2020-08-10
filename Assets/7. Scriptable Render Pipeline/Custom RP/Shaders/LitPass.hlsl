@@ -55,7 +55,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET {
 #endif
 
 #if defined(_SHADOWS_CLIP)
-	clip(base.a - UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff));
+	clip(base.a - INPUT_PROP(_Cutoff));
 #elif defined(_SHADOWS_DITHER)
 	float dither = InterleavedGradientNoise(input.positionCS.xy, 0);
 	clip(base.a - dither);
@@ -69,6 +69,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET {
 	surface.color = base.rgb;
 	surface.alpha = base.a;
 	surface.metallic = GetMetallic(input.baseUV);
+	surface.occlusion = GetOcclusion(input.baseUV);
 	surface.smoothness = GetSmoothness(input.baseUV);
 	surface.fresnelStrength = GetFresnel(input.baseUV);
 	surface.dither = InterleavedGradientNoise(input.positionCS.xy, 0);

@@ -35,7 +35,7 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET{
 #endif
 
 #if defined(_SHADOWS_CLIP)
-	clip(base.a - UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff));
+	clip(base.a - INPUT_PROP(_Cutoff));
 #endif
 	return base;
 }
