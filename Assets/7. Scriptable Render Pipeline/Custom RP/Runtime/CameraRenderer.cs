@@ -21,6 +21,7 @@ namespace CustomRP
 		public void Render(
 			ScriptableRenderContext context, Camera camera,
 			bool useDynamicBatching, bool useGPUInstancing,
+			bool useLightsPerObject,
 			ShadowSettings shadowSettings
 		) {
 			this.context = context;
@@ -34,10 +35,10 @@ namespace CustomRP
 
 			buffer.BeginSample(SampleName);
 			ExecuteBuffer();
-			lighting.Setup(context, cullingResults, shadowSettings);
+			lighting.Setup(context, cullingResults, shadowSettings, useLightsPerObject);
 			buffer.EndSample(SampleName);
 			Setup();
-			DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
+			DrawVisibleGeometry(useDynamicBatching, useGPUInstancing, useLightsPerObject);
 			DrawUnsupportedShaders();
 			DrawGizmos();
 			lighting.Cleanup();
@@ -63,7 +64,12 @@ namespace CustomRP
 			ExecuteBuffer();
 		}
 
-		private void DrawVisibleGeometry(bool useDynamicBatching, bool useGPUInstancing) {
+		private void DrawVisibleGeometry(
+			bool useDynamicBatching, bool useGPUInstancing, bool useLightsPerObject) {
+			PerObjectData lightsPerObjectFlags = useLightsPerObject ?
+				PerObjectData.LightData | PerObjectData.LightIndices :
+				PerObjectData.None;
+
 			// draw opaque
 			var sortingSettings = new SortingSettings(camera) {
 				criteria = SortingCriteria.CommonOpaque
@@ -77,7 +83,8 @@ namespace CustomRP
 								PerObjectData.LightProbe |
 								PerObjectData.OcclusionProbe |
 								PerObjectData.OcclusionProbeProxyVolume |
-								PerObjectData.LightProbeProxyVolume
+								PerObjectData.LightProbeProxyVolume |
+								lightsPerObjectFlags
 			};
 			drawingSettings.SetShaderPassName(1, litShaderTagId);
 
