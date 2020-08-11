@@ -3,7 +3,7 @@ using UnityEngine.Rendering;
 
 namespace CustomRP
 {
-	public class CustomRenderPipeline : RenderPipeline
+	public partial class CustomRenderPipeline : RenderPipeline
 	{
 		private CameraRenderer renderer = new CameraRenderer();
 		private bool useDynamicBatching, useGPUInstancing;
@@ -18,6 +18,8 @@ namespace CustomRP
 			this.useGPUInstancing = useGPUInstancing;
 			GraphicsSettings.useScriptableRenderPipelineBatching = useSRPBatcher;
 			GraphicsSettings.lightsUseLinearIntensity = true;
+
+			InitializeForEditor();
 		}
 
 		protected override void Render(ScriptableRenderContext context, Camera[] cameras) {
