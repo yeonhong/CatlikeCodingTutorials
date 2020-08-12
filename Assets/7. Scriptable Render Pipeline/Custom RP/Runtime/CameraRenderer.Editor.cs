@@ -8,7 +8,8 @@ namespace CustomRP
 	partial class CameraRenderer
 	{
 
-		partial void DrawGizmos();
+		partial void DrawGizmosBeforeFX();
+		partial void DrawGizmosAfterFX();
 
 		partial void DrawUnsupportedShaders();
 
@@ -31,9 +32,14 @@ namespace CustomRP
 
 		string SampleName { get; set; }
 
-		partial void DrawGizmos() {
+		partial void DrawGizmosBeforeFX() {
 			if (Handles.ShouldRenderGizmos()) {
 				context.DrawGizmos(camera, GizmoSubset.PreImageEffects);
+			}
+		}
+
+		partial void DrawGizmosAfterFX() {
+			if (Handles.ShouldRenderGizmos()) {
 				context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
 			}
 		}

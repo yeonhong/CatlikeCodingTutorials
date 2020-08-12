@@ -5,28 +5,25 @@ namespace CustomRP
 {
 	public partial class CameraRenderer
 	{
-		const string bufferName = "Render Camera";
-
-		static ShaderTagId
+		private const string bufferName = "Render Camera";
+		private static ShaderTagId
 			unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit"),
 			litShaderTagId = new ShaderTagId("CustomLit");
-
-		CommandBuffer buffer = new CommandBuffer {
+		private CommandBuffer buffer = new CommandBuffer {
 			name = bufferName
 		};
+		private static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
 
-		ScriptableRenderContext context;
-
-		Camera camera;
-
-		CullingResults cullingResults;
-
-		Lighting lighting = new Lighting();
+		private ScriptableRenderContext context;
+		private Camera camera;
+		private CullingResults cullingResults;
+		private Lighting lighting = new Lighting();
+		private PostFXStack postFXStack = new PostFXStack();
 
 		public void Render(
 			ScriptableRenderContext context, Camera camera,
 			bool useDynamicBatching, bool useGPUInstancing, bool useLightsPerObject,
-			ShadowSettings shadowSettings
+			ShadowSettings shadowSettings, PostFXSettings postFXSettings
 		) {
 			this.context = context;
 			this.camera = camera;
@@ -39,21 +36,22 @@ namespace CustomRP
 
 			buffer.BeginSample(SampleName);
 			ExecuteBuffer();
-			lighting.Setup(
-				context, cullingResults, shadowSettings, useLightsPerObject
-			);
+			lighting.Setup(context, cullingResults, shadowSettings, useLightsPerObject);
+			postFXStack.Setup(context, camera, postFXSettings);
 			buffer.EndSample(SampleName);
 			Setup();
-			DrawVisibleGeometry(
-				useDynamicBatching, useGPUInstancing, useLightsPerObject
-			);
+			DrawVisibleGeometry(useDynamicBatching, useGPUInstancing, useLightsPerObject);
 			DrawUnsupportedShaders();
-			DrawGizmos();
-			lighting.Cleanup();
+			DrawGizmosBeforeFX();
+			if (postFXStack.IsActive) {
+				postFXStack.Render(frameBufferId);
+			}
+			DrawGizmosAfterFX();
+			Cleanup();
 			Submit();
 		}
 
-		bool Cull(float maxShadowDistance) {
+		private bool Cull(float maxShadowDistance) {
 			if (camera.TryGetCullingParameters(out ScriptableCullingParameters p)) {
 				p.shadowDistance = Mathf.Min(maxShadowDistance, camera.farClipPlane);
 				cullingResults = context.Cull(ref p);
@@ -62,9 +60,24 @@ namespace CustomRP
 			return false;
 		}
 
-		void Setup() {
+		private void Setup() {
 			context.SetupCameraProperties(camera);
 			CameraClearFlags flags = camera.clearFlags;
+
+			if (postFXStack.IsActive) {
+				if (flags > CameraClearFlags.Color) {
+					flags = CameraClearFlags.Color;
+				}
+				buffer.GetTemporaryRT(
+					frameBufferId, camera.pixelWidth, camera.pixelHeight,
+					32, FilterMode.Bilinear, RenderTextureFormat.Default
+				);
+				buffer.SetRenderTarget(
+					frameBufferId,
+					RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
+				);
+			}
+
 			buffer.ClearRenderTarget(
 				flags <= CameraClearFlags.Depth,
 				flags == CameraClearFlags.Color,
@@ -75,18 +88,25 @@ namespace CustomRP
 			ExecuteBuffer();
 		}
 
-		void Submit() {
+		void Cleanup() {
+			lighting.Cleanup();
+			if (postFXStack.IsActive) {
+				buffer.ReleaseTemporaryRT(frameBufferId);
+			}
+		}
+
+		private void Submit() {
 			buffer.EndSample(SampleName);
 			ExecuteBuffer();
 			context.Submit();
 		}
 
-		void ExecuteBuffer() {
+		private void ExecuteBuffer() {
 			context.ExecuteCommandBuffer(buffer);
 			buffer.Clear();
 		}
 
-		void DrawVisibleGeometry(
+		private void DrawVisibleGeometry(
 			bool useDynamicBatching, bool useGPUInstancing, bool useLightsPerObject
 		) {
 			PerObjectData lightsPerObjectFlags = useLightsPerObject ?
@@ -126,5 +146,5 @@ namespace CustomRP
 				cullingResults, ref drawingSettings, ref filteringSettings
 			);
 		}
-	} 
+	}
 }

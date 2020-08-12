@@ -13,13 +13,13 @@ namespace CustomRP
 			useSRPBatcher = true,
 			useLightsPerObject = true;
 
-		[SerializeField]
-		private ShadowSettings shadows = default;
+		[SerializeField] private ShadowSettings shadows = default;
+		[SerializeField] PostFXSettings postFXSettings = default;
 
 		protected override RenderPipeline CreatePipeline() {
 			return new CustomRenderPipeline(
 				useDynamicBatching, useGPUInstancing, useSRPBatcher,
-				useLightsPerObject, shadows
+				useLightsPerObject, shadows, postFXSettings
 			);
 		}
 	} 

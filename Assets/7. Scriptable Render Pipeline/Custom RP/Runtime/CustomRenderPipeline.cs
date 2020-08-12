@@ -8,11 +8,14 @@ namespace CustomRP
 		private CameraRenderer renderer = new CameraRenderer();
 		private bool useDynamicBatching, useGPUInstancing, useLightsPerObject;
 		private ShadowSettings shadowSettings;
+		private PostFXSettings postFXSettings;
 
 		public CustomRenderPipeline(
 			bool useDynamicBatching, bool useGPUInstancing, bool useSRPBatcher,
-			bool useLightsPerObject, ShadowSettings shadowSettings
+			bool useLightsPerObject, ShadowSettings shadowSettings,
+			PostFXSettings postFXSettings
 		) {
+			this.postFXSettings = postFXSettings;
 			this.shadowSettings = shadowSettings;
 			this.useDynamicBatching = useDynamicBatching;
 			this.useGPUInstancing = useGPUInstancing;
@@ -29,9 +32,9 @@ namespace CustomRP
 				renderer.Render(
 					context, camera,
 					useDynamicBatching, useGPUInstancing, useLightsPerObject,
-					shadowSettings
+					shadowSettings, postFXSettings
 				);
 			}
 		}
-	} 
+	}
 }
