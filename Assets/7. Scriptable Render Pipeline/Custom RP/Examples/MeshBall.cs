@@ -10,16 +10,19 @@ namespace CustomRP
 			metallicId = Shader.PropertyToID("_Metallic"),
 			smoothnessId = Shader.PropertyToID("_Smoothness");
 
-		[SerializeField] private Mesh mesh = default;
+		[SerializeField]
+		private Mesh mesh = default;
 
-		[SerializeField] private Material material = default;
+		[SerializeField]
+		private Material material = default;
 
-		[SerializeField] LightProbeProxyVolume lightProbeVolume = null;
-
+		[SerializeField]
+		private LightProbeProxyVolume lightProbeVolume = null;
 		private Matrix4x4[] matrices = new Matrix4x4[1023];
 		private Vector4[] baseColors = new Vector4[1023];
-		private float[] metallic = new float[1023],
-						smoothness = new float[1023];
+		private float[]
+			metallic = new float[1023],
+			smoothness = new float[1023];
 		private MaterialPropertyBlock block;
 
 		private void Awake() {
@@ -31,13 +34,11 @@ namespace CustomRP
 					),
 					Vector3.one * Random.Range(0.5f, 1.5f)
 				);
-
 				baseColors[i] =
 					new Vector4(
 						Random.value, Random.value, Random.value,
 						Random.Range(0.5f, 1f)
 					);
-
 				metallic[i] = Random.value < 0.25f ? 1f : 0f;
 				smoothness[i] = Random.Range(0.05f, 0.95f);
 			}
@@ -55,7 +56,6 @@ namespace CustomRP
 					for (int i = 0; i < matrices.Length; i++) {
 						positions[i] = matrices[i].GetColumn(3);
 					}
-
 					var lightProbes = new SphericalHarmonicsL2[1023];
 					var occlusionProbes = new Vector4[1023];
 					LightProbes.CalculateInterpolatedLightAndOcclusionProbes(
@@ -68,9 +68,10 @@ namespace CustomRP
 			Graphics.DrawMeshInstanced(
 				mesh, 0, material, matrices, 1023, block,
 				ShadowCastingMode.On, true, 0, null,
-				lightProbeVolume ? 
-				LightProbeUsage.UseProxyVolume : LightProbeUsage.CustomProvided,	lightProbeVolume
+				lightProbeVolume ?
+					LightProbeUsage.UseProxyVolume : LightProbeUsage.CustomProvided,
+				lightProbeVolume
 			);
 		}
-	}
+	} 
 }

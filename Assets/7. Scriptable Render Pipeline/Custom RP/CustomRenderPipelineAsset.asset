@@ -15,6 +15,7 @@ MonoBehaviour:
   useDynamicBatching: 0
   useGPUInstancing: 1
   useSRPBatcher: 1
+  useLightsPerObject: 1
   shadows:
     maxDistance: 11
     distanceFade: 0.363
@@ -27,3 +28,6 @@ MonoBehaviour:
       cascadeRatio3: 1
       cascadeFade: 1
       cascadeBlend: 1
+    other:
+      atlasSize: 512
+      filter: 0

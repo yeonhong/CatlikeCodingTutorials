@@ -2,7 +2,9 @@
 #define CUSTOM_LIGHTING_INCLUDED
 
 float3 IncomingLight(Surface surface, Light light) {
-	return saturate(dot(surface.normal, light.direction)) * light.attenuation * light.color;
+	return
+		saturate(dot(surface.normal, light.direction) * light.attenuation) *
+		light.color;
 }
 
 float3 GetLighting(Surface surface, BRDF brdf, Light light) {
@@ -31,7 +33,6 @@ float3 GetLighting(Surface surfaceWS, BRDF brdf, GI gi) {
 		color += GetLighting(surfaceWS, brdf, light);
 	}
 #endif
-
 	return color;
 }
 

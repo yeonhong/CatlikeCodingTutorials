@@ -7,6 +7,7 @@ namespace CustomRP
 {
 	public partial class CustomRenderPipeline
 	{
+
 		partial void InitializeForEditor();
 
 #if UNITY_EDITOR
@@ -20,7 +21,7 @@ namespace CustomRP
 			Lightmapping.ResetDelegate();
 		}
 
-		static Lightmapping.RequestLightsDelegate lightsDelegate =
+		private static Lightmapping.RequestLightsDelegate lightsDelegate =
 			(Light[] lights, NativeArray<LightDataGI> output) => {
 				var lightData = new LightDataGI();
 				for (int i = 0; i < lights.Length; i++) {
@@ -55,6 +56,7 @@ namespace CustomRP
 					output[i] = lightData;
 				}
 			};
+
 #endif
-	}
+	} 
 }

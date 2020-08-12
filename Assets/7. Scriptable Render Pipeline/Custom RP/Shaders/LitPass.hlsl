@@ -14,7 +14,7 @@ struct Attributes {
 	float4 tangentOS : TANGENT;
 	float2 baseUV : TEXCOORD0;
 	GI_ATTRIBUTE_DATA
-	UNITY_VERTEX_INPUT_INSTANCE_ID
+		UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct Varyings {
@@ -25,9 +25,11 @@ struct Varyings {
 	float4 tangentWS : VAR_TANGENT;
 #endif
 	float2 baseUV : VAR_BASE_UV;
+#if defined(_DETAIL_MAP)
 	float2 detailUV : VAR_DETAIL_UV;
+#endif
 	GI_VARYINGS_DATA
-	UNITY_VERTEX_INPUT_INSTANCE_ID
+		UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 Varyings LitPassVertex(Attributes input) {
@@ -37,60 +39,47 @@ Varyings LitPassVertex(Attributes input) {
 	TRANSFER_GI_DATA(input, output);
 	output.positionWS = TransformObjectToWorld(input.positionOS);
 	output.positionCS = TransformWorldToHClip(output.positionWS);
-#if UNITY_REVERSED_Z
-	output.positionCS.z =
-		min(output.positionCS.z, output.positionCS.w * UNITY_NEAR_CLIP_VALUE);
-#else
-	output.positionCS.z =
-		max(output.positionCS.z, output.positionCS.w * UNITY_NEAR_CLIP_VALUE);
-#endif
 	output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 #if defined(_NORMAL_MAP)
-	output.tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
+	output.tangentWS = float4(
+		TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w
+		);
 #endif
 	output.baseUV = TransformBaseUV(input.baseUV);
 #if defined(_DETAIL_MAP)
 	output.detailUV = TransformDetailUV(input.baseUV);
 #endif
-
 	return output;
 }
 
-float4 LitPassFragment(Varyings input) : SV_TARGET {
+float4 LitPassFragment(Varyings input) : SV_TARGET{
 	UNITY_SETUP_INSTANCE_ID(input);
 	ClipLOD(input.positionCS.xy, unity_LODFade.x);
+
 	InputConfig config = GetInputConfig(input.baseUV);
-#if defined(_MASK_MAP)
-	config.useMask = true;
-#endif
-#if defined(_DETAIL_MAP)
-	config.detailUV = input.detailUV;
-	config.useDetail = true;
-#endif
+	#if defined(_MASK_MAP)
+		config.useMask = true;
+	#endif
+	#if defined(_DETAIL_MAP)
+		config.detailUV = input.detailUV;
+		config.useDetail = true;
+	#endif
 
 	float4 base = GetBase(config);
-#if defined(_CLIPPING)
-	clip(base.a - GetCutoff(config));
-#endif
-
-#if defined(_SHADOWS_CLIP)
-	clip(base.a - INPUT_PROP(_Cutoff));
-#elif defined(_SHADOWS_DITHER)
-	float dither = InterleavedGradientNoise(input.positionCS.xy, 0);
-	clip(base.a - dither);
-#endif
+	#if defined(_CLIPPING)
+		clip(base.a - GetCutoff(config));
+	#endif
 
 	Surface surface;
 	surface.position = input.positionWS;
-#if defined(_NORMAL_MAP)
-	surface.normal = NormalTangentToWorld(
-		GetNormalTS(config),
-		input.normalWS, input.tangentWS
-	);
-#else
-	surface.normal = normalize(input.normalWS);
-#endif
-	surface.interpolatedNormal = input.normalWS;
+	#if defined(_NORMAL_MAP)
+		surface.normal = NormalTangentToWorld(
+			GetNormalTS(config), input.normalWS, input.tangentWS
+		);
+	#else
+		surface.normal = normalize(input.normalWS);
+	#endif
+	surface.interpolatedNormal = surface.normal;
 	surface.viewDirection = normalize(_WorldSpaceCameraPos - input.positionWS);
 	surface.depth = -TransformWorldToView(input.positionWS).z;
 	surface.color = base.rgb;
@@ -100,12 +89,11 @@ float4 LitPassFragment(Varyings input) : SV_TARGET {
 	surface.smoothness = GetSmoothness(config);
 	surface.fresnelStrength = GetFresnel(config);
 	surface.dither = InterleavedGradientNoise(input.positionCS.xy, 0);
-	
-#if defined(_PREMULTIPLY_ALPHA)
-	BRDF brdf = GetBRDF(surface, true);
-#else
-	BRDF brdf = GetBRDF(surface);
-#endif
+	#if defined(_PREMULTIPLY_ALPHA)
+		BRDF brdf = GetBRDF(surface, true);
+	#else
+		BRDF brdf = GetBRDF(surface);
+	#endif
 	GI gi = GetGI(GI_FRAGMENT_DATA(input), surface, brdf);
 	float3 color = GetLighting(surface, brdf, gi);
 	color += GetEmission(config);

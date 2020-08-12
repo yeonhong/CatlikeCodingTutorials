@@ -6,15 +6,16 @@ namespace CustomRP
 {
 	public class CustomShaderGUI : ShaderGUI
 	{
-		private bool showPresets;
-
 		private MaterialEditor editor;
 		private Object[] materials;
 		private MaterialProperty[] properties;
+		private bool showPresets;
 
 		private bool Clipping {
 			set => SetProperty("_Clipping", "_CLIPPING", value);
 		}
+
+		private bool HasPremultiplyAlpha => HasProperty("_PremulAlpha");
 
 		private bool PremultiplyAlpha {
 			set => SetProperty("_PremulAlpha", "_PREMULTIPLY_ALPHA", value);
@@ -32,14 +33,6 @@ namespace CustomRP
 			set => SetProperty("_ZWrite", value ? 1f : 0f);
 		}
 
-		private RenderQueue RenderQueue {
-			set {
-				foreach (Material m in materials) {
-					m.renderQueue = (int)value;
-				}
-			}
-		}
-
 		private enum ShadowMode
 		{
 			On, Clip, Dither, Off
@@ -54,16 +47,19 @@ namespace CustomRP
 			}
 		}
 
-		private bool HasProperty(string name) {
-			return FindProperty(name, properties, false) != null;
+		private RenderQueue RenderQueue {
+			set {
+				foreach (Material m in materials) {
+					m.renderQueue = (int)value;
+				}
+			}
 		}
 
-		private bool HasPremultiplyAlpha => HasProperty("_PremulAlpha");
-
-		public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties) {
+		public override void OnGUI(
+			MaterialEditor materialEditor, MaterialProperty[] properties
+		) {
 			EditorGUI.BeginChangeCheck();
 			base.OnGUI(materialEditor, properties);
-
 			editor = materialEditor;
 			materials = materialEditor.targets;
 			this.properties = properties;
@@ -85,7 +81,22 @@ namespace CustomRP
 			}
 		}
 
-		void BakedEmission() {
+		private void CopyLightMappingProperties() {
+			MaterialProperty mainTex = FindProperty("_MainTex", properties, false);
+			MaterialProperty baseMap = FindProperty("_BaseMap", properties, false);
+			if (mainTex != null && baseMap != null) {
+				mainTex.textureValue = baseMap.textureValue;
+				mainTex.textureScaleAndOffset = baseMap.textureScaleAndOffset;
+			}
+			MaterialProperty color = FindProperty("_Color", properties, false);
+			MaterialProperty baseColor =
+				FindProperty("_BaseColor", properties, false);
+			if (color != null && baseColor != null) {
+				color.colorValue = baseColor.colorValue;
+			}
+		}
+
+		private void BakedEmission() {
 			EditorGUI.BeginChangeCheck();
 			editor.LightmapEmissionProperty();
 			if (EditorGUI.EndChangeCheck()) {
@@ -94,6 +105,66 @@ namespace CustomRP
 						~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
 				}
 			}
+		}
+
+		private void OpaquePreset() {
+			if (PresetButton("Opaque")) {
+				Clipping = false;
+				Shadows = ShadowMode.On;
+				PremultiplyAlpha = false;
+				SrcBlend = BlendMode.One;
+				DstBlend = BlendMode.Zero;
+				ZWrite = true;
+				RenderQueue = RenderQueue.Geometry;
+			}
+		}
+
+		private void ClipPreset() {
+			if (PresetButton("Clip")) {
+				Clipping = true;
+				Shadows = ShadowMode.Clip;
+				PremultiplyAlpha = false;
+				SrcBlend = BlendMode.One;
+				DstBlend = BlendMode.Zero;
+				ZWrite = true;
+				RenderQueue = RenderQueue.AlphaTest;
+			}
+		}
+
+		private void FadePreset() {
+			if (PresetButton("Fade")) {
+				Clipping = false;
+				Shadows = ShadowMode.Dither;
+				PremultiplyAlpha = false;
+				SrcBlend = BlendMode.SrcAlpha;
+				DstBlend = BlendMode.OneMinusSrcAlpha;
+				ZWrite = false;
+				RenderQueue = RenderQueue.Transparent;
+			}
+		}
+
+		private void TransparentPreset() {
+			if (HasPremultiplyAlpha && PresetButton("Transparent")) {
+				Clipping = false;
+				Shadows = ShadowMode.Dither;
+				PremultiplyAlpha = true;
+				SrcBlend = BlendMode.One;
+				DstBlend = BlendMode.OneMinusSrcAlpha;
+				ZWrite = false;
+				RenderQueue = RenderQueue.Transparent;
+			}
+		}
+
+		private bool PresetButton(string name) {
+			if (GUILayout.Button(name)) {
+				editor.RegisterPropertyChangeUndo(name);
+				return true;
+			}
+			return false;
+		}
+
+		private bool HasProperty(string name) {
+			return FindProperty(name, properties, false) != null;
 		}
 
 		private void SetProperty(string name, string keyword, bool value) {
@@ -124,14 +195,6 @@ namespace CustomRP
 			}
 		}
 
-		private bool PresetButton(string name) {
-			if (GUILayout.Button(name)) {
-				editor.RegisterPropertyChangeUndo(name);
-				return true;
-			}
-			return false;
-		}
-
 		private void SetShadowCasterPass() {
 			MaterialProperty shadows = FindProperty("_Shadows", properties, false);
 			if (shadows == null || shadows.hasMixedValue) {
@@ -142,63 +205,5 @@ namespace CustomRP
 				m.SetShaderPassEnabled("ShadowCaster", enabled);
 			}
 		}
-
-		void CopyLightMappingProperties() {
-			MaterialProperty mainTex = FindProperty("_MainTex", properties, false);
-			MaterialProperty baseMap = FindProperty("_BaseMap", properties, false);
-			if (mainTex != null && baseMap != null) {
-				mainTex.textureValue = baseMap.textureValue;
-				mainTex.textureScaleAndOffset = baseMap.textureScaleAndOffset;
-			}
-			MaterialProperty color = FindProperty("_Color", properties, false);
-			MaterialProperty baseColor = FindProperty("_BaseColor", properties, false);
-			if (color != null && baseColor != null) {
-				color.colorValue = baseColor.colorValue;
-			}
-		}
-
-		private void OpaquePreset() {
-			if (PresetButton("Opaque")) {
-				Clipping = false;
-				PremultiplyAlpha = false;
-				SrcBlend = BlendMode.One;
-				DstBlend = BlendMode.Zero;
-				ZWrite = true;
-				RenderQueue = RenderQueue.Geometry;
-			}
-		}
-
-		private void ClipPreset() {
-			if (PresetButton("Clip")) {
-				Clipping = true;
-				PremultiplyAlpha = false;
-				SrcBlend = BlendMode.One;
-				DstBlend = BlendMode.Zero;
-				ZWrite = true;
-				RenderQueue = RenderQueue.AlphaTest;
-			}
-		}
-
-		private void FadePreset() {
-			if (PresetButton("Fade")) {
-				Clipping = false;
-				PremultiplyAlpha = false;
-				SrcBlend = BlendMode.SrcAlpha;
-				DstBlend = BlendMode.OneMinusSrcAlpha;
-				ZWrite = false;
-				RenderQueue = RenderQueue.Transparent;
-			}
-		}
-
-		private void TransparentPreset() {
-			if (HasPremultiplyAlpha && PresetButton("Transparent")) {
-				Clipping = false;
-				PremultiplyAlpha = true;
-				SrcBlend = BlendMode.One;
-				DstBlend = BlendMode.OneMinusSrcAlpha;
-				ZWrite = false;
-				RenderQueue = RenderQueue.Transparent;
-			}
-		}
-	}
+	} 
 }

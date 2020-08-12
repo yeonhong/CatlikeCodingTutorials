@@ -1,8 +1,6 @@
 #ifndef CUSTOM_UNLIT_PASS_INCLUDED
 #define CUSTOM_UNLIT_PASS_INCLUDED
 
-#include "../ShaderLibrary/Common.hlsl"
-
 struct Attributes {
 	float3 positionOS : POSITION;
 	float2 baseUV : TEXCOORD0;
@@ -22,22 +20,17 @@ Varyings UnlitPassVertex(Attributes input) {
 	float3 positionWS = TransformObjectToWorld(input.positionOS);
 	output.positionCS = TransformWorldToHClip(positionWS);
 	output.baseUV = TransformBaseUV(input.baseUV);
-
 	return output;
 }
 
 float4 UnlitPassFragment(Varyings input) : SV_TARGET{
 	UNITY_SETUP_INSTANCE_ID(input);
+
 	InputConfig config = GetInputConfig(input.baseUV);
 	float4 base = GetBase(config);
-
-#if defined(_CLIPPING)
-	clip(base.a - GetCutoff(config.baseUV));
-#endif
-
-#if defined(_SHADOWS_CLIP)
-	clip(base.a - INPUT_PROP(_Cutoff));
-#endif
+	#if defined(_CLIPPING)
+		clip(base.a - GetCutoff(config));
+	#endif
 	return base;
 }
 
