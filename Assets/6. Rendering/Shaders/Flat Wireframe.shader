@@ -1,4 +1,4 @@
-﻿Shader "Custom/My First Lighting Shader"
+﻿Shader "Custom/Flat Wireframe"
 {
 	Properties {
 		_Color("Tint", Color) = (1, 1, 1, 1)
@@ -42,7 +42,7 @@
 			ZWrite [_ZWrite]
 			CGPROGRAM
 
-			#pragma target 3.0
+			#pragma target 4.0
 
 			#pragma shader_feature _METALLIC_MAP
 			#pragma shader_feature _ _SMOOTHNESS_ALBEDO _SMOOTHNESS_METALLIC
@@ -63,6 +63,7 @@
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
+			#pragma geometry MyGeometryProgram
 			
 			#define BINORMAL_PER_FRAGMENT
 			#define FOG_DISTANCE
@@ -76,7 +77,7 @@
 			#define PARALLAX_FUNCTION ParallaxRaymarching
 			#define PARALLAX_SUPPORT_SCALED_DYNAMIC_BATCHING
 
-			#include "My Lighting.cginc"
+			#include "MyFlatWireframe.cginc"
 
 			ENDCG
 		}
