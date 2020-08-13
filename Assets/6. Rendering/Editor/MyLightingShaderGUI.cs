@@ -64,6 +64,9 @@ public class MyLightingShaderGUI : ShaderGUI
 		this.properties = properties;
 
 		DoRenderingMode();
+		if (target.HasProperty("_WireframeColor")) {
+			DoWireframe();
+		}
 		DoMain();
 		DoSecondary();
 		DoAdvanced();
@@ -268,7 +271,7 @@ public class MyLightingShaderGUI : ShaderGUI
 		}
 	}
 
-	void DoParallax() {
+	private void DoParallax() {
 		MaterialProperty map = FindProperty("_ParallaxMap");
 		Texture tex = map.textureValue;
 		EditorGUI.BeginChangeCheck();
@@ -336,5 +339,23 @@ public class MyLightingShaderGUI : ShaderGUI
 	private void DoAdvanced() {
 		GUILayout.Label("Advanced Options", EditorStyles.boldLabel);
 		editor.EnableInstancingField();
+	}
+
+	private void DoWireframe() {
+		GUILayout.Label("Wireframe", EditorStyles.boldLabel);
+		EditorGUI.indentLevel += 2;
+		editor.ShaderProperty(
+			FindProperty("_WireframeColor"),
+			MakeLabel("Color")
+		);
+		editor.ShaderProperty(
+			FindProperty("_WireframeSmoothing"),
+			MakeLabel("Smoothing", "In screen space.")
+		);
+		editor.ShaderProperty(
+			FindProperty("_WireframeThickness"),
+			MakeLabel("Thickness", "In screen space.")
+		);
+		EditorGUI.indentLevel -= 2;
 	}
 }
