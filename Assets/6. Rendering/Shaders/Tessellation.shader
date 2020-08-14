@@ -167,19 +167,26 @@
 
 			CGPROGRAM
 
-			#pragma target 3.0
+			#pragma target 4.6
 
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 			#pragma shader_feature _SEMITRANSPARENT_SHADOWS
 			#pragma shader_feature _SMOOTHNESS_ALBEDO
+			#pragma shader_feature _PARALLAX_MAP
+			#pragma shader_feature _TESSELLATION_EDGE
 
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
-			#pragma vertex MyShadowVertexProgram
+			#pragma vertex MyTessellationVertexProgram
 			#pragma fragment MyShadowFragmentProgram
+			#pragma hull MyHullProgram
+			#pragma domain MyDomainProgram
+
+			#define VERTEX_DISPLACEMENT_INSTEAD_OF_PARALLAX
 
 			#include "My Shadows.cginc"
+			#include "MyTessellation.cginc"
 
 			ENDCG
 		}
