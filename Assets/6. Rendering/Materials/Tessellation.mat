@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Tessellation
   m_Shader: {fileID: 4800000, guid: a087836668b420a4eb058de087880cd8, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: _TESSELLATION_EDGE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -85,6 +85,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TessellationEdgeLength: 57
     - _TessellationUniform: 1
     - _UVSec: 0
     - _WireframeSmoothing: 1

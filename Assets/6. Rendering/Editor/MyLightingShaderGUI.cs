@@ -58,6 +58,11 @@ public class MyLightingShaderGUI : ShaderGUI
 	private MaterialProperty[] properties;
 	private bool shouldShowAlphaCutoff;
 
+	enum TessellationMode
+	{
+		Uniform, Edge
+	}
+
 	public override void OnGUI(MaterialEditor editor, MaterialProperty[] properties) {
 		this.target = editor.target as Material;
 		this.editor = editor;
@@ -365,10 +370,32 @@ public class MyLightingShaderGUI : ShaderGUI
 	void DoTessellation() {
 		GUILayout.Label("Tessellation", EditorStyles.boldLabel);
 		EditorGUI.indentLevel += 2;
-		editor.ShaderProperty(
-			FindProperty("_TessellationUniform"),
-			MakeLabel("Uniform")
+
+		TessellationMode mode = TessellationMode.Uniform;
+		if (IsKeywordEnabled("_TESSELLATION_EDGE")) {
+			mode = TessellationMode.Edge;
+		}
+		EditorGUI.BeginChangeCheck();
+		mode = (TessellationMode)EditorGUILayout.EnumPopup(
+			MakeLabel("Mode"), mode
 		);
+		if (EditorGUI.EndChangeCheck()) {
+			RecordAction("Tessellation Mode");
+			SetKeyword("_TESSELLATION_EDGE", mode == TessellationMode.Edge);
+		}
+
+		if (mode == TessellationMode.Uniform) {
+			editor.ShaderProperty(
+				FindProperty("_TessellationUniform"),
+				MakeLabel("Uniform")
+			);
+		}
+		else {
+			editor.ShaderProperty(
+				FindProperty("_TessellationEdgeLength"),
+				MakeLabel("Edge Length")
+			);
+		}
 		EditorGUI.indentLevel -= 2;
 	}
 }
