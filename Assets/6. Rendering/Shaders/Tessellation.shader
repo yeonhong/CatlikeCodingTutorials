@@ -21,7 +21,7 @@
 		_Emission ("Emission", Color) = (0, 0, 0)
 
 		[NoScaleOffset] _ParallaxMap("Parallax", 2D) = "black" {}
-		_ParallaxStrength("Parallax Strength", Range(0, 0.1)) = 0
+		_ParallaxStrength("Parallax Strength", Range(0, 1)) = 0
 
 		[NoScaleOffset] _OcclusionMap ("Occlusion", 2D) = "white" {}
 		_OcclusionStrength("Occlusion Strength", Range(0, 1)) = 1
@@ -30,10 +30,6 @@
 		[HideInInspector] _SrcBlend ( "_SrcBlend" , Float ) = 1
 		[HideInInspector] _DstBlend ( "_DstBlend" , Float ) = 0
 		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1
-
-		_WireframeColor("Wireframe Color", Color) = (0, 0, 0)
-		_WireframeSmoothing("Wireframe Smoothing", Range(0, 10)) = 1
-		_WireframeThickness("Wireframe Thickness", Range(0, 10)) = 1
 
 		_TessellationUniform("Tessellation Uniform", Range(1, 64)) = 1
 		_TessellationEdgeLength("Tessellation Edge Length", Range(5, 100)) = 50
@@ -71,21 +67,14 @@
 			#pragma fragment MyFragmentProgram
 			#pragma hull MyHullProgram
 			#pragma domain MyDomainProgram
-			#pragma geometry MyGeometryProgram
-			
+						
 			#define BINORMAL_PER_FRAGMENT
 			#define FOG_DISTANCE
 			#define FORWARD_BASE_PASS
 
-			#define PARALLAX_BIAS 0
-			//#define PARALLAX_OFFSET_LIMITING
-			#define PARALLAX_RAYMARCHING_STEPS 100
-			#define PARALLAX_RAYMARCHING_INTERPOLATE
-			#define PARALLAX_RAYMARCHING_SEARCH_STEPS 3
-			#define PARALLAX_FUNCTION ParallaxRaymarching
-			#define PARALLAX_SUPPORT_SCALED_DYNAMIC_BATCHING
+			#define VERTEX_DISPLACEMENT_INSTEAD_OF_PARALLAX
 
-			#include "MyFlatWireframe.cginc"
+			#include "My Lighting.cginc"
 			#include "MyTessellation.cginc"
 
 			ENDCG
@@ -119,15 +108,12 @@
 			#pragma fragment MyFragmentProgram
 			#pragma hull MyHullProgram
 			#pragma domain MyDomainProgram
-			#pragma geometry MyGeometryProgram
 
 			#define DEFERRED_PASS
 
-			#define PARALLAX_BIAS 0
-			//#define PARALLAX_OFFSET_LIMITING
-			#define PARALLAX_FUNCTION ParallaxRaymarching
+			#define VERTEX_DISPLACEMENT_INSTEAD_OF_PARALLAX
 
-			#include "MyFlatWireframe.cginc"
+			#include "My Lighting.cginc"
 			#include "MyTessellation.cginc"
 
 			ENDCG
@@ -162,16 +148,13 @@
 			#pragma fragment MyFragmentProgram
 			#pragma hull MyHullProgram
 			#pragma domain MyDomainProgram
-			#pragma geometry MyGeometryProgram
 
 			#define BINORMAL_PER_FRAGMENT
 			#define FOG_DISTANCE
 
-			#define PARALLAX_BIAS 0
-			//#define PARALLAX_OFFSET_LIMITING
-			#define PARALLAX_FUNCTION ParallaxRaymarching
+			#define VERTEX_DISPLACEMENT_INSTEAD_OF_PARALLAX
 
-			#include "MyFlatWireframe.cginc"
+			#include "My Lighting.cginc"
 			#include "MyTessellation.cginc"
 
 			ENDCG
