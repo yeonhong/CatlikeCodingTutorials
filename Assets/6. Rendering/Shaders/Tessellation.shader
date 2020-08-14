@@ -34,6 +34,8 @@
 		_WireframeColor("Wireframe Color", Color) = (0, 0, 0)
 		_WireframeSmoothing("Wireframe Smoothing", Range(0, 10)) = 1
 		_WireframeThickness("Wireframe Thickness", Range(0, 10)) = 1
+
+		_TessellationUniform("Tessellation Uniform", Range(1, 64)) = 1
 	}
 
 	SubShader {

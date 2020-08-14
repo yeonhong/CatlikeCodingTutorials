@@ -64,6 +64,9 @@ public class MyLightingShaderGUI : ShaderGUI
 		this.properties = properties;
 
 		DoRenderingMode();
+		if (target.HasProperty("_TessellationUniform")) {
+			DoTessellation();
+		}
 		if (target.HasProperty("_WireframeColor")) {
 			DoWireframe();
 		}
@@ -355,6 +358,16 @@ public class MyLightingShaderGUI : ShaderGUI
 		editor.ShaderProperty(
 			FindProperty("_WireframeThickness"),
 			MakeLabel("Thickness", "In screen space.")
+		);
+		EditorGUI.indentLevel -= 2;
+	}
+
+	void DoTessellation() {
+		GUILayout.Label("Tessellation", EditorStyles.boldLabel);
+		EditorGUI.indentLevel += 2;
+		editor.ShaderProperty(
+			FindProperty("_TessellationUniform"),
+			MakeLabel("Uniform")
 		);
 		EditorGUI.indentLevel -= 2;
 	}

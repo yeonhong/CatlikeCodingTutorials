@@ -15,10 +15,12 @@ struct TessellationControlPoint {
 	float2 uv2 : TEXCOORD2;
 };
 
+float _TessellationUniform;
+
 [UNITY_domain("tri")]
 [UNITY_outputcontrolpoints(3)]
 [UNITY_outputtopology("triangle_cw")]
-[UNITY_partitioning("integer")]
+[UNITY_partitioning("fractional_even")]
 [UNITY_patchconstantfunc("MyPatchConstantFunction")]
 TessellationControlPoint MyHullProgram(
 	InputPatch<TessellationControlPoint, 3> patch,
@@ -29,10 +31,10 @@ TessellationControlPoint MyHullProgram(
 
 TessellationFactors MyPatchConstantFunction(InputPatch<TessellationControlPoint, 3> patch) {
 	TessellationFactors f;
-	f.edge[0] = 1;
-	f.edge[1] = 1;
-	f.edge[2] = 1;
-	f.inside = 1;
+	f.edge[0] = _TessellationUniform;
+	f.edge[1] = _TessellationUniform;
+	f.edge[2] = _TessellationUniform;
+	f.inside = _TessellationUniform;
 	return f;
 }
 
