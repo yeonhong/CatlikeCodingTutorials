@@ -496,8 +496,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a797296450423c24bb65a24e569ce372, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 1
   bloomShader: {fileID: 4800000, guid: c010aa7f43bcaa9449623d833735e775, type: 3}
+  intensity: 1.8
+  iterations: 4
+  threshold: 1
+  softThreshold: 0.36
+  debug: 0
 --- !u!1 &1950639525
 GameObject:
   m_ObjectHideFlags: 0
