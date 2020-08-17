@@ -6,8 +6,9 @@
 	CGINCLUDE
 	#include "UnityCG.cginc"
 
-		sampler2D _MainTex;
+	sampler2D _MainTex, _CameraDepthTexture;
 	float4 _MainTex_TexelSize;
+	float _FocusDistance, _FocusRange;
 
 	struct VertexData {
 		float4 vertex : POSITION;
@@ -33,13 +34,17 @@
 		ZTest Always
 		ZWrite Off
 
-		Pass {
+		Pass { // 0 circleOfConfusionPass
 			CGPROGRAM
 				#pragma vertex VertexProgram
 				#pragma fragment FragmentProgram
 
-				half4 FragmentProgram(Interpolators i) : SV_Target {
-					return tex2D(_MainTex, i.uv);
+				half FragmentProgram(Interpolators i) : SV_Target {
+					half depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
+					depth = LinearEyeDepth(depth);
+					float coc = (depth - _FocusDistance) / _FocusRange;
+					coc = clamp(coc, -1, 1);
+					return coc;
 				}
 			ENDCG
 		}
