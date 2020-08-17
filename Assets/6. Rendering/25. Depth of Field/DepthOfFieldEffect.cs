@@ -7,8 +7,10 @@ namespace Rendering
 	public class DepthOfFieldEffect : MonoBehaviour
 	{
 		const int circleOfConfusionPass = 0;
-		const int bokehPass = 1;
-		const int postFilterPass = 2;
+		const int preFilterPass = 1;
+		const int bokehPass = 2;
+		const int postFilterPass = 3;
+		const int combinePass = 4;
 
 		[HideInInspector]
 		public Shader dofShader;
@@ -40,12 +42,14 @@ namespace Rendering
 			RenderTextureFormat format = source.format;
 			RenderTexture dof0 = RenderTexture.GetTemporary(width, height, 0, format);
 			RenderTexture dof1 = RenderTexture.GetTemporary(width, height, 0, format);
+			dofMaterial.SetTexture("_CoCTex", coc);
+			dofMaterial.SetTexture("_DoFTex", dof0);
 
 			Graphics.Blit(source, coc, dofMaterial, circleOfConfusionPass);
-			Graphics.Blit(source, dof0);
+			Graphics.Blit(source, dof0, dofMaterial, preFilterPass);
 			Graphics.Blit(dof0, dof1, dofMaterial, bokehPass);
 			Graphics.Blit(dof1, dof0, dofMaterial, postFilterPass);
-			Graphics.Blit(dof0, destination);
+			Graphics.Blit(source, destination, dofMaterial, combinePass);
 
 			RenderTexture.ReleaseTemporary(coc);
 			RenderTexture.ReleaseTemporary(dof0);
