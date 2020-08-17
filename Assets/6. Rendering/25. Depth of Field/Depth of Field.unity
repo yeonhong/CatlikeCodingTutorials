@@ -218,8 +218,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dofShader: {fileID: 4800000, guid: f51115d3dfeace541a150edd32eb59bf, type: 3}
-  focusDistance: 76
+  focusDistance: 55
   focusRange: 9.4
+  bokehRadius: 5.9
 --- !u!1 &992291228
 GameObject:
   m_ObjectHideFlags: 0
@@ -586,8 +587,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563024832}
   m_LocalRotation: {x: -0.27563733, y: 0, z: 0, w: 0.96126175}
-  m_LocalPosition: {x: 0, y: -6, z: -11.6}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalPosition: {x: 1.5, y: 25.9, z: 60.5}
+  m_LocalScale: {x: 22, y: 1, z: 30}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
