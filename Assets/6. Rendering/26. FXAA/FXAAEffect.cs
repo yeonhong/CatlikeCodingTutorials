@@ -4,20 +4,38 @@ using System;
 [ExecuteInEditMode, ImageEffectAllowedInSceneView]
 public class FXAAEffect : MonoBehaviour
 {
+
 	const int luminancePass = 0;
 	const int fxaaPass = 1;
 
-	[HideInInspector] public Shader fxaaShader;
-	[NonSerialized] Material fxaaMaterial;
-
 	public enum LuminanceMode { Alpha, Green, Calculate }
-	public LuminanceMode luminanceSource = LuminanceMode.Calculate;
+
+	public LuminanceMode luminanceSource;
+
+	[Range(0.0312f, 0.0833f)]
+	public float contrastThreshold = 0.0312f;
+
+	[Range(0.063f, 0.333f)]
+	public float relativeThreshold = 0.063f;
+
+	[Range(0f, 1f)]
+	public float subpixelBlending = 1f;
+
+	[HideInInspector]
+	public Shader fxaaShader;
+
+	[NonSerialized]
+	Material fxaaMaterial;
 
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (fxaaMaterial == null) {
 			fxaaMaterial = new Material(fxaaShader);
 			fxaaMaterial.hideFlags = HideFlags.HideAndDontSave;
 		}
+
+		fxaaMaterial.SetFloat("_ContrastThreshold", contrastThreshold);
+		fxaaMaterial.SetFloat("_RelativeThreshold", relativeThreshold);
+		fxaaMaterial.SetFloat("_SubpixelBlending", subpixelBlending);
 
 		if (luminanceSource == LuminanceMode.Calculate) {
 			fxaaMaterial.DisableKeyword("LUMINANCE_GREEN");
