@@ -25,21 +25,51 @@
 		i.uv = v.uv;
 		return i;
 	}
+
+	float4 Sample(float2 uv) {
+		return tex2D(_MainTex, uv);
+	}
+
+	float SampleLuminance(float2 uv) {
+	#if defined(LUMINANCE_GREEN)
+		return Sample(uv).g;
+	#else
+		return Sample(uv).a;
+	#endif
+	}
+
+	float4 ApplyFXAA(float2 uv) {
+		return SampleLuminance(uv);
+	}
 	ENDCG
 
-	SubShader{
+	SubShader {
 		Cull Off
 		ZTest Always
 		ZWrite Off
 
-		Pass { // 0 blitPass
+		Pass { // 0 luminancePass
 			CGPROGRAM
 				#pragma vertex VertexProgram
 				#pragma fragment FragmentProgram
 
 				float4 FragmentProgram(Interpolators i) : SV_Target {
 					float4 sample = tex2D(_MainTex, i.uv);
+					sample.rgb = LinearRgbToLuminance(saturate(sample.rgb));
 					return sample;
+				}
+			ENDCG
+		}
+
+		Pass { // 1 fxaaPass
+			CGPROGRAM
+				#pragma vertex VertexProgram
+				#pragma fragment FragmentProgram
+
+				#pragma multi_compile _ LUMINANCE_GREEN
+
+				float4 FragmentProgram(Interpolators i) : SV_Target {
+					return ApplyFXAA(i.uv);
 				}
 			ENDCG
 		}
