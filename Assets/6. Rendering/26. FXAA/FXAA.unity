@@ -491,15 +491,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2094802182}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d9544a074466fe48aa13f89141817f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fxaaShader: {fileID: 4800000, guid: 6f0830ea50e00f04c8da81eb1b7ee24c, type: 3}
+  luminanceSource: 2
   contrastThreshold: 0.0312
   relativeThreshold: 0.063
-  luminanceSource: 2
+  subpixelBlending: 1
+  fxaaShader: {fileID: 4800000, guid: 6f0830ea50e00f04c8da81eb1b7ee24c, type: 3}
+  lowQuality: 1
 --- !u!1 &2140755796
 GameObject:
   m_ObjectHideFlags: 0
