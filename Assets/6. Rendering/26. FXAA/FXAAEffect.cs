@@ -29,6 +29,7 @@ namespace Rendering
 		Material fxaaMaterial;
 
 		public bool lowQuality;
+		public bool gammaBlending;
 
 		void OnRenderImage(RenderTexture source, RenderTexture destination) {
 			if (fxaaMaterial == null) {
@@ -44,6 +45,12 @@ namespace Rendering
 				fxaaMaterial.EnableKeyword("LOW_QUALITY");
 			} else {
 				fxaaMaterial.DisableKeyword("LOW_QUALITY");
+			}
+
+			if (gammaBlending) {
+				fxaaMaterial.EnableKeyword("GAMMA_BLENDING");
+			} else {
+				fxaaMaterial.DisableKeyword("GAMMA_BLENDING");
 			}
 
 			if (luminanceSource == LuminanceMode.Calculate) {
