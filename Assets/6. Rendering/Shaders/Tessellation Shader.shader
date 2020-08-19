@@ -1,4 +1,4 @@
-﻿Shader "Custom/My First Lighting Shader" {
+﻿Shader "Custom/Tessellation" {
 
 	Properties {
 		_Color ("Tint", Color) = (1, 1, 1, 1)
@@ -12,7 +12,7 @@
 		_Smoothness ("Smoothness", Range(0, 1)) = 0.1
 
 		[NoScaleOffset] _ParallaxMap ("Parallax", 2D) = "black" {}
-		_ParallaxStrength ("Parallax Strength", Range(0, 0.1)) = 0
+		_ParallaxStrength ("Parallax Strength", Range(0, 1)) = 0
 
 		[NoScaleOffset] _OcclusionMap ("Occlusion", 2D) = "white" {}
 		_OcclusionStrength ("Occlusion Strength", Range(0, 1)) = 1
@@ -27,6 +27,9 @@
 
 		_Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
 
+		_TessellationUniform ("Tessellation Uniform", Range(1, 64)) = 1
+		_TessellationEdgeLength ("Tessellation Edge Length", Range(5, 100)) = 50
+
 		[HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1
 		[HideInInspector] _DstBlend ("_DstBlend", Float) = 0
 		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1
@@ -37,13 +40,7 @@
 	#define BINORMAL_PER_FRAGMENT
 	#define FOG_DISTANCE
 
-	#define PARALLAX_BIAS 0
-//	#define PARALLAX_OFFSET_LIMITING
-	#define PARALLAX_RAYMARCHING_STEPS 10
-	#define PARALLAX_RAYMARCHING_INTERPOLATE
-//	#define PARALLAX_RAYMARCHING_SEARCH_STEPS 3
-	#define PARALLAX_FUNCTION ParallaxRaymarching
-	#define PARALLAX_SUPPORT_SCALED_DYNAMIC_BATCHING
+	#define VERTEX_DISPLACEMENT_INSTEAD_OF_PARALLAX
 
 	ENDCG
 
@@ -58,7 +55,7 @@
 
 			CGPROGRAM
 
-			#pragma target 3.0
+			#pragma target 4.6
 
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 			#pragma shader_feature _METALLIC_MAP
@@ -70,20 +67,22 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
+			#pragma shader_feature _TESSELLATION_EDGE
 
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
-			#pragma multi_compile_instancing
-			#pragma instancing_options lodfade force_same_maxcount_for_gl
 
-			#pragma vertex MyVertexProgram
+			#pragma vertex MyTessellationVertexProgram
 			#pragma fragment MyFragmentProgram
+			#pragma hull MyHullProgram
+			#pragma domain MyDomainProgram
 
 			#define FORWARD_BASE_PASS
 
 			#include "My Lighting.cginc"
+			#include "MyTessellation.cginc"
 
 			ENDCG
 		}
@@ -98,7 +97,7 @@
 
 			CGPROGRAM
 
-			#pragma target 3.0
+			#pragma target 4.6
 
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 			#pragma shader_feature _METALLIC_MAP
@@ -108,16 +107,20 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
+			#pragma shader_feature _TESSELLATION_EDGE
 
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile_fog
 			
-			#pragma vertex MyVertexProgram
+			#pragma vertex MyTessellationVertexProgram
 			#pragma fragment MyFragmentProgram
+			#pragma hull MyHullProgram
+			#pragma domain MyDomainProgram
 
 			#include "My Lighting.cginc"
+			#include "MyTessellation.cginc"
 
 			ENDCG
 		}
@@ -129,7 +132,7 @@
 
 			CGPROGRAM
 
-			#pragma target 3.0
+			#pragma target 4.6
 			#pragma exclude_renderers nomrt
 
 			#pragma shader_feature _ _RENDERING_CUTOUT
@@ -142,19 +145,21 @@
 			#pragma shader_feature _DETAIL_MASK
 			#pragma shader_feature _DETAIL_ALBEDO_MAP
 			#pragma shader_feature _DETAIL_NORMAL_MAP
+			#pragma shader_feature _TESSELLATION_EDGE
 
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma multi_compile_prepassfinal
-			#pragma multi_compile_instancing
-			#pragma instancing_options lodfade
 
-			#pragma vertex MyVertexProgram
+			#pragma vertex MyTessellationVertexProgram
 			#pragma fragment MyFragmentProgram
+			#pragma hull MyHullProgram
+			#pragma domain MyDomainProgram
 
 			#define DEFERRED_PASS
 
 			#include "My Lighting.cginc"
+			#include "MyTessellation.cginc"
 
 			ENDCG
 		}
@@ -166,22 +171,25 @@
 
 			CGPROGRAM
 
-			#pragma target 3.0
+			#pragma target 4.6
 
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 			#pragma shader_feature _SEMITRANSPARENT_SHADOWS
 			#pragma shader_feature _SMOOTHNESS_ALBEDO
+			#pragma shader_feature _PARALLAX_MAP
+			#pragma shader_feature _TESSELLATION_EDGE
 
 			#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma multi_compile_shadowcaster
-			#pragma multi_compile_instancing
-			#pragma instancing_options lodfade force_same_maxcount_for_gl
 
-			#pragma vertex MyShadowVertexProgram
+			#pragma vertex MyTessellationVertexProgram
 			#pragma fragment MyShadowFragmentProgram
+			#pragma hull MyHullProgram
+			#pragma domain MyDomainProgram
 
 			#include "My Shadows.cginc"
+			#include "MyTessellation.cginc"
 
 			ENDCG
 		}

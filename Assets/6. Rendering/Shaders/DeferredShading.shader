@@ -6,26 +6,25 @@
 	SubShader {
 
 		Pass {
-			Blend[_SrcBlend][_DstBlend]
+			Blend [_SrcBlend] [_DstBlend]
 			ZWrite Off
-			
+
 			CGPROGRAM
 
 			#pragma target 3.0
 			#pragma vertex VertexProgram
 			#pragma fragment FragmentProgram
-			
+
 			#pragma exclude_renderers nomrt
 
 			#pragma multi_compile_lightpass
 			#pragma multi_compile _ UNITY_HDR_ON
-			
+
 			#include "MyDeferredShading.cginc"
 
 			ENDCG
 		}
 
-		
 		Pass {
 			Cull Off
 			ZTest Always
@@ -37,17 +36,17 @@
 				CompBack Equal
 				CompFront Equal
 			}
-			
+
 			CGPROGRAM
 
 			#pragma target 3.0
 			#pragma vertex VertexProgram
 			#pragma fragment FragmentProgram
-			
+
 			#pragma exclude_renderers nomrt
-			
+
 			#include "UnityCG.cginc"
-			
+
 			sampler2D _LightBuffer;
 
 			struct VertexData {
