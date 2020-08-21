@@ -5,6 +5,10 @@
 		[NoScaleOffset] _MOHSMap("MOHS", 2D) = "white" {}
 		[NoScaleOffset] _NormalMap("Normals", 2D) = "white" {}
 
+		[NoScaleOffset] _TopMainTex("Top Albedo", 2D) = "white" {}
+		[NoScaleOffset] _TopMOHSMap("Top MOHS", 2D) = "white" {}
+		[NoScaleOffset] _TopNormalMap("Top Normals", 2D) = "white" {}
+
 		_MapScale("Map Scale", Float) = 1
 		_BlendOffset("Blend Offset", Range(0, 0.5)) = 0.25
 		_BlendExponent("Blend Exponent", Range(1, 8)) = 2
@@ -25,6 +29,8 @@
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma multi_compile_instancing
+
+			#pragma shader_feature _SEPARATE_TOP_MAPS
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
@@ -52,6 +58,8 @@
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile_fog
 
+			#pragma shader_feature _SEPARATE_TOP_MAPS
+
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
 
@@ -73,6 +81,8 @@
 
 			#pragma multi_compile_prepassfinal
 			#pragma multi_compile_instancing
+
+			#pragma shader_feature _SEPARATE_TOP_MAPS
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
