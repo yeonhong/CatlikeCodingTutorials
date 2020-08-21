@@ -435,7 +435,7 @@ FragmentOutput MyFragmentProgram (Interpolators i) {
 
 		SurfaceParameters sp;
 		sp.normal = i.normal;
-		sp.position = i.worldPos;
+		sp.position = i.worldPos.xyz;
 		sp.uv = UV_FUNCTION(i);
 
 		SURFACE_FUNCTION(surface, sp);
