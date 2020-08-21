@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class MyLightingShaderGUI : ShaderGUI
+public class MyLightingShaderGUI : MyBaseShaderGUI
 {
 	private enum RenderingMode
 	{
@@ -53,20 +53,17 @@ public class MyLightingShaderGUI : ShaderGUI
 		Uniform, Albedo, Metallic
 	}
 
-	private Material target;
-	private MaterialEditor editor;
-	private MaterialProperty[] properties;
-	private bool shouldShowAlphaCutoff;
-
 	enum TessellationMode
 	{
 		Uniform, Edge
 	}
 
+	private static GUIContent staticLabel = new GUIContent();
+	private MaterialProperty[] properties;
+	private bool shouldShowAlphaCutoff;
+
 	public override void OnGUI(MaterialEditor editor, MaterialProperty[] properties) {
-		this.target = editor.target as Material;
-		this.editor = editor;
-		this.properties = properties;
+		base.OnGUI(editor, properties);
 
 		DoRenderingMode();
 		if (target.HasProperty("_TessellationUniform")) {
@@ -78,45 +75,6 @@ public class MyLightingShaderGUI : ShaderGUI
 		DoMain();
 		DoSecondary();
 		DoAdvanced();
-	}
-
-	private MaterialProperty FindProperty(string name) {
-		return FindProperty(name, properties);
-	}
-
-	private static GUIContent staticLabel = new GUIContent();
-
-	private static GUIContent MakeLabel(string text, string tooltip = null) {
-		staticLabel.text = text;
-		staticLabel.tooltip = tooltip;
-		return staticLabel;
-	}
-
-	private static GUIContent MakeLabel(MaterialProperty property, string tooltip = null) {
-		staticLabel.text = property.displayName;
-		staticLabel.tooltip = tooltip;
-		return staticLabel;
-	}
-
-	private bool IsKeywordEnabled(string keyword) {
-		return target.IsKeywordEnabled(keyword);
-	}
-
-	private void SetKeyword(string keyword, bool state) {
-		if (state) {
-			foreach (Material m in editor.targets) {
-				m.EnableKeyword(keyword);
-			}
-		}
-		else {
-			foreach (Material m in editor.targets) {
-				m.DisableKeyword(keyword);
-			}
-		}
-	}
-
-	private void RecordAction(string label) {
-		editor.RegisterPropertyChangeUndo(label);
 	}
 
 	private void DoSemitransparentShadows() {

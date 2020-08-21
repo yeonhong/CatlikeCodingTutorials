@@ -105,4 +105,6 @@
 			ENDCG
 		}
 	}
+
+	CustomEditor "MyTriplanarShaderGUI"
 }
