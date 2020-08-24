@@ -40,9 +40,20 @@
 			}
 
 			void surf(Input IN, inout SurfaceOutputStandard o) {
-				float2 uv = IN.uv_MainTex * _Tiling;
-				float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uv));
+				float time = _Time.y * _Speed;
+				float2x2 derivRotation;
+				float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
+				flow.xy = flow.xy * 2 - 1;
+				flow.z *= _FlowStrength;
+				float2 uvFlow = DirectionalFlowUV(
+					IN.uv_MainTex, flow, _Tiling, time,
+					derivRotation
+				);
+
+				float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
+				dh.xy = mul(derivRotation, dh.xy);
 				fixed4 c = dh.z * dh.z * _Color;
+				
 				o.Albedo = c.rgb;
 				o.Normal = normalize(float3(-dh.xy, 1));
 				o.Metallic = _Metallic;
