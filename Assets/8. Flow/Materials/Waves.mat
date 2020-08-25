@@ -76,7 +76,7 @@ Material:
     - _FlowOffset: -1.12
     - _FlowStrength: 0.05
     - _GlossMapScale: 1
-    - _Glossiness: 0.54
+    - _Glossiness: 0
     - _GlossyReflections: 1
     - _HeightScale: 0.1
     - _HeightScaleModulated: 9
@@ -97,4 +97,5 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.3058823, g: 0.5137254, b: 0.6627451, a: 1}
+    - _Direction: {r: 1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
