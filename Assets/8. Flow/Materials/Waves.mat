@@ -76,7 +76,7 @@ Material:
     - _FlowOffset: -1.12
     - _FlowStrength: 0.05
     - _GlossMapScale: 1
-    - _Glossiness: 0.7
+    - _Glossiness: 0.54
     - _GlossyReflections: 1
     - _HeightScale: 0.1
     - _HeightScaleModulated: 9
@@ -88,6 +88,7 @@ Material:
     - _SpecularHighlights: 1
     - _Speed: 3
     - _SrcBlend: 1
+    - _Steepness: 0.46
     - _Tiling: 2
     - _UJump: 0
     - _UVSec: 0
