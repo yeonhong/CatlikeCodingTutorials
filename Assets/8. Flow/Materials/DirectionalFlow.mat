@@ -77,6 +77,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.7
     - _GlossyReflections: 1
+    - _GridResolution: 30
     - _HeightScale: 0.1
     - _HeightScaleModulated: 9
     - _Metallic: 0
@@ -87,7 +88,8 @@ Material:
     - _SpecularHighlights: 1
     - _Speed: 0.5
     - _SrcBlend: 1
-    - _Tiling: 1
+    - _Tiling: 3
+    - _TilingModulated: 3
     - _UJump: 0
     - _UVSec: 0
     - _VJump: 0
