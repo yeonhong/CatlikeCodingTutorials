@@ -18,11 +18,11 @@
 		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
 		SubShader{
-			Tags { "RenderType" = "Opaque" }
+			Tags { "RenderType" = "Transparent" "Queue" = "Transparent" }
 			LOD 200
 
 			CGPROGRAM
-			#pragma surface surf Standard fullforwardshadows
+			#pragma surface surf Standard alpha
 			#pragma target 3.0
 
 			#include "Flow.cginc"
@@ -83,6 +83,4 @@
 			}
 			ENDCG
 		}
-
-			FallBack "Diffuse"
 }
