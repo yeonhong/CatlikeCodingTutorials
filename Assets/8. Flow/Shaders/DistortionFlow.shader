@@ -13,7 +13,8 @@
 		_FlowOffset("Flow Offset", Float) = 0
 		_HeightScale("Height Scale, Constant", Float) = 0.25
 		_HeightScaleModulated("Height Scale, Modulated", Float) = 0.75
-
+		_WaterFogColor("Water Fog Color", Color) = (0, 0, 0, 0)
+		_WaterFogDensity("Water Fog Density", Range(0, 2)) = 0.1
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
@@ -21,11 +22,14 @@
 			Tags { "RenderType" = "Transparent" "Queue" = "Transparent" }
 			LOD 200
 
+			GrabPass { "_WaterBackground" }
+
 			CGPROGRAM
-			#pragma surface surf Standard alpha
+			#pragma surface surf Standard alpha finalcolor:ResetAlpha
 			#pragma target 3.0
 
 			#include "Flow.cginc"
+			#include "LookingThroughWater.cginc"
 
 			sampler2D _MainTex, _FlowMap, _DerivHeightMap;
 			float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset;
@@ -33,11 +37,16 @@
 
 			struct Input {
 				float2 uv_MainTex;
+				float4 screenPos;
 			};
 
 			half _Glossiness;
 			half _Metallic;
 			fixed4 _Color;
+
+			void ResetAlpha(Input IN, SurfaceOutputStandard o, inout fixed4 color) {
+				color.a = 1;
+			}
 
 			float3 UnpackDerivativeHeight(float4 textureData) {
 				float3 dh = textureData.agb;
@@ -80,6 +89,7 @@
 				o.Metallic = _Metallic;
 				o.Smoothness = _Glossiness;
 				o.Alpha = c.a;
+				o.Emission = ColorBelowWater(IN.screenPos) * (1 - c.a);
 			}
 			ENDCG
 		}
