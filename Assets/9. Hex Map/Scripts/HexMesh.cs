@@ -9,24 +9,34 @@ namespace HexMap
 		private Mesh hexMesh;
 		private List<Vector3> vertices;
 		private List<int> triangles;
+		private MeshCollider meshCollider;
+		private List<Color> colors;
 
 		private void Awake() {
 			GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
+			meshCollider = gameObject.AddComponent<MeshCollider>();
 			hexMesh.name = "Hex Mesh";
 			vertices = new List<Vector3>();
+			colors = new List<Color>();
 			triangles = new List<int>();
 		}
 
 		public void Triangulate(HexCell[] cells) {
 			hexMesh.Clear();
 			vertices.Clear();
+			colors.Clear();
 			triangles.Clear();
 			for (int i = 0; i < cells.Length; i++) {
 				Triangulate(cells[i]);
 			}
 			hexMesh.vertices = vertices.ToArray();
+			hexMesh.colors = colors.ToArray();
 			hexMesh.triangles = triangles.ToArray();
 			hexMesh.RecalculateNormals();
+
+			// meshColider 잠김버그..
+			meshCollider.enabled = false;
+			meshCollider.enabled = true;
 		}
 
 		private void Triangulate(HexCell cell) {
@@ -37,7 +47,9 @@ namespace HexMap
 					center + HexMetrics.corners[i],
 					center + HexMetrics.corners[i + 1]
 				);
+				AddTriangleColor(cell.color);
 			}
+			meshCollider.sharedMesh = hexMesh;
 		}
 
 		private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3) {
@@ -48,6 +60,12 @@ namespace HexMap
 			triangles.Add(vertexIndex);
 			triangles.Add(vertexIndex + 1);
 			triangles.Add(vertexIndex + 2);
+		}
+
+		void AddTriangleColor(Color color) {
+			colors.Add(color);
+			colors.Add(color);
+			colors.Add(color);
 		}
 	}
 }
