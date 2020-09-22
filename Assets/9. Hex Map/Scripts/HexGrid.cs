@@ -13,8 +13,11 @@ namespace HexMap
 		public Text cellLabelPrefab;
 		private Canvas gridCanvas;
 
+		private HexMesh hexMesh;
+
 		private void Awake() {
 			gridCanvas = GetComponentInChildren<Canvas>();
+			hexMesh = GetComponentInChildren<HexMesh>();
 
 			cells = new HexCell[height * width];
 
@@ -23,6 +26,10 @@ namespace HexMap
 					CreateCell(x, z, i++);
 				}
 			}
+		}
+
+		void Start() {
+			hexMesh.Triangulate(cells);
 		}
 
 		private void CreateCell(int x, int z, int i) {
