@@ -2,6 +2,11 @@
 
 namespace HexMap
 {
+	public enum HexEdgeType
+	{
+		Flat, Slope, Cliff
+	}
+
 	public static class HexMetrics
 	{
 		public const float outerRadius = 10f;
@@ -60,6 +65,18 @@ namespace HexMap
 		public static Color TerraceLerp(Color a, Color b, int step) {
 			float h = step * HexMetrics.horizontalTerraceStepSize;
 			return Color.Lerp(a, b, h);
+		}
+
+		public static HexEdgeType GetEdgeType(int elevation1, int elevation2) {
+			if (elevation1 == elevation2) {
+				return HexEdgeType.Flat;
+			}
+
+			int delta = elevation2 - elevation1;
+			if (delta == 1 || delta == -1) {
+				return HexEdgeType.Slope;
+			}
+			return HexEdgeType.Cliff;
 		}
 	}
 }
