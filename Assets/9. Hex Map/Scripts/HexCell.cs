@@ -8,7 +8,28 @@ namespace HexMap
 		public Color color;
 
 		[SerializeField]
-		HexCell[] neighbors = null;
+		private HexCell[] neighbors = null;
+
+		public int Elevation {
+			get {
+				return elevation;
+			}
+			set {
+				elevation = value;
+
+				Vector3 position = transform.localPosition;
+				position.y = value * HexMetrics.elevationStep;
+				transform.localPosition = position;
+
+				Vector3 uiPosition = uiRect.localPosition;
+				uiPosition.z = elevation * -HexMetrics.elevationStep;
+				uiRect.localPosition = uiPosition;
+			}
+		}
+
+		private int elevation;
+
+		public RectTransform uiRect;
 
 		public HexCell GetNeighbor(HexDirection direction) {
 			return neighbors[(int)direction];
