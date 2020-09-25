@@ -9,19 +9,24 @@ namespace HexMap
 
 	public static class HexMetrics
 	{
+		// cell coordinate
 		public const float outerRadius = 10f;
 		public const float innerRadius = outerRadius * 0.866025404f;
 		public const float solidFactor = 0.75f;
 		public const float blendFactor = 1f - solidFactor;
 
+		// elevation
 		public const float elevationStep = 5f;
 
+		// terrace
 		public const int terracesPerSlope = 2;
 		public const int terraceSteps = terracesPerSlope * 2 + 1;
 
+		// perturb
 		public static Texture2D noiseSource;
 		public const float cellPerturbStrength = 5f;
 		public const float noiseScale = 0.003f;
+		public const float elevationPerturbStrength = 1.5f;
 
 		#region HexMapping Coordinate
 		public static Vector3[] corners = {
