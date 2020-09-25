@@ -18,7 +18,10 @@ namespace HexMap
 		public Color defaultColor = Color.white;
 		public Color touchedColor = Color.magenta;
 
+		public Texture2D noiseSource;
+
 		private void Awake() {
+			HexMetrics.noiseSource = noiseSource;
 			gridCanvas = GetComponentInChildren<Canvas>();
 			hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -33,6 +36,10 @@ namespace HexMap
 
 		private void Start() {
 			hexMesh.Triangulate(cells);
+		}
+
+		void OnEnable() {
+			HexMetrics.noiseSource = noiseSource;
 		}
 
 		private void CreateCell(int x, int z, int i) {

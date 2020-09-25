@@ -19,6 +19,9 @@ namespace HexMap
 		public const int terracesPerSlope = 2;
 		public const int terraceSteps = terracesPerSlope * 2 + 1;
 
+		public static Texture2D noiseSource;
+
+		#region HexMapping Coordinate
 		public static Vector3[] corners = {
 			new Vector3(0f, 0f, outerRadius),
 			new Vector3(innerRadius, 0f, 0.5f * outerRadius),
@@ -48,8 +51,10 @@ namespace HexMap
 		public static Vector3 GetBridge(HexDirection direction) {
 			return (corners[(int)direction] + corners[(int)direction + 1]) *
 				blendFactor;
-		}
+		} 
+		#endregion
 
+		#region Terrace
 		public const float horizontalTerraceStepSize = 1f / terraceSteps;
 		public const float verticalTerraceStepSize = 1f / (terracesPerSlope + 1);
 
@@ -78,5 +83,12 @@ namespace HexMap
 			}
 			return HexEdgeType.Cliff;
 		}
+		#endregion
+
+		#region Mesh Noise
+		public static Vector4 SampleNoise(Vector3 position) {
+			return noiseSource.GetPixelBilinear(position.x, position.z);
+		} 
+		#endregion
 	}
 }
