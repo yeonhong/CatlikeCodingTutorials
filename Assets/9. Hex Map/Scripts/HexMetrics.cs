@@ -28,6 +28,9 @@ namespace HexMap
 		public const float noiseScale = 0.003f;
 		public const float elevationPerturbStrength = 1.5f;
 
+		// grid chunk
+		public const int chunkSizeX = 5, chunkSizeZ = 5;
+
 		#region HexMapping Coordinate
 		public static Vector3[] corners = {
 			new Vector3(0f, 0f, outerRadius),
