@@ -30,7 +30,7 @@ namespace HexMap
 			CreateCells();
 		}
 
-		void CreateChunks() {
+		private void CreateChunks() {
 			chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
 			for (int z = 0, i = 0; z < chunkCountZ; z++) {
@@ -96,7 +96,7 @@ namespace HexMap
 			AddCellToChunk(x, z, cell);
 		}
 
-		void AddCellToChunk(int x, int z, HexCell cell) {
+		private void AddCellToChunk(int x, int z, HexCell cell) {
 			int chunkX = x / HexMetrics.chunkSizeX;
 			int chunkZ = z / HexMetrics.chunkSizeZ;
 			HexGridChunk chunk = chunks[chunkX + chunkZ * chunkCountX];
@@ -111,6 +111,26 @@ namespace HexMap
 			HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 			int index = coordinates.X + coordinates.Z * cellCountX + coordinates.Z / 2;
 			return cells[index];
+		}
+
+		public HexCell GetCell(HexCoordinates coordinates) {
+			int z = coordinates.Z;
+			if (z < 0 || z >= cellCountZ) {
+				return null;
+			}
+
+			int x = coordinates.X + z / 2;
+			if (x < 0 || x >= cellCountX) {
+				return null;
+			}
+
+			return cells[x + z * cellCountX];
+		}
+
+		public void ShowUI(bool visible) {
+			for (int i = 0; i < chunks.Length; i++) {
+				chunks[i].ShowUI(visible);
+			}
 		}
 	}
 }

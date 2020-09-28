@@ -13,6 +13,7 @@ namespace HexMap
 			hexMesh = GetComponentInChildren<HexMesh>();
 
 			cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
+			ShowUI(false);
 		}
 
 		public void AddCell(int index, HexCell cell) {
@@ -29,6 +30,10 @@ namespace HexMap
 		private void LateUpdate() {
 			hexMesh.Triangulate(cells);
 			enabled = false;
+		}
+
+		public void ShowUI(bool visible) {
+			gridCanvas.gameObject.SetActive(visible);
 		}
 	}
 }
