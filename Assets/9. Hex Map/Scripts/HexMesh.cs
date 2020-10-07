@@ -458,7 +458,7 @@ namespace HexMap
 			AddQuadColor(c1, c2);
 		}
 
-		private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3) {
+		public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3) {
 			int vertexIndex = vertices.Count;
 			vertices.Add(HexMetrics.Perturb(v1));
 			vertices.Add(HexMetrics.Perturb(v2));
@@ -468,7 +468,7 @@ namespace HexMap
 			triangles.Add(vertexIndex + 2);
 		}
 
-		private void AddTriangleUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3) {
+		public void AddTriangleUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3) {
 			int vertexIndex = vertices.Count;
 			vertices.Add(v1);
 			vertices.Add(v2);
@@ -478,19 +478,19 @@ namespace HexMap
 			triangles.Add(vertexIndex + 2);
 		}
 
-		private void AddTriangleColor(Color color) {
+		public void AddTriangleColor(Color color) {
 			colors.Add(color);
 			colors.Add(color);
 			colors.Add(color);
 		}
 
-		private void AddTriangleColor(Color c1, Color c2, Color c3) {
+		public void AddTriangleColor(Color c1, Color c2, Color c3) {
 			colors.Add(c1);
 			colors.Add(c2);
 			colors.Add(c3);
 		}
 
-		private void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
+		public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
 			int vertexIndex = vertices.Count;
 			vertices.Add(HexMetrics.Perturb(v1));
 			vertices.Add(HexMetrics.Perturb(v2));
@@ -504,21 +504,21 @@ namespace HexMap
 			triangles.Add(vertexIndex + 3);
 		}
 
-		private void AddQuadColor(Color color) {
+		public void AddQuadColor(Color color) {
 			colors.Add(color);
 			colors.Add(color);
 			colors.Add(color);
 			colors.Add(color);
 		}
 
-		private void AddQuadColor(Color c1, Color c2) {
+		public void AddQuadColor(Color c1, Color c2) {
 			colors.Add(c1);
 			colors.Add(c1);
 			colors.Add(c2);
 			colors.Add(c2);
 		}
 
-		private void AddQuadColor(Color c1, Color c2, Color c3, Color c4) {
+		public void AddQuadColor(Color c1, Color c2, Color c3, Color c4) {
 			colors.Add(c1);
 			colors.Add(c2);
 			colors.Add(c3);
