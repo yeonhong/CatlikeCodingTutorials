@@ -34,7 +34,7 @@ namespace HexMap
 		public const int chunkSizeX = 5, chunkSizeZ = 5;
 
 		// river
-		public const float streamBedElevationOffset = -1f;
+		public const float streamBedElevationOffset = 0f;
 
 		#region HexMapping Coordinate
 		public static Vector3[] corners = {
