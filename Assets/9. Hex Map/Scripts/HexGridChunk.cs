@@ -4,7 +4,7 @@ namespace HexMap
 {
 	public class HexGridChunk : MonoBehaviour
 	{
-		public HexMesh terrain, rivers;
+		public HexMesh terrain, rivers, roads;
 		private HexCell[] cells;
 		private Canvas gridCanvas;
 
@@ -38,11 +38,13 @@ namespace HexMap
 		public void Triangulate() {
 			terrain.Clear();
 			rivers.Clear();
+			roads.Clear();
 			for (int i = 0; i < cells.Length; i++) {
 				Triangulate(cells[i]);
 			}
 			terrain.Apply();
 			rivers.Apply();
+			roads.Apply();
 		}
 
 		private void Triangulate(HexCell cell) {
