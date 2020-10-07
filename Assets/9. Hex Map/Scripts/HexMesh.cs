@@ -1,47 +1,76 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace HexMap
 {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	public class HexMesh : MonoBehaviour
 	{
+		[NonSerialized] private List<Vector3> vertices;
+		[NonSerialized] private List<Color> colors;
+		[NonSerialized] private List<int> triangles;
+		[NonSerialized] private List<Vector2> uvs;
 
-		static List<Vector3> vertices = new List<Vector3>();
-		static List<Color> colors = new List<Color>();
-		static List<int> triangles = new List<int>();
+		public bool useCollider, useColors, useUVCoordinates;
 
-		Mesh hexMesh;
-		MeshCollider meshCollider;
+		private Mesh hexMesh;
+		private MeshCollider meshCollider;
 
-		void Awake() {
+		private void Awake() {
 			GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
-			meshCollider = gameObject.AddComponent<MeshCollider>();
+			if (useCollider) {
+				meshCollider = gameObject.AddComponent<MeshCollider>();
+			}
 			hexMesh.name = "Hex Mesh";
 		}
 
-		public void Triangulate(HexCell[] cells) {
+		public void Clear() {
 			hexMesh.Clear();
-			vertices.Clear();
-			colors.Clear();
-			triangles.Clear();
+			vertices = ListPool<Vector3>.Get();
+			if (useColors) {
+				colors = ListPool<Color>.Get();
+			}
+			if (useUVCoordinates) {
+				uvs = ListPool<Vector2>.Get();
+			}
+			triangles = ListPool<int>.Get();
+		}
+
+		public void Apply() {
+			hexMesh.SetVertices(vertices);
+			ListPool<Vector3>.Add(vertices);
+			if (useColors) {
+				hexMesh.SetColors(colors);
+				ListPool<Color>.Add(colors);
+			}
+			if (useUVCoordinates) {
+				hexMesh.SetUVs(0, uvs);
+				ListPool<Vector2>.Add(uvs);
+			}
+			hexMesh.SetTriangles(triangles, 0);
+			ListPool<int>.Add(triangles);
+			hexMesh.RecalculateNormals();
+			if (useCollider) {
+				meshCollider.sharedMesh = hexMesh;
+			}
+		}
+
+		public void Triangulate(HexCell[] cells) {
+			Clear();
 			for (int i = 0; i < cells.Length; i++) {
 				Triangulate(cells[i]);
 			}
-			hexMesh.vertices = vertices.ToArray();
-			hexMesh.colors = colors.ToArray();
-			hexMesh.triangles = triangles.ToArray();
-			hexMesh.RecalculateNormals();
-			meshCollider.sharedMesh = hexMesh;
+			Apply();
 		}
 
-		void Triangulate(HexCell cell) {
+		private void Triangulate(HexCell cell) {
 			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 				Triangulate(d, cell);
 			}
 		}
 
-		void Triangulate(HexDirection direction, HexCell cell) {
+		private void Triangulate(HexDirection direction, HexCell cell) {
 			Vector3 center = cell.Position;
 			EdgeVertices e = new EdgeVertices(
 				center + HexMetrics.GetFirstSolidCorner(direction),
@@ -71,7 +100,7 @@ namespace HexMap
 			}
 		}
 
-		void TriangulateAdjacentToRiver(
+		private void TriangulateAdjacentToRiver(
 			HexDirection direction, HexCell cell, Vector3 center, EdgeVertices e
 		) {
 			if (cell.HasRiverThroughEdge(direction.Next())) {
@@ -101,7 +130,7 @@ namespace HexMap
 			TriangulateEdgeFan(center, m, cell.Color);
 		}
 
-		void TriangulateWithRiverBeginOrEnd(
+		private void TriangulateWithRiverBeginOrEnd(
 			HexDirection direction, HexCell cell, Vector3 center, EdgeVertices e
 		) {
 			EdgeVertices m = new EdgeVertices(
@@ -114,7 +143,7 @@ namespace HexMap
 			TriangulateEdgeFan(center, m, cell.Color);
 		}
 
-		void TriangulateWithRiver(
+		private void TriangulateWithRiver(
 			HexDirection direction, HexCell cell, Vector3 center, EdgeVertices e
 		) {
 			Vector3 centerL, centerR;
@@ -165,7 +194,7 @@ namespace HexMap
 			AddTriangleColor(cell.Color);
 		}
 
-		void TriangulateConnection(
+		private void TriangulateConnection(
 			HexDirection direction, HexCell cell, EdgeVertices e1
 		) {
 			HexCell neighbor = cell.GetNeighbor(direction);
@@ -221,7 +250,7 @@ namespace HexMap
 			}
 		}
 
-		void TriangulateCorner(
+		private void TriangulateCorner(
 			Vector3 bottom, HexCell bottomCell,
 			Vector3 left, HexCell leftCell,
 			Vector3 right, HexCell rightCell
@@ -276,7 +305,7 @@ namespace HexMap
 			}
 		}
 
-		void TriangulateEdgeTerraces(
+		private void TriangulateEdgeTerraces(
 			EdgeVertices begin, HexCell beginCell,
 			EdgeVertices end, HexCell endCell
 		) {
@@ -296,7 +325,7 @@ namespace HexMap
 			TriangulateEdgeStrip(e2, c2, end, endCell.Color);
 		}
 
-		void TriangulateCornerTerraces(
+		private void TriangulateCornerTerraces(
 			Vector3 begin, HexCell beginCell,
 			Vector3 left, HexCell leftCell,
 			Vector3 right, HexCell rightCell
@@ -326,7 +355,7 @@ namespace HexMap
 			AddQuadColor(c3, c4, leftCell.Color, rightCell.Color);
 		}
 
-		void TriangulateCornerTerracesCliff(
+		private void TriangulateCornerTerracesCliff(
 			Vector3 begin, HexCell beginCell,
 			Vector3 left, HexCell leftCell,
 			Vector3 right, HexCell rightCell
@@ -335,7 +364,7 @@ namespace HexMap
 			if (b < 0) {
 				b = -b;
 			}
-			Vector3 boundary = Vector3.Lerp(Perturb(begin), Perturb(right), b);
+			Vector3 boundary = Vector3.Lerp(HexMetrics.Perturb(begin), HexMetrics.Perturb(right), b);
 			Color boundaryColor = Color.Lerp(beginCell.Color, rightCell.Color, b);
 
 			TriangulateBoundaryTriangle(
@@ -348,12 +377,12 @@ namespace HexMap
 				);
 			}
 			else {
-				AddTriangleUnperturbed(Perturb(left), Perturb(right), boundary);
+				AddTriangleUnperturbed(HexMetrics.Perturb(left), HexMetrics.Perturb(right), boundary);
 				AddTriangleColor(leftCell.Color, rightCell.Color, boundaryColor);
 			}
 		}
 
-		void TriangulateCornerCliffTerraces(
+		private void TriangulateCornerCliffTerraces(
 			Vector3 begin, HexCell beginCell,
 			Vector3 left, HexCell leftCell,
 			Vector3 right, HexCell rightCell
@@ -362,7 +391,7 @@ namespace HexMap
 			if (b < 0) {
 				b = -b;
 			}
-			Vector3 boundary = Vector3.Lerp(Perturb(begin), Perturb(left), b);
+			Vector3 boundary = Vector3.Lerp(HexMetrics.Perturb(begin), HexMetrics.Perturb(left), b);
 			Color boundaryColor = Color.Lerp(beginCell.Color, leftCell.Color, b);
 
 			TriangulateBoundaryTriangle(
@@ -375,36 +404,36 @@ namespace HexMap
 				);
 			}
 			else {
-				AddTriangleUnperturbed(Perturb(left), Perturb(right), boundary);
+				AddTriangleUnperturbed(HexMetrics.Perturb(left), HexMetrics.Perturb(right), boundary);
 				AddTriangleColor(leftCell.Color, rightCell.Color, boundaryColor);
 			}
 		}
 
-		void TriangulateBoundaryTriangle(
+		private void TriangulateBoundaryTriangle(
 			Vector3 begin, HexCell beginCell,
 			Vector3 left, HexCell leftCell,
 			Vector3 boundary, Color boundaryColor
 		) {
-			Vector3 v2 = Perturb(HexMetrics.TerraceLerp(begin, left, 1));
+			Vector3 v2 = HexMetrics.Perturb(HexMetrics.TerraceLerp(begin, left, 1));
 			Color c2 = HexMetrics.TerraceLerp(beginCell.Color, leftCell.Color, 1);
 
-			AddTriangleUnperturbed(Perturb(begin), v2, boundary);
+			AddTriangleUnperturbed(HexMetrics.Perturb(begin), v2, boundary);
 			AddTriangleColor(beginCell.Color, c2, boundaryColor);
 
 			for (int i = 2; i < HexMetrics.terraceSteps; i++) {
 				Vector3 v1 = v2;
 				Color c1 = c2;
-				v2 = Perturb(HexMetrics.TerraceLerp(begin, left, i));
+				v2 = HexMetrics.Perturb(HexMetrics.TerraceLerp(begin, left, i));
 				c2 = HexMetrics.TerraceLerp(beginCell.Color, leftCell.Color, i);
 				AddTriangleUnperturbed(v1, v2, boundary);
 				AddTriangleColor(c1, c2, boundaryColor);
 			}
 
-			AddTriangleUnperturbed(v2, Perturb(left), boundary);
+			AddTriangleUnperturbed(v2, HexMetrics.Perturb(left), boundary);
 			AddTriangleColor(c2, leftCell.Color, boundaryColor);
 		}
 
-		void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, Color color) {
+		private void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, Color color) {
 			AddTriangle(center, edge.v1, edge.v2);
 			AddTriangleColor(color);
 			AddTriangle(center, edge.v2, edge.v3);
@@ -415,7 +444,7 @@ namespace HexMap
 			AddTriangleColor(color);
 		}
 
-		void TriangulateEdgeStrip(
+		private void TriangulateEdgeStrip(
 			EdgeVertices e1, Color c1,
 			EdgeVertices e2, Color c2
 		) {
@@ -429,17 +458,17 @@ namespace HexMap
 			AddQuadColor(c1, c2);
 		}
 
-		void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3) {
+		private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3) {
 			int vertexIndex = vertices.Count;
-			vertices.Add(Perturb(v1));
-			vertices.Add(Perturb(v2));
-			vertices.Add(Perturb(v3));
+			vertices.Add(HexMetrics.Perturb(v1));
+			vertices.Add(HexMetrics.Perturb(v2));
+			vertices.Add(HexMetrics.Perturb(v3));
 			triangles.Add(vertexIndex);
 			triangles.Add(vertexIndex + 1);
 			triangles.Add(vertexIndex + 2);
 		}
 
-		void AddTriangleUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3) {
+		private void AddTriangleUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3) {
 			int vertexIndex = vertices.Count;
 			vertices.Add(v1);
 			vertices.Add(v2);
@@ -449,24 +478,24 @@ namespace HexMap
 			triangles.Add(vertexIndex + 2);
 		}
 
-		void AddTriangleColor(Color color) {
+		private void AddTriangleColor(Color color) {
 			colors.Add(color);
 			colors.Add(color);
 			colors.Add(color);
 		}
 
-		void AddTriangleColor(Color c1, Color c2, Color c3) {
+		private void AddTriangleColor(Color c1, Color c2, Color c3) {
 			colors.Add(c1);
 			colors.Add(c2);
 			colors.Add(c3);
 		}
 
-		void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
+		private void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
 			int vertexIndex = vertices.Count;
-			vertices.Add(Perturb(v1));
-			vertices.Add(Perturb(v2));
-			vertices.Add(Perturb(v3));
-			vertices.Add(Perturb(v4));
+			vertices.Add(HexMetrics.Perturb(v1));
+			vertices.Add(HexMetrics.Perturb(v2));
+			vertices.Add(HexMetrics.Perturb(v3));
+			vertices.Add(HexMetrics.Perturb(v4));
 			triangles.Add(vertexIndex);
 			triangles.Add(vertexIndex + 2);
 			triangles.Add(vertexIndex + 1);
@@ -475,32 +504,45 @@ namespace HexMap
 			triangles.Add(vertexIndex + 3);
 		}
 
-		void AddQuadColor(Color color) {
+		private void AddQuadColor(Color color) {
 			colors.Add(color);
 			colors.Add(color);
 			colors.Add(color);
 			colors.Add(color);
 		}
 
-		void AddQuadColor(Color c1, Color c2) {
+		private void AddQuadColor(Color c1, Color c2) {
 			colors.Add(c1);
 			colors.Add(c1);
 			colors.Add(c2);
 			colors.Add(c2);
 		}
 
-		void AddQuadColor(Color c1, Color c2, Color c3, Color c4) {
+		private void AddQuadColor(Color c1, Color c2, Color c3, Color c4) {
 			colors.Add(c1);
 			colors.Add(c2);
 			colors.Add(c3);
 			colors.Add(c4);
 		}
 
-		Vector3 Perturb(Vector3 position) {
-			Vector4 sample = HexMetrics.SampleNoise(position);
-			position.x += (sample.x * 2f - 1f) * HexMetrics.cellPerturbStrength;
-			position.z += (sample.z * 2f - 1f) * HexMetrics.cellPerturbStrength;
-			return position;
+		public void AddTriangleUV(Vector2 uv1, Vector2 uv2, Vector2 uv3) {
+			uvs.Add(uv1);
+			uvs.Add(uv2);
+			uvs.Add(uv3);
 		}
-	} 
+
+		public void AddQuadUV(Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4) {
+			uvs.Add(uv1);
+			uvs.Add(uv2);
+			uvs.Add(uv3);
+			uvs.Add(uv4);
+		}
+
+		public void AddQuadUV(float uMin, float uMax, float vMin, float vMax) {
+			uvs.Add(new Vector2(uMin, vMin));
+			uvs.Add(new Vector2(uMax, vMin));
+			uvs.Add(new Vector2(uMin, vMax));
+			uvs.Add(new Vector2(uMax, vMax));
+		}
+	}
 }

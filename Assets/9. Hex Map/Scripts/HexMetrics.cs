@@ -104,6 +104,14 @@ namespace HexMap
 		public static Vector4 SampleNoise(Vector3 position) {
 			return noiseSource.GetPixelBilinear(position.x * noiseScale, position.z * noiseScale);
 		}
+
+		public static Vector3 Perturb(Vector3 position) {
+			Vector4 sample = SampleNoise(position);
+			position.x += (sample.x * 2f - 1f) * cellPerturbStrength;
+			position.z += (sample.z * 2f - 1f) * cellPerturbStrength;
+			return position;
+		}
+
 		#endregion
 
 		public static Vector3 GetSolidEdgeMiddle(HexDirection direction) {

@@ -5,12 +5,11 @@ namespace HexMap
 	public class HexGridChunk : MonoBehaviour
 	{
 		private HexCell[] cells;
-		private HexMesh hexMesh;
+		public HexMesh terrain;
 		private Canvas gridCanvas;
 
 		private void Awake() {
 			gridCanvas = GetComponentInChildren<Canvas>();
-			hexMesh = GetComponentInChildren<HexMesh>();
 
 			cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
 			ShowUI(false);
@@ -28,7 +27,7 @@ namespace HexMap
 		}
 
 		private void LateUpdate() {
-			hexMesh.Triangulate(cells);
+			terrain.Triangulate(cells);
 			enabled = false;
 		}
 

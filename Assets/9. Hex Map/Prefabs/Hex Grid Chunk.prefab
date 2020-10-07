@@ -92,6 +92,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 194bfaad63b6e414b9453f437b81f78d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useCollider: 1
+  useColors: 1
+  useUVCoordinates: 0
 --- !u!1 &6682032007012075807
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,7 +186,7 @@ GameObject:
   - component: {fileID: 6418290655206174949}
   - component: {fileID: 3134508886542257025}
   m_Layer: 0
-  m_Name: HexGridChunk
+  m_Name: Hex Grid Chunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -217,3 +220,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1396af2569b2c4b41847d6cae695550a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  terrain: {fileID: 6214298959971336389}
