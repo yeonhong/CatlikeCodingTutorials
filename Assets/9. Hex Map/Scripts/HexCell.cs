@@ -133,6 +133,9 @@ namespace HexMap
 			neighbor.incomingRiver = direction.Opposite();
 			neighbor.RefreshSelfOnly();
 		}
+
+		public float StreamBedY => 
+			(elevation + HexMetrics.streamBedElevationOffset) *	HexMetrics.elevationStep;
 		#endregion // Rivers
 
 		public HexCell GetNeighbor(HexDirection direction) {
