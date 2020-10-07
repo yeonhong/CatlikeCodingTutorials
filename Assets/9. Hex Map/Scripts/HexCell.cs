@@ -134,8 +134,11 @@ namespace HexMap
 			neighbor.RefreshSelfOnly();
 		}
 
-		public float StreamBedY => 
-			(elevation + HexMetrics.streamBedElevationOffset) *	HexMetrics.elevationStep;
+		public float StreamBedY =>
+			(elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+		public float RiverSurfaceY => 
+			(elevation + HexMetrics.riverSurfaceElevationOffset) *	HexMetrics.elevationStep;
+
 		#endregion // Rivers
 
 		public HexCell GetNeighbor(HexDirection direction) {

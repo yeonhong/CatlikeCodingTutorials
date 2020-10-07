@@ -4,7 +4,7 @@ namespace HexMap
 {
 	public class HexGridChunk : MonoBehaviour
 	{
-		public HexMesh terrain;
+		public HexMesh terrain, rivers;
 		private HexCell[] cells;
 		private Canvas gridCanvas;
 
@@ -37,10 +37,12 @@ namespace HexMap
 
 		public void Triangulate() {
 			terrain.Clear();
+			rivers.Clear();
 			for (int i = 0; i < cells.Length; i++) {
 				Triangulate(cells[i]);
 			}
 			terrain.Apply();
+			rivers.Apply();
 		}
 
 		private void Triangulate(HexCell cell) {
@@ -76,6 +78,27 @@ namespace HexMap
 
 			if (direction <= HexDirection.SE) {
 				TriangulateConnection(direction, cell, e);
+			}
+		}
+
+		private void TriangulateRiverQuad(
+			Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
+			float y, float v, bool reversed) {
+			TriangulateRiverQuad(v1, v2, v3, v4, y, y, v, reversed);
+		}
+
+		private void TriangulateRiverQuad(
+			Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
+			float y1, float y2, float v, bool reversed) {
+
+			v1.y = v2.y = y1;
+			v3.y = v4.y = y2;
+			rivers.AddQuad(v1, v2, v3, v4);
+			if (reversed) {
+				rivers.AddQuadUV(1f, 0f, 0.8f - v, 0.6f - v);
+			}
+			else {
+				rivers.AddQuadUV(0f, 1f, v, v + 0.2f);
 			}
 		}
 
@@ -120,6 +143,25 @@ namespace HexMap
 
 			TriangulateEdgeStrip(m, cell.Color, e, cell.Color);
 			TriangulateEdgeFan(center, m, cell.Color);
+
+			bool reversed = cell.HasIncomingRiver;
+			TriangulateRiverQuad(
+				m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed
+			);
+			center.y = m.v2.y = m.v4.y = cell.RiverSurfaceY;
+			rivers.AddTriangle(center, m.v2, m.v4);
+			if (reversed) {
+				rivers.AddTriangleUV(
+					new Vector2(0.5f, 0.4f),
+					new Vector2(1f, 0.2f), new Vector2(0f, 0.2f)
+				);
+			}
+			else {
+				rivers.AddTriangleUV(
+					new Vector2(0.5f, 0.4f),
+					new Vector2(0f, 0.6f), new Vector2(1f, 0.6f)
+				);
+			}
 		}
 
 		private void TriangulateWithRiver(
@@ -171,6 +213,14 @@ namespace HexMap
 			terrain.AddQuadColor(cell.Color);
 			terrain.AddTriangle(centerR, m.v4, m.v5);
 			terrain.AddTriangleColor(cell.Color);
+
+			bool reversed = cell.IncomingRiver == direction;
+			TriangulateRiverQuad(
+				centerL, centerR, m.v2, m.v4, cell.RiverSurfaceY, 0.4f, reversed
+			);
+			TriangulateRiverQuad(
+				m.v2, m.v4, e.v2, e.v4, cell.RiverSurfaceY, 0.6f, reversed
+			);
 		}
 
 		private void TriangulateConnection(
@@ -190,6 +240,11 @@ namespace HexMap
 
 			if (cell.HasRiverThroughEdge(direction)) {
 				e2.v3.y = neighbor.StreamBedY;
+				TriangulateRiverQuad(
+					e1.v2, e1.v4, e2.v2, e2.v4,
+					cell.RiverSurfaceY, neighbor.RiverSurfaceY, 0.8f,
+					cell.HasIncomingRiver && cell.IncomingRiver == direction
+				);
 			}
 
 			if (cell.GetEdgeType(direction) == HexEdgeType.Slope) {

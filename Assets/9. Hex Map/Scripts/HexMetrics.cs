@@ -35,6 +35,7 @@ namespace HexMap
 
 		// river
 		public const float streamBedElevationOffset = 0f;
+		public const float riverSurfaceElevationOffset = -0.5f;
 
 		#region HexMapping Coordinate
 		public static Vector3[] corners = {
