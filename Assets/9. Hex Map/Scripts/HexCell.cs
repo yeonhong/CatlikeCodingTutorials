@@ -43,12 +43,97 @@ namespace HexMap
 				uiPosition.z = -position.y;
 				uiRect.localPosition = uiPosition;
 
+				// River Exception
+				if (
+					hasOutgoingRiver &&
+					elevation < GetNeighbor(outgoingRiver).elevation) {
+					RemoveOutgoingRiver();
+				}
+				if (
+					hasIncomingRiver &&
+					elevation > GetNeighbor(incomingRiver).elevation
+				) {
+					RemoveIncomingRiver();
+				}
+
 				Refresh();
 			}
 		}
 
 		public RectTransform uiRect;
 		public HexGridChunk chunk;
+
+		#region Rivers
+		private bool hasIncomingRiver, hasOutgoingRiver;
+		private HexDirection incomingRiver, outgoingRiver;
+
+		public bool HasIncomingRiver => hasIncomingRiver;
+		public bool HasOutgoingRiver => hasOutgoingRiver;
+		public HexDirection IncomingRiver => incomingRiver;
+		public HexDirection OutgoingRiver => outgoingRiver;
+
+		public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
+		public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
+		public bool HasRiverThroughEdge(HexDirection direction) {
+			return
+				hasIncomingRiver && incomingRiver == direction ||
+				hasOutgoingRiver && outgoingRiver == direction;
+		}
+
+		public void RemoveIncomingRiver() {
+			if (!hasIncomingRiver) {
+				return;
+			}
+			hasIncomingRiver = false;
+			RefreshSelfOnly();
+
+			HexCell neighbor = GetNeighbor(incomingRiver);
+			neighbor.hasOutgoingRiver = false;
+			neighbor.RefreshSelfOnly();
+		}
+
+		public void RemoveOutgoingRiver() {
+			if (!hasOutgoingRiver) {
+				return;
+			}
+			hasOutgoingRiver = false;
+			RefreshSelfOnly();
+
+			HexCell neighbor = GetNeighbor(outgoingRiver);
+			neighbor.hasIncomingRiver = false;
+			neighbor.RefreshSelfOnly();
+		}
+
+		public void RemoveRiver() {
+			RemoveOutgoingRiver();
+			RemoveIncomingRiver();
+		}
+
+		public void SetOutgoingRiver(HexDirection direction) {
+			if (hasOutgoingRiver && outgoingRiver == direction) {
+				return;
+			}
+
+			HexCell neighbor = GetNeighbor(direction);
+			if (!neighbor || elevation < neighbor.elevation) {
+				return;
+			}
+
+			RemoveOutgoingRiver();
+			if (hasIncomingRiver && incomingRiver == direction) {
+				RemoveIncomingRiver();
+			}
+
+			hasOutgoingRiver = true;
+			outgoingRiver = direction;
+			RefreshSelfOnly();
+
+			neighbor.RemoveIncomingRiver();
+			neighbor.hasIncomingRiver = true;
+			neighbor.incomingRiver = direction.Opposite();
+			neighbor.RefreshSelfOnly();
+		}
+		#endregion // Rivers
 
 		public HexCell GetNeighbor(HexDirection direction) {
 			return neighbors[(int)direction];
@@ -81,6 +166,10 @@ namespace HexMap
 					}
 				}
 			}
+		}
+
+		private void RefreshSelfOnly() {
+			chunk.Refresh();
 		}
 	}
 }
