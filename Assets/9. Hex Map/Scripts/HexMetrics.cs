@@ -37,6 +37,24 @@ namespace HexMap
 		public const float streamBedElevationOffset = -1.75f;
 		public const float waterElevationOffset = -0.5f;
 
+		// water
+		public const float waterFactor = 0.6f;
+
+		public static Vector3 GetFirstWaterCorner(HexDirection direction) {
+			return corners[(int)direction] * waterFactor;
+		}
+
+		public static Vector3 GetSecondWaterCorner(HexDirection direction) {
+			return corners[(int)direction + 1] * waterFactor;
+		}
+
+		public const float waterBlendFactor = 1f - waterFactor;
+
+		public static Vector3 GetWaterBridge(HexDirection direction) {
+			return (corners[(int)direction] + corners[(int)direction + 1]) *
+				waterBlendFactor;
+		}
+
 		#region HexMapping Coordinate
 		public static Vector3[] corners = {
 			new Vector3(0f, 0f, outerRadius),
@@ -67,7 +85,7 @@ namespace HexMap
 		public static Vector3 GetBridge(HexDirection direction) {
 			return (corners[(int)direction] + corners[(int)direction + 1]) *
 				blendFactor;
-		} 
+		}
 		#endregion
 
 		#region Terrace
