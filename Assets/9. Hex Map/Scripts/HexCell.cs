@@ -148,7 +148,7 @@ namespace HexMap
 			(elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 		public float RiverSurfaceY =>
 			(elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
-
+		public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 		#endregion // Rivers
 
 		#region Roads
