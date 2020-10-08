@@ -147,7 +147,7 @@ namespace HexMap
 		public float StreamBedY =>
 			(elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 		public float RiverSurfaceY =>
-			(elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
+			(elevation + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
 		public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 		#endregion // Rivers
 
@@ -193,6 +193,26 @@ namespace HexMap
 			neighbors[index].RefreshSelfOnly();
 			RefreshSelfOnly();
 		}
+		#endregion
+
+		#region Water
+		private int waterLevel;
+		public int WaterLevel {
+			get => waterLevel;
+			set {
+				if (waterLevel == value) {
+					return;
+				}
+				waterLevel = value;
+				Refresh();
+			}
+		}
+
+		public bool IsUnderwater => waterLevel > elevation;
+
+		public float WaterSurfaceY => 
+			(waterLevel + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
+
 		#endregion
 
 		public HexCell GetNeighbor(HexDirection direction) {

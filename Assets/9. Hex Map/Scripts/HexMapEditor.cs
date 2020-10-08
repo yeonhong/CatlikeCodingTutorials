@@ -9,9 +9,11 @@ namespace HexMap
 		public HexGrid hexGrid;
 		private Color activeColor;
 		private int activeElevation;
+		private int activeWaterLevel;
 
 		private bool applyColor;
 		private bool applyElevation = true;
+		private bool applyWaterLevel = true;
 		private int brushSize;
 
 		private enum OptionalToggle
@@ -96,6 +98,9 @@ namespace HexMap
 				if (applyElevation) {
 					cell.Elevation = activeElevation;
 				}
+				if (applyWaterLevel) {
+					cell.WaterLevel = activeWaterLevel;
+				}
 				if (riverMode == OptionalToggle.No) {
 					cell.RemoveRiver();
 				}
@@ -145,6 +150,14 @@ namespace HexMap
 
 		public void SetRoadMode(int mode) {
 			roadMode = (OptionalToggle)mode;
+		}
+
+		public void SetApplyWaterLevel(bool toggle) {
+			applyWaterLevel = toggle;
+		}
+
+		public void SetWaterLevel(float level) {
+			activeWaterLevel = (int)level;
 		}
 	}
 }

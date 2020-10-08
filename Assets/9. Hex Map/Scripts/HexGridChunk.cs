@@ -4,11 +4,10 @@ namespace HexMap
 {
 	public class HexGridChunk : MonoBehaviour
 	{
-
 		public HexMesh terrain, rivers, roads;
 		private HexCell[] cells;
 		private Canvas gridCanvas;
-
+		
 		private void Awake() {
 			gridCanvas = GetComponentInChildren<Canvas>();
 
@@ -189,7 +188,7 @@ namespace HexMap
 				if (!hasRoadThroughEdge) {
 					return;
 				}
-				Vector3 offset = HexMetrics.GetSolidEdgeMiddle(direction) *	HexMetrics.innerToOuter;
+				Vector3 offset = HexMetrics.GetSolidEdgeMiddle(direction) * HexMetrics.innerToOuter;
 				roadCenter += offset * 0.7f;
 				center += offset * 0.5f;
 			}
