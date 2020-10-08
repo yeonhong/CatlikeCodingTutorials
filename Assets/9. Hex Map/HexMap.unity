@@ -6665,7 +6665,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Elevation
+  m_Text: Water
 --- !u!222 &1975785349
 CanvasRenderer:
   m_ObjectHideFlags: 0
