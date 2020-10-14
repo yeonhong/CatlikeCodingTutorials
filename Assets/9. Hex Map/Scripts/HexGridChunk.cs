@@ -7,6 +7,7 @@ namespace HexMap
 		public HexMesh terrain, rivers, roads, water, waterShore, estuaries;
 		private HexCell[] cells;
 		private Canvas gridCanvas;
+		public HexFeatureManager features;
 
 		private void Awake() {
 			gridCanvas = GetComponentInChildren<Canvas>();
@@ -42,6 +43,7 @@ namespace HexMap
 			water.Clear();
 			waterShore.Clear();
 			estuaries.Clear();
+			features.Clear();
 
 			for (int i = 0; i < cells.Length; i++) {
 				Triangulate(cells[i]);
@@ -53,12 +55,15 @@ namespace HexMap
 			water.Apply();
 			waterShore.Apply();
 			estuaries.Apply();
+			features.Apply();
 		}
 
 		private void Triangulate(HexCell cell) {
 			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 				Triangulate(d, cell);
 			}
+
+			features.AddFeature(cell.Position);
 		}
 
 		private void Triangulate(HexDirection direction, HexCell cell) {
