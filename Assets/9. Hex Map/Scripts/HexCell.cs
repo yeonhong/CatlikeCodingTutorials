@@ -227,6 +227,20 @@ namespace HexMap
 
 		#endregion
 
+		#region Features
+		public int UrbanLevel {
+			get => urbanLevel;
+			set {
+				if (urbanLevel != value) {
+					urbanLevel = value;
+					RefreshSelfOnly();
+				}
+			}
+		}
+
+		private int urbanLevel;
+		#endregion
+
 		public HexCell GetNeighbor(HexDirection direction) {
 			return neighbors[(int)direction];
 		}
