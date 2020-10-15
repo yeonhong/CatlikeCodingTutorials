@@ -168,5 +168,17 @@ namespace HexMap
 			return hashGrid[x + z * hashGridSize];
 		}
 		#endregion
+
+		#region Features
+		private static float[][] featureThresholds = {
+			new float[] {0.0f, 0.0f, 0.4f},
+			new float[] {0.0f, 0.4f, 0.6f},
+			new float[] {0.4f, 0.6f, 0.8f}
+		};
+
+		public static float[] GetFeatureThresholds(int level) {
+			return featureThresholds[level];
+		} 
+		#endregion
 	}
 }

@@ -13,9 +13,9 @@ namespace HexMap
 		private int activeUrbanLevel;
 
 		private bool applyColor;
-		private bool applyElevation = true;
-		private bool applyWaterLevel = true;
-		private bool applyUrbanLevel;
+		private bool applyElevation = false;
+		private bool applyWaterLevel = false;
+		private bool applyUrbanLevel = false;
 		private int brushSize;
 
 		private enum OptionalToggle
