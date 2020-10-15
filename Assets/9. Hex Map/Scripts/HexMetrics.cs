@@ -68,7 +68,18 @@ namespace HexMap
 			offset.y = 0f;
 			offset.z = far.z - near.z;
 			return offset.normalized * (wallThickness * 0.5f);
-		} 
+		}
+
+		public const float wallElevationOffset = verticalTerraceStepSize;
+
+		public static Vector3 WallLerp(Vector3 near, Vector3 far) {
+			near.x += (far.x - near.x) * 0.5f;
+			near.z += (far.z - near.z) * 0.5f;
+			float v =
+				near.y < far.y ? wallElevationOffset : (1f - wallElevationOffset);
+			near.y += (far.y - near.y) * v;
+			return near;
+		}
 		#endregion
 
 		#region HexMapping Coordinate
