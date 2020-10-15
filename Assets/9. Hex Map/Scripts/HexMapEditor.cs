@@ -23,7 +23,7 @@ namespace HexMap
 			Ignore, Yes, No
 		}
 
-		private OptionalToggle riverMode, roadMode;
+		private OptionalToggle riverMode, roadMode, walledMode;
 
 		private bool isDrag;
 		private HexDirection dragDirection;
@@ -161,6 +161,10 @@ namespace HexMap
 
 		public void SetRoadMode(int mode) {
 			roadMode = (OptionalToggle)mode;
+		}
+
+		public void SetWalledMode(int mode) {
+			walledMode = (OptionalToggle)mode;
 		}
 
 		public void SetApplyWaterLevel(bool toggle) {

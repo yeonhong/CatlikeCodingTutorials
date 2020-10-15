@@ -239,9 +239,7 @@ namespace HexMap
 		}
 
 		public int FarmLevel {
-			get {
-				return farmLevel;
-			}
+			get => farmLevel;
 			set {
 				if (farmLevel != value) {
 					farmLevel = value;
@@ -251,9 +249,7 @@ namespace HexMap
 		}
 
 		public int PlantLevel {
-			get {
-				return plantLevel;
-			}
+			get => plantLevel;
 			set {
 				if (plantLevel != value) {
 					plantLevel = value;
@@ -263,6 +259,20 @@ namespace HexMap
 		}
 
 		private int urbanLevel, farmLevel, plantLevel;
+		#endregion
+
+		#region Walls
+		public bool Walled {
+			get => walled;
+			set {
+				if (walled != value) {
+					walled = value;
+					Refresh();
+				}
+			}
+		}
+
+		private bool walled;
 		#endregion
 
 		public HexCell GetNeighbor(HexDirection direction) {
