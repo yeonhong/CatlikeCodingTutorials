@@ -545,6 +545,8 @@ namespace HexMap
 				);
 			}
 
+			features.AddWall(e1, cell, e2, neighbor);
+
 			HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
 			if (direction <= HexDirection.E && nextNeighbor != null) {
 				Vector3 v5 = e1.v5 + HexMetrics.GetBridge(direction.Next());
@@ -630,6 +632,8 @@ namespace HexMap
 					bottomCell.Color, leftCell.Color, rightCell.Color
 				);
 			}
+
+			features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
 		}
 
 		private void TriangulateEdgeTerraces(

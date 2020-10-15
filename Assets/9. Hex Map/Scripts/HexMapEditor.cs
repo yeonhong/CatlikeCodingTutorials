@@ -115,6 +115,9 @@ namespace HexMap
 				if (riverMode == OptionalToggle.No) {
 					cell.RemoveRiver();
 				}
+				if (walledMode != OptionalToggle.Ignore) {
+					cell.Walled = walledMode == OptionalToggle.Yes;
+				}
 				if (roadMode == OptionalToggle.No) {
 					cell.RemoveRoads();
 				}
