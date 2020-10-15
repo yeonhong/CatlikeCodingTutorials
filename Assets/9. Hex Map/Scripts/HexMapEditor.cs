@@ -10,12 +10,12 @@ namespace HexMap
 		private Color activeColor;
 		private int activeElevation;
 		private int activeWaterLevel;
-		private int activeUrbanLevel;
+		private int activeUrbanLevel, activeFarmLevel, activePlantLevel;
 
 		private bool applyColor;
 		private bool applyElevation = false;
 		private bool applyWaterLevel = false;
-		private bool applyUrbanLevel = false;
+		private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel;
 		private int brushSize;
 
 		private enum OptionalToggle
@@ -30,7 +30,7 @@ namespace HexMap
 		private HexCell previousCell;
 
 		private void Awake() {
-			SelectColor(0);
+			SelectColor(-1);
 		}
 
 		private void Update() {
@@ -106,6 +106,12 @@ namespace HexMap
 				if (applyUrbanLevel) {
 					cell.UrbanLevel = activeUrbanLevel;
 				}
+				if (applyFarmLevel) {
+					cell.FarmLevel = activeFarmLevel;
+				}
+				if (applyPlantLevel) {
+					cell.PlantLevel = activePlantLevel;
+				}
 				if (riverMode == OptionalToggle.No) {
 					cell.RemoveRiver();
 				}
@@ -171,6 +177,22 @@ namespace HexMap
 
 		public void SetUrbanLevel(float level) {
 			activeUrbanLevel = (int)level;
+		}
+
+		public void SetApplyFarmLevel(bool toggle) {
+			applyFarmLevel = toggle;
+		}
+
+		public void SetFarmLevel(float level) {
+			activeFarmLevel = (int)level;
+		}
+
+		public void SetApplyPlantLevel(bool toggle) {
+			applyPlantLevel = toggle;
+		}
+
+		public void SetPlantLevel(float level) {
+			activePlantLevel = (int)level;
 		}
 	}
 }
