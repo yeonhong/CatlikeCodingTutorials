@@ -37,6 +37,8 @@ namespace HexMap
 		public const float streamBedElevationOffset = -1.75f;
 		public const float waterElevationOffset = -0.5f;
 
+		public const float bridgeDesignLength = 7f;
+
 		#region Water
 		// water
 		public const float waterFactor = 0.6f;
