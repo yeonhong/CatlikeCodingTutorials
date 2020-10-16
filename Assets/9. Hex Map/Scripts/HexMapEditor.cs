@@ -10,12 +10,12 @@ namespace HexMap
 		private Color activeColor;
 		private int activeElevation;
 		private int activeWaterLevel;
-		private int activeUrbanLevel, activeFarmLevel, activePlantLevel;
+		private int activeUrbanLevel, activeFarmLevel, activePlantLevel, activeSpecialIndex;
 
 		private bool applyColor;
 		private bool applyElevation = false;
 		private bool applyWaterLevel = false;
-		private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel;
+		private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
 		private int brushSize;
 
 		private enum OptionalToggle
@@ -102,6 +102,9 @@ namespace HexMap
 				}
 				if (applyWaterLevel) {
 					cell.WaterLevel = activeWaterLevel;
+				}
+				if (applySpecialIndex) {
+					cell.SpecialIndex = activeSpecialIndex;
 				}
 				if (applyUrbanLevel) {
 					cell.UrbanLevel = activeUrbanLevel;
@@ -200,6 +203,14 @@ namespace HexMap
 
 		public void SetPlantLevel(float level) {
 			activePlantLevel = (int)level;
+		}
+
+		public void SetApplySpecialIndex(bool toggle) {
+			applySpecialIndex = toggle;
+		}
+
+		public void SetSpecialIndex(float index) {
+			activeSpecialIndex = (int)index;
 		}
 	}
 }

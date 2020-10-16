@@ -131,10 +131,12 @@ namespace HexMap
 
 			hasOutgoingRiver = true;
 			outgoingRiver = direction;
+			specialIndex = 0;
 
 			neighbor.RemoveIncomingRiver();
 			neighbor.hasIncomingRiver = true;
 			neighbor.incomingRiver = direction.Opposite();
+			neighbor.specialIndex = 0;
 
 			SetRoad((int)direction, false);
 		}
@@ -185,6 +187,7 @@ namespace HexMap
 
 		public void AddRoad(HexDirection direction) {
 			if (!roads[(int)direction] && !HasRiverThroughEdge(direction) &&
+				!IsSpecial && !GetNeighbor(direction).IsSpecial &&
 				GetElevationDifference(direction) <= 1) {
 				SetRoad((int)direction, true);
 			}
@@ -259,6 +262,23 @@ namespace HexMap
 		}
 
 		private int urbanLevel, farmLevel, plantLevel;
+
+		public int SpecialIndex {
+			get => specialIndex;
+			set {
+				if (specialIndex != value && !HasRiver) {
+					specialIndex = value;
+					RemoveRoads();
+					RefreshSelfOnly();
+				}
+			}
+		}
+
+		public bool IsSpecial {
+			get => specialIndex > 0;
+		}
+
+		private int specialIndex;
 		#endregion
 
 		#region Walls
