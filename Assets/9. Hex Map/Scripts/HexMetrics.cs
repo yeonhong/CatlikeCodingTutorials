@@ -59,8 +59,10 @@ namespace HexMap
 
 		#region Walls
 		// walls
-		public const float wallHeight = 3f;
+		public const float wallHeight = 4f;
+		public const float wallYOffset = -1f;
 		public const float wallThickness = 0.75f;
+		public const float wallTowerThreshold = 0.5f;
 
 		public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far) {
 			Vector3 offset;
@@ -77,7 +79,7 @@ namespace HexMap
 			near.z += (far.z - near.z) * 0.5f;
 			float v =
 				near.y < far.y ? wallElevationOffset : (1f - wallElevationOffset);
-			near.y += (far.y - near.y) * v;
+			near.y += (far.y - near.y) * v + wallYOffset;
 			return near;
 		}
 		#endregion
@@ -205,7 +207,7 @@ namespace HexMap
 
 		public static float[] GetFeatureThresholds(int level) {
 			return featureThresholds[level];
-		} 
+		}
 		#endregion
 	}
 }
