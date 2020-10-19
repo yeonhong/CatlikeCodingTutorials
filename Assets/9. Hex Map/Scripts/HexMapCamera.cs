@@ -4,6 +4,8 @@ namespace HexMap
 {
 	public class HexMapCamera : MonoBehaviour
 	{
+		private static HexMapCamera instance;
+
 		private Transform swivel, stick;
 
 		private float zoom = 1f;
@@ -17,9 +19,17 @@ namespace HexMap
 
 		public HexGrid grid;
 
+		public static bool Locked {
+			set => instance.enabled = !value;
+		}
+
 		private void Awake() {
 			swivel = transform.GetChild(0);
 			stick = swivel.GetChild(0);
+		}
+
+		private void OnEnable() {
+			instance = this;
 		}
 
 		private void Update() {
@@ -49,17 +59,15 @@ namespace HexMap
 			Vector3 position = transform.localPosition;
 			position += direction * distance;
 			transform.localPosition = ClampPosition(position);
+
+			Debug.Log(transform.localPosition);
 		}
 
 		private Vector3 ClampPosition(Vector3 position) {
-			float xMax =
-				(grid.chunkCountX * HexMetrics.chunkSizeX - 0.5f) *
-				(2f * HexMetrics.innerRadius);
+			float xMax = (grid.cellCountX - 0.5f) * (2f * HexMetrics.innerRadius);
 			position.x = Mathf.Clamp(position.x, 0f, xMax);
 
-			float zMax =
-				(grid.chunkCountZ * HexMetrics.chunkSizeZ - 1) *
-				(1.5f * HexMetrics.outerRadius);
+			float zMax = (grid.cellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
 			position.z = Mathf.Clamp(position.z, 0f, zMax);
 
 			return position;
@@ -84,6 +92,10 @@ namespace HexMap
 
 			float angle = Mathf.Lerp(swivelMinZoom, swivelMaxZoom, zoom);
 			swivel.localRotation = Quaternion.Euler(angle, 0f, 0f);
+		}
+
+		public static void ValidatePosition() {
+			instance.AdjustPosition(0f, 0f);
 		}
 	}
 }

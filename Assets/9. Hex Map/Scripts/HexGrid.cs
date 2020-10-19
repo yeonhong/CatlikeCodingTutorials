@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
 
 namespace HexMap
 {
 	public class HexGrid : MonoBehaviour
 	{
-		public int chunkCountX = 4, chunkCountZ = 3;
+		public int cellCountX = 20, cellCountZ = 15;
 		public HexCell cellPrefab;
 		private HexCell[] cells;
 
@@ -15,8 +15,7 @@ namespace HexMap
 		public Texture2D noiseSource;
 
 		public HexGridChunk chunkPrefab;
-
-		private int cellCountX, cellCountZ;
+		private int chunkCountX, chunkCountZ;
 		private HexGridChunk[] chunks;
 
 		public int seed;
@@ -27,12 +26,7 @@ namespace HexMap
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
 			HexMetrics.colors = colors;
-
-			cellCountX = chunkCountX * HexMetrics.chunkSizeX;
-			cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
-
-			CreateChunks();
-			CreateCells();
+			CreateMap(cellCountX, cellCountZ);
 		}
 
 		private void OnEnable() {
@@ -41,6 +35,28 @@ namespace HexMap
 				HexMetrics.InitializeHashGrid(seed);
 				HexMetrics.colors = colors;
 			}
+		}
+
+		public void CreateMap(int x, int z) {
+			if (x <= 0 || x % HexMetrics.chunkSizeX != 0 ||
+				z <= 0 || z % HexMetrics.chunkSizeZ != 0) {
+				Debug.LogError("Unsupported map size.");
+				return;
+			}
+
+			if (chunks != null) {
+				
+				for (int i = 0; i < chunks.Length; i++) {
+					Destroy(chunks[i].gameObject);
+				}
+			}
+
+			cellCountX = x;
+			cellCountZ = z;
+			chunkCountX = cellCountX / HexMetrics.chunkSizeX;
+			chunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
+			CreateChunks();
+			CreateCells();
 		}
 
 		private void CreateChunks() {
