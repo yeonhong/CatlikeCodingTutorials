@@ -6,15 +6,16 @@ namespace HexMap
 	{
 		public HexCoordinates coordinates;
 
-		private Color color;
-		public Color Color {
-			get => color;
+		private int terrainTypeIndex;
+		public Color Color => HexMetrics.colors[terrainTypeIndex];
+
+		public int TerrainTypeIndex {
+			get => terrainTypeIndex;
 			set {
-				if (color == value) {
-					return;
+				if (terrainTypeIndex != value) {
+					terrainTypeIndex = value;
+					Refresh();
 				}
-				color = value;
-				Refresh();
 			}
 		}
 
@@ -274,9 +275,7 @@ namespace HexMap
 			}
 		}
 
-		public bool IsSpecial {
-			get => specialIndex > 0;
-		}
+		public bool IsSpecial => specialIndex > 0;
 
 		private int specialIndex;
 		#endregion

@@ -11,8 +11,6 @@ namespace HexMap
 
 		public Text cellLabelPrefab;
 
-		public Color defaultColor = Color.white;
-
 		public Texture2D noiseSource;
 
 		public HexGridChunk chunkPrefab;
@@ -22,15 +20,26 @@ namespace HexMap
 
 		public int seed;
 
+		public Color[] colors;
+
 		private void Awake() {
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
+			HexMetrics.colors = colors;
 
 			cellCountX = chunkCountX * HexMetrics.chunkSizeX;
 			cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
 
 			CreateChunks();
 			CreateCells();
+		}
+
+		private void OnEnable() {
+			if (!HexMetrics.noiseSource) {
+				HexMetrics.noiseSource = noiseSource;
+				HexMetrics.InitializeHashGrid(seed);
+				HexMetrics.colors = colors;
+			}
 		}
 
 		private void CreateChunks() {
@@ -54,13 +63,6 @@ namespace HexMap
 			}
 		}
 
-		private void OnEnable() {
-			if (!HexMetrics.noiseSource) {
-				HexMetrics.noiseSource = noiseSource;
-				HexMetrics.InitializeHashGrid(seed);
-			}
-		}
-
 		private void CreateCell(int x, int z, int i) {
 			Vector3 position;
 			position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
@@ -70,7 +72,6 @@ namespace HexMap
 			HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
 			cell.transform.localPosition = position;
 			cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-			cell.Color = defaultColor;
 
 			// link neighbor
 			if (x > 0) {

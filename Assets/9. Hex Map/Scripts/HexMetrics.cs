@@ -36,8 +36,10 @@ namespace HexMap
 		// river
 		public const float streamBedElevationOffset = -1.75f;
 		public const float waterElevationOffset = -0.5f;
-
 		public const float bridgeDesignLength = 7f;
+
+		// colors
+		public static Color[] colors;
 
 		#region Water
 		// water

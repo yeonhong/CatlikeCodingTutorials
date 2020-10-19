@@ -5,14 +5,12 @@ namespace HexMap
 {
 	public class HexMapEditor : MonoBehaviour
 	{
-		public Color[] colors;
 		public HexGrid hexGrid;
-		private Color activeColor;
+		private int activeTerrainTypeIndex;
 		private int activeElevation;
 		private int activeWaterLevel;
 		private int activeUrbanLevel, activeFarmLevel, activePlantLevel, activeSpecialIndex;
 
-		private bool applyColor;
 		private bool applyElevation = false;
 		private bool applyWaterLevel = false;
 		private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
@@ -28,10 +26,6 @@ namespace HexMap
 		private bool isDrag;
 		private HexDirection dragDirection;
 		private HexCell previousCell;
-
-		private void Awake() {
-			SelectColor(-1);
-		}
 
 		private void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
@@ -94,8 +88,8 @@ namespace HexMap
 
 		private void EditCell(HexCell cell) {
 			if (cell) {
-				if (applyColor) {
-					cell.Color = activeColor;
+				if (activeTerrainTypeIndex >= 0) {
+					cell.TerrainTypeIndex = activeTerrainTypeIndex;
 				}
 				if (applyElevation) {
 					cell.Elevation = activeElevation;
@@ -138,19 +132,16 @@ namespace HexMap
 			}
 		}
 
+		public void SetTerrainTypeIndex(int index) {
+			activeTerrainTypeIndex = index;
+		}
+
 		public void SetApplyElevation(bool toggle) {
 			applyElevation = toggle;
 		}
 
 		public void SetElevation(float elevation) {
 			activeElevation = (int)elevation;
-		}
-
-		public void SelectColor(int index) {
-			applyColor = index >= 0;
-			if (applyColor) {
-				activeColor = colors[index];
-			}
 		}
 
 		public void SetBrushSize(float size) {
