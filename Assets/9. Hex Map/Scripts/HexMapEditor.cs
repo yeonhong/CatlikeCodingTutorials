@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using System.IO;
 
 namespace HexMap
 {
@@ -31,8 +31,7 @@ namespace HexMap
 		private void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
 				HandleInput();
-			}
-			else {
+			} else {
 				previousCell = null;
 			}
 		}
@@ -44,14 +43,12 @@ namespace HexMap
 				HexCell currentCell = hexGrid.GetCell(hit.point);
 				if (previousCell && previousCell != currentCell) {
 					ValidateDrag(currentCell);
-				}
-				else {
+				} else {
 					isDrag = false;
 				}
 				EditCells(currentCell);
 				previousCell = currentCell;
-			}
-			else {
+			} else {
 				previousCell = null;
 			}
 		}
@@ -136,7 +133,7 @@ namespace HexMap
 		public void Save() {
 			string path = Path.Combine(Application.persistentDataPath, "test.map");
 			using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
-				writer.Write(0);
+				writer.Write(1);
 				hexGrid.Save(writer);
 			}
 		}
@@ -145,10 +142,10 @@ namespace HexMap
 			string path = Path.Combine(Application.persistentDataPath, "test.map");
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(path))) {
 				int header = reader.ReadInt32();
-				if (header == 0) {
-					hexGrid.Load(reader);
-				}
-				else {
+				if (header <= 1) {
+					hexGrid.Load(reader, header);
+					HexMapCamera.ValidatePosition();
+				} else {
 					Debug.LogWarning("Unknown map format " + header);
 				}
 			}

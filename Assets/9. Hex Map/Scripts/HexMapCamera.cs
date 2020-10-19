@@ -59,8 +59,6 @@ namespace HexMap
 			Vector3 position = transform.localPosition;
 			position += direction * distance;
 			transform.localPosition = ClampPosition(position);
-
-			Debug.Log(transform.localPosition);
 		}
 
 		private Vector3 ClampPosition(Vector3 position) {

@@ -342,21 +342,19 @@ namespace HexMap
 			writer.Write((byte)urbanLevel);
 			writer.Write((byte)farmLevel);
 			writer.Write((byte)plantLevel);
-			writer.Write(specialIndex);
+			writer.Write((byte)specialIndex);
 
 			writer.Write(walled);
 
 			if (hasIncomingRiver) {
 				writer.Write((byte)(incomingRiver + 128));
-			}
-			else {
+			} else {
 				writer.Write((byte)0);
 			}
 
 			if (hasOutgoingRiver) {
 				writer.Write((byte)(outgoingRiver + 128));
-			}
-			else {
+			} else {
 				writer.Write((byte)0);
 			}
 
@@ -378,14 +376,14 @@ namespace HexMap
 			farmLevel = reader.ReadByte();
 			plantLevel = reader.ReadByte();
 			specialIndex = reader.ReadByte();
+
 			walled = reader.ReadBoolean();
 
 			byte riverData = reader.ReadByte();
 			if (riverData >= 128) {
 				hasIncomingRiver = true;
 				incomingRiver = (HexDirection)(riverData - 128);
-			}
-			else {
+			} else {
 				hasIncomingRiver = false;
 			}
 
@@ -393,8 +391,7 @@ namespace HexMap
 			if (riverData >= 128) {
 				hasOutgoingRiver = true;
 				outgoingRiver = (HexDirection)(riverData - 128);
-			}
-			else {
+			} else {
 				hasOutgoingRiver = false;
 			}
 
