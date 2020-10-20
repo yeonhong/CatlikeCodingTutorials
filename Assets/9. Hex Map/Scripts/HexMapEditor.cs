@@ -31,7 +31,7 @@ namespace HexMap
 		private HexCell previousCell;
 
 		void Awake() {
-			TerrainMaterial.DisableKeyword("GRID_ON");
+			terrainMaterial.DisableKeyword("GRID_ON");
 		}
 
 		private void Update() {
