@@ -1,5 +1,4 @@
-﻿using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace HexMap
@@ -18,6 +17,7 @@ namespace HexMap
 		private bool applyWaterLevel = false;
 		private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
 		private int brushSize;
+		private bool editMode;
 
 		private enum OptionalToggle
 		{
@@ -30,14 +30,15 @@ namespace HexMap
 		private HexDirection dragDirection;
 		private HexCell previousCell;
 
-		void Awake() {
+		private void Awake() {
 			terrainMaterial.DisableKeyword("GRID_ON");
 		}
 
 		private void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
 				HandleInput();
-			} else {
+			}
+			else {
 				previousCell = null;
 			}
 		}
@@ -49,12 +50,16 @@ namespace HexMap
 				HexCell currentCell = hexGrid.GetCell(hit.point);
 				if (previousCell && previousCell != currentCell) {
 					ValidateDrag(currentCell);
-				} else {
+				}
+				else {
 					isDrag = false;
 				}
-				EditCells(currentCell);
+				if (editMode) {
+					EditCells(currentCell);
+				}
 				previousCell = currentCell;
-			} else {
+			}
+			else {
 				previousCell = null;
 			}
 		}
@@ -152,10 +157,6 @@ namespace HexMap
 			brushSize = (int)size;
 		}
 
-		public void ShowUI(bool visible) {
-			hexGrid.ShowUI(visible);
-		}
-
 		public void SetRiverMode(int mode) {
 			riverMode = (OptionalToggle)mode;
 		}
@@ -215,6 +216,11 @@ namespace HexMap
 			else {
 				terrainMaterial.DisableKeyword("GRID_ON");
 			}
+		}
+
+		public void SetEditMode(bool toggle) {
+			editMode = toggle;
+			hexGrid.ShowUI(!toggle);
 		}
 	}
 }
