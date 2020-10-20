@@ -20,12 +20,9 @@ namespace HexMap
 
 		public int seed;
 
-		public Color[] colors;
-
 		private void Awake() {
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
-			HexMetrics.colors = colors;
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -33,7 +30,6 @@ namespace HexMap
 			if (!HexMetrics.noiseSource) {
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
-				HexMetrics.colors = colors;
 			}
 		}
 

@@ -8,7 +8,6 @@ namespace HexMap
 		public HexCoordinates coordinates;
 
 		private int terrainTypeIndex;
-		public Color Color => HexMetrics.colors[terrainTypeIndex];
 
 		public int TerrainTypeIndex {
 			get => terrainTypeIndex;
