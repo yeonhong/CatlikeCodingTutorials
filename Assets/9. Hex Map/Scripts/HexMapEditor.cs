@@ -7,6 +7,8 @@ namespace HexMap
 	public class HexMapEditor : MonoBehaviour
 	{
 		public HexGrid hexGrid;
+		public Material terrainMaterial;
+
 		private int activeTerrainTypeIndex;
 		private int activeElevation;
 		private int activeWaterLevel;
@@ -27,6 +29,10 @@ namespace HexMap
 		private bool isDrag;
 		private HexDirection dragDirection;
 		private HexCell previousCell;
+
+		void Awake() {
+			TerrainMaterial.DisableKeyword("GRID_ON");
+		}
 
 		private void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
@@ -200,6 +206,15 @@ namespace HexMap
 
 		public void SetSpecialIndex(float index) {
 			activeSpecialIndex = (int)index;
+		}
+
+		public void ShowGrid(bool visible) {
+			if (visible) {
+				terrainMaterial.EnableKeyword("GRID_ON");
+			}
+			else {
+				terrainMaterial.DisableKeyword("GRID_ON");
+			}
 		}
 	}
 }

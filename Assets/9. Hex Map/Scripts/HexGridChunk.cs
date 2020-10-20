@@ -710,7 +710,7 @@ namespace HexMap
 			types.z = rightCell.TerrainTypeIndex;
 
 			terrain.AddTriangle(begin, v3, v4);
-			terrain.AddTriangleColor(beginCell.Color, c3, c4);
+			terrain.AddTriangleColor(color1, c3, c4);
 			terrain.AddTriangleTerrainTypes(types);
 
 			for (int i = 2; i < HexMetrics.terraceSteps; i++) {
