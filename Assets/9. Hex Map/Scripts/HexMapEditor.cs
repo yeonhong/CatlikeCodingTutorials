@@ -56,6 +56,8 @@ namespace HexMap
 				}
 				if (editMode) {
 					EditCells(currentCell);
+				} else {
+					hexGrid.FindDistancesTo(currentCell);
 				}
 				previousCell = currentCell;
 			}

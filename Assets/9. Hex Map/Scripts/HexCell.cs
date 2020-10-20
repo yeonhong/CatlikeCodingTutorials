@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace HexMap
 {
@@ -297,6 +298,25 @@ namespace HexMap
 		private bool walled;
 		#endregion
 
+		#region Distance
+		private int distance;
+
+		public int Distance {
+			get {
+				return distance;
+			}
+			set {
+				distance = value;
+				UpdateDistanceLabel();
+			}
+		}
+		private void UpdateDistanceLabel() {
+			Text label = uiRect.GetComponent<Text>();
+			label.text = distance.ToString();
+		}
+		#endregion
+
+		#region Neighbor Data
 		public HexCell GetNeighbor(HexDirection direction) {
 			return neighbors[(int)direction];
 		}
@@ -332,8 +352,10 @@ namespace HexMap
 
 		private void RefreshSelfOnly() {
 			chunk.Refresh();
-		}
+		} 
+		#endregion
 
+		#region Data
 		public void Save(BinaryWriter writer) {
 			writer.Write((byte)terrainTypeIndex);
 			writer.Write((byte)elevation);
@@ -399,5 +421,6 @@ namespace HexMap
 				roads[i] = (roadFlags & (1 << i)) != 0;
 			}
 		}
+		#endregion
 	}
 }

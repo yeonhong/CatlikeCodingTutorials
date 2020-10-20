@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace HexMap
 {
@@ -68,6 +69,12 @@ namespace HexMap
 			}
 
 			return new HexCoordinates(iX, iZ);
+		}
+
+		public int DistanceTo(HexCoordinates other) {
+			return ((x < other.x ? other.x - x : x - other.x) +
+					(Y < other.Y ? other.Y - Y : Y - other.Y) +
+					(z < other.z ? other.z - z : z - other.z)) / 2;
 		}
 	} 
 }
