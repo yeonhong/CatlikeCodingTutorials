@@ -1,8 +1,6 @@
 ﻿using System.IO;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 namespace HexMap
 {
@@ -43,7 +41,7 @@ namespace HexMap
 			}
 
 			if (chunks != null) {
-				
+
 				for (int i = 0; i < chunks.Length; i++) {
 					Destroy(chunks[i].gameObject);
 				}
@@ -100,8 +98,7 @@ namespace HexMap
 					if (x > 0) {
 						cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
 					}
-				}
-				else {
+				} else {
 					cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
 					if (x < cellCountX - 1) {
 						cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
@@ -185,7 +182,8 @@ namespace HexMap
 			}
 		}
 
-		HexCellPriorityQueue searchFrontier;
+		private HexCellPriorityQueue searchFrontier;
+		private int searchFrontierPhase;
 
 		public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
 			//System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -197,26 +195,27 @@ namespace HexMap
 			//Debug.Log(sw.ElapsedMilliseconds);
 		}
 
-		void Search(HexCell fromCell, HexCell toCell, int speed) {
+		private void Search(HexCell fromCell, HexCell toCell, int speed) {
+			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
-			}
-			else {
+			} else {
 				searchFrontier.Clear();
 			}
 
 			for (int i = 0; i < cells.Length; i++) {
-				cells[i].Distance = int.MaxValue;
 				cells[i].SetLabel(null);
 				cells[i].DisableHighlight();
 			}
 			fromCell.EnableHighlight(Color.blue);
-			
 
+			fromCell.SearchPhase = searchFrontierPhase;
 			fromCell.Distance = 0;
 			searchFrontier.Enqueue(fromCell);
+
 			while (searchFrontier.Count > 0) {
 				HexCell current = searchFrontier.Dequeue();
+				current.SearchPhase += 1;
 
 				if (current == toCell) {
 					while (current != fromCell) {
@@ -232,7 +231,7 @@ namespace HexMap
 				int currentTurn = current.Distance / speed;
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 					HexCell neighbor = current.GetNeighbor(d);
-					if (neighbor == null) {
+					if (neighbor == null ||	neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
 					if (neighbor.IsUnderwater) {
@@ -260,7 +259,8 @@ namespace HexMap
 						distance = turn * speed + moveCost;
 					}
 
-					if (neighbor.Distance == int.MaxValue) {
+					if (neighbor.SearchPhase < searchFrontierPhase) {
+						neighbor.SearchPhase = searchFrontierPhase;
 						neighbor.Distance = distance;
 						neighbor.PathFrom = current;
 						neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);

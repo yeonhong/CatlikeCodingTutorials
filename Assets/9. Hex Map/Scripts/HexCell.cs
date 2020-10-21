@@ -34,6 +34,7 @@ namespace HexMap
 			}
 		}
 		public HexCell NextWithSamePriority { get; set; }
+		public int SearchPhase { get; set; }
 
 		public Vector3 Position => transform.localPosition;
 
