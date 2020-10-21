@@ -27,6 +27,12 @@ namespace HexMap
 		private bool[] roads = null;
 
 		public HexCell PathFrom { get; set; }
+		public int SearchHeuristic { get; set; }
+		public int SearchPriority {
+			get {
+				return distance + SearchHeuristic;
+			}
+		}
 
 		public Vector3 Position => transform.localPosition;
 
