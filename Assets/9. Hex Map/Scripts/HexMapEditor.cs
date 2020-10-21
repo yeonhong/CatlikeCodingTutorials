@@ -37,8 +37,7 @@ namespace HexMap
 		private void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
 				HandleInput();
-			}
-			else {
+			} else {
 				previousCell = null;
 			}
 		}
@@ -50,8 +49,7 @@ namespace HexMap
 				HexCell currentCell = hexGrid.GetCell(hit.point);
 				if (previousCell && previousCell != currentCell) {
 					ValidateDrag(currentCell);
-				}
-				else {
+				} else {
 					isDrag = false;
 				}
 				if (editMode) {
@@ -63,16 +61,14 @@ namespace HexMap
 					searchFromCell = currentCell;
 					searchFromCell.EnableHighlight(Color.blue);
 					if (searchToCell) {
-						hexGrid.FindPath(searchFromCell, searchToCell);
+						hexGrid.FindPath(searchFromCell, searchToCell, 24);
 					}
-				}
-				else if (searchFromCell && searchFromCell != currentCell) {
+				} else if (searchFromCell && searchFromCell != currentCell) {
 					searchToCell = currentCell;
-					hexGrid.FindPath(searchFromCell, searchToCell);
+					hexGrid.FindPath(searchFromCell, searchToCell, 24);
 				}
 				previousCell = currentCell;
-			}
-			else {
+			} else {
 				previousCell = null;
 			}
 		}
@@ -225,8 +221,7 @@ namespace HexMap
 		public void ShowGrid(bool visible) {
 			if (visible) {
 				terrainMaterial.EnableKeyword("GRID_ON");
-			}
-			else {
+			} else {
 				terrainMaterial.DisableKeyword("GRID_ON");
 			}
 		}
