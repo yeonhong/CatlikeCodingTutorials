@@ -28,7 +28,7 @@ namespace HexMap
 
 		private bool isDrag;
 		private HexDirection dragDirection;
-		private HexCell previousCell;
+		private HexCell previousCell, searchFromCell, searchToCell;
 
 		private void Awake() {
 			terrainMaterial.DisableKeyword("GRID_ON");
@@ -56,8 +56,19 @@ namespace HexMap
 				}
 				if (editMode) {
 					EditCells(currentCell);
-				} else {
-					hexGrid.FindDistancesTo(currentCell);
+				} else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
+					if (searchFromCell) {
+						searchFromCell.DisableHighlight();
+					}
+					searchFromCell = currentCell;
+					searchFromCell.EnableHighlight(Color.blue);
+					if (searchToCell) {
+						hexGrid.FindPath(searchFromCell, searchToCell);
+					}
+				}
+				else if (searchFromCell && searchFromCell != currentCell) {
+					searchToCell = currentCell;
+					hexGrid.FindPath(searchFromCell, searchToCell);
 				}
 				previousCell = currentCell;
 			}

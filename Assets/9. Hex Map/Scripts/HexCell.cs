@@ -26,6 +26,8 @@ namespace HexMap
 		[SerializeField]
 		private bool[] roads = null;
 
+		public HexCell PathFrom { get; set; }
+
 		public Vector3 Position => transform.localPosition;
 
 		private int elevation = int.MinValue;
