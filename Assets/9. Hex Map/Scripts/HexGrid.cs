@@ -40,6 +40,7 @@ namespace HexMap
 				return false;
 			}
 
+			ClearPath();
 			if (chunks != null) {
 
 				for (int i = 0; i < chunks.Length; i++) {
@@ -162,6 +163,8 @@ namespace HexMap
 		}
 
 		public void Load(BinaryReader reader, int header) {
+			ClearPath();
+
 			int x = 20, z = 15;
 			if (header >= 1) {
 				x = reader.ReadInt32();
@@ -184,30 +187,61 @@ namespace HexMap
 
 		private HexCellPriorityQueue searchFrontier;
 		private int searchFrontierPhase;
+		private HexCell currentPathFrom, currentPathTo;
+		private bool currentPathExists;
 
 		public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
-			//System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+			//var sw = new System.Diagnostics.Stopwatch();
 			//sw.Start();
 
-			Search(fromCell, toCell, speed);
+			ClearPath();
+			currentPathFrom = fromCell;
+			currentPathTo = toCell;
+			currentPathExists = Search(fromCell, toCell, speed);
+			ShowPath(speed);
 
 			//sw.Stop();
-			//Debug.Log(sw.ElapsedMilliseconds);
+			//Debug.Log($"{sw.ElapsedMilliseconds}");
 		}
 
-		private void Search(HexCell fromCell, HexCell toCell, int speed) {
+		private void ClearPath() {
+			if (currentPathExists) {
+				HexCell current = currentPathTo;
+				while (current != currentPathFrom) {
+					current.SetLabel(null);
+					current.DisableHighlight();
+					current = current.PathFrom;
+				}
+				current.DisableHighlight();
+				currentPathExists = false;
+			} else if (currentPathFrom) {
+				currentPathFrom.DisableHighlight();
+				currentPathTo.DisableHighlight();
+			}
+			currentPathFrom = currentPathTo = null;
+		}
+
+		private void ShowPath(int speed) {
+			if (currentPathExists) {
+				HexCell current = currentPathTo;
+				while (current != currentPathFrom) {
+					int turn = current.Distance / speed;
+					current.SetLabel(turn.ToString());
+					current.EnableHighlight(Color.white);
+					current = current.PathFrom;
+				}
+			}
+			currentPathFrom.EnableHighlight(Color.blue);
+			currentPathTo.EnableHighlight(Color.red);
+		}
+
+		private bool Search(HexCell fromCell, HexCell toCell, int speed) {
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
 			} else {
 				searchFrontier.Clear();
 			}
-
-			for (int i = 0; i < cells.Length; i++) {
-				cells[i].SetLabel(null);
-				cells[i].DisableHighlight();
-			}
-			fromCell.EnableHighlight(Color.blue);
 
 			fromCell.SearchPhase = searchFrontierPhase;
 			fromCell.Distance = 0;
@@ -218,20 +252,14 @@ namespace HexMap
 				current.SearchPhase += 1;
 
 				if (current == toCell) {
-					while (current != fromCell) {
-						int turn = current.Distance / speed;
-						current.SetLabel(turn.ToString());
-						current.EnableHighlight(Color.white);
-						current = current.PathFrom;
-					}
-					toCell.EnableHighlight(Color.red);
-					break;
+					return true;
+
 				}
 
 				int currentTurn = current.Distance / speed;
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 					HexCell neighbor = current.GetNeighbor(d);
-					if (neighbor == null ||	neighbor.SearchPhase > searchFrontierPhase) {
+					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
 					if (neighbor.IsUnderwater) {
@@ -273,6 +301,7 @@ namespace HexMap
 					}
 				}
 			}
+			return false;
 		}
 	}
 }
