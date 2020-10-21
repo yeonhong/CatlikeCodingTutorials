@@ -33,6 +33,7 @@ namespace HexMap
 				return distance + SearchHeuristic;
 			}
 		}
+		public HexCell NextWithSamePriority { get; set; }
 
 		public Vector3 Position => transform.localPosition;
 
