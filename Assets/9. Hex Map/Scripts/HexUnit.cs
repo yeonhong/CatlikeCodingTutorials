@@ -10,6 +10,9 @@ namespace HexMap
 		public HexCell Location {
 			get => location;
 			set {
+				if (location) {
+					location.Unit = null;
+				}
 				location = value;
 				value.Unit = this;
 				transform.localPosition = value.Position;
@@ -50,6 +53,10 @@ namespace HexMap
 			grid.AddUnit(
 				Instantiate(unitPrefab), grid.GetCell(coordinates), orientation
 			);
+		}
+
+		public bool IsValidDestination(HexCell cell) {
+			return !cell.IsUnderwater && !cell.Unit;
 		}
 	}
 }

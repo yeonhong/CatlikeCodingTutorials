@@ -224,10 +224,19 @@ namespace HexMap
 			units.Clear();
 		}
 
+		public HexCell GetCell(Ray ray) {
+			RaycastHit hit;
+			if (Physics.Raycast(ray, out hit)) {
+				return GetCell(hit.point);
+			}
+			return null;
+		}
+
 		private HexCellPriorityQueue searchFrontier;
 		private int searchFrontierPhase;
 		private HexCell currentPathFrom, currentPathTo;
 		private bool currentPathExists;
+		public bool HasPath => currentPathExists;
 
 		public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
 			//var sw = new System.Diagnostics.Stopwatch();
@@ -243,7 +252,7 @@ namespace HexMap
 			//Debug.Log($"{sw.ElapsedMilliseconds}");
 		}
 
-		private void ClearPath() {
+		public void ClearPath() {
 			if (currentPathExists) {
 				HexCell current = currentPathTo;
 				while (current != currentPathFrom) {
@@ -303,7 +312,7 @@ namespace HexMap
 					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
-					if (neighbor.IsUnderwater) {
+					if (neighbor.IsUnderwater || neighbor.Unit) {
 						continue;
 					}
 					HexEdgeType edgeType = current.GetEdgeType(neighbor);

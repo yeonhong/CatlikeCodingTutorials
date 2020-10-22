@@ -17,7 +17,6 @@ namespace HexMap
 		private bool applyWaterLevel = false;
 		private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
 		private int brushSize;
-		private bool editMode;
 
 		private enum OptionalToggle
 		{
@@ -28,10 +27,11 @@ namespace HexMap
 
 		private bool isDrag;
 		private HexDirection dragDirection;
-		private HexCell previousCell, searchFromCell, searchToCell;
+		private HexCell previousCell;
 
 		private void Awake() {
 			terrainMaterial.DisableKeyword("GRID_ON");
+			SetEditMode(false);
 		}
 
 		private void Update() {
@@ -62,27 +62,7 @@ namespace HexMap
 				else {
 					isDrag = false;
 				}
-				if (editMode) {
-					EditCells(currentCell);
-				}
-				else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
-					if (searchFromCell != currentCell) {
-						if (searchFromCell) {
-							searchFromCell.DisableHighlight();
-						}
-						searchFromCell = currentCell;
-						searchFromCell.EnableHighlight(Color.blue);
-						if (searchToCell) {
-							hexGrid.FindPath(searchFromCell, searchToCell, 24);
-						}
-					}
-				}
-				else if (searchFromCell && searchFromCell != currentCell) {
-					if (searchFromCell != currentCell) {
-						searchToCell = currentCell;
-						hexGrid.FindPath(searchFromCell, searchToCell, 24);
-					}
-				}
+				EditCells(currentCell);
 				previousCell = currentCell;
 			}
 			else {
@@ -105,12 +85,7 @@ namespace HexMap
 		}
 
 		private HexCell GetCellUnderCursor() {
-			Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-			RaycastHit hit;
-			if (Physics.Raycast(inputRay, out hit)) {
-				return hexGrid.GetCell(hit.point);
-			}
-			return null;
+			return hexGrid.GetCell(Camera.main.ScreenPointToRay(Input.mousePosition));
 		}
 
 		private void CreateUnit() {
@@ -268,8 +243,7 @@ namespace HexMap
 		}
 
 		public void SetEditMode(bool toggle) {
-			editMode = toggle;
-			hexGrid.ShowUI(!toggle);
+			enabled = toggle;
 		}
 	}
 }
