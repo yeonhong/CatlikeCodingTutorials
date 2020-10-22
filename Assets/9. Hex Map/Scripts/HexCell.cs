@@ -361,11 +361,17 @@ namespace HexMap
 						neighbor.chunk.Refresh();
 					}
 				}
+				if (Unit) {
+					Unit.ValidateLocation();
+				}
 			}
 		}
 
 		private void RefreshSelfOnly() {
 			chunk.Refresh();
+			if (Unit) {
+				Unit.ValidateLocation();
+			}
 		} 
 		#endregion
 
@@ -448,6 +454,10 @@ namespace HexMap
 			highlight.color = color;
 			highlight.enabled = true;
 		}
+		#endregion
+
+		#region Unit
+		public HexUnit Unit { get; set; }
 		#endregion
 	}
 }
