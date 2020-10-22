@@ -7,7 +7,6 @@ namespace HexMap
 	{
 		public HexGrid hexGrid;
 		public Material terrainMaterial;
-		public HexUnit unitPrefab;
 
 		private int activeTerrainTypeIndex;
 		private int activeElevation;
@@ -117,17 +116,14 @@ namespace HexMap
 		private void CreateUnit() {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && !cell.Unit) {
-				HexUnit unit = Instantiate(unitPrefab);
-				unit.transform.SetParent(hexGrid.transform, false);
-				unit.Location = cell;
-				unit.Orientation = Random.Range(0f, 360f);
+				hexGrid.AddUnit(Instantiate(HexUnit.unitPrefab), cell, Random.Range(0f, 360f));
 			}
 		}
 
 		private void DestroyUnit() {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && cell.Unit) {
-				cell.Unit.Die();
+				hexGrid.RemoveUnit(cell.Unit);
 			}
 		}
 

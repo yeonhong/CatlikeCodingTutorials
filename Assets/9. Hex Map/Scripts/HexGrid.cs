@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,7 @@ namespace HexMap
 		public int cellCountX = 20, cellCountZ = 15;
 		public HexCell cellPrefab;
 		private HexCell[] cells;
+		private List<HexUnit> units = new List<HexUnit>();
 
 		public Text cellLabelPrefab;
 
@@ -20,9 +22,12 @@ namespace HexMap
 
 		public int seed;
 
+		public HexUnit unitPrefab;
+
 		private void Awake() {
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
+			HexUnit.unitPrefab = unitPrefab;
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -30,6 +35,7 @@ namespace HexMap
 			if (!HexMetrics.noiseSource) {
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
+				HexUnit.unitPrefab = unitPrefab;
 			}
 		}
 
@@ -41,6 +47,7 @@ namespace HexMap
 			}
 
 			ClearPath();
+			ClearUnits();
 			if (chunks != null) {
 
 				for (int i = 0; i < chunks.Length; i++) {
@@ -99,7 +106,8 @@ namespace HexMap
 					if (x > 0) {
 						cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
 					}
-				} else {
+				}
+				else {
 					cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
 					if (x < cellCountX - 1) {
 						cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
@@ -160,10 +168,15 @@ namespace HexMap
 			for (int i = 0; i < cells.Length; i++) {
 				cells[i].Save(writer);
 			}
+			writer.Write(units.Count);
+			for (int i = 0; i < units.Count; i++) {
+				units[i].Save(writer);
+			}
 		}
 
 		public void Load(BinaryReader reader, int header) {
 			ClearPath();
+			ClearUnits();
 
 			int x = 20, z = 15;
 			if (header >= 1) {
@@ -183,6 +196,32 @@ namespace HexMap
 			for (int i = 0; i < chunks.Length; i++) {
 				chunks[i].Refresh();
 			}
+
+			if (header >= 2) {
+				int unitCount = reader.ReadInt32();
+				for (int i = 0; i < unitCount; i++) {
+					HexUnit.Load(reader, this);
+				}
+			}
+		}
+
+		public void AddUnit(HexUnit unit, HexCell location, float orientation) {
+			units.Add(unit);
+			unit.transform.SetParent(transform, false);
+			unit.Location = location;
+			unit.Orientation = orientation;
+		}
+
+		public void RemoveUnit(HexUnit unit) {
+			units.Remove(unit);
+			unit.Die();
+		}
+
+		private void ClearUnits() {
+			for (int i = 0; i < units.Count; i++) {
+				units[i].Die();
+			}
+			units.Clear();
 		}
 
 		private HexCellPriorityQueue searchFrontier;
@@ -214,7 +253,8 @@ namespace HexMap
 				}
 				current.DisableHighlight();
 				currentPathExists = false;
-			} else if (currentPathFrom) {
+			}
+			else if (currentPathFrom) {
 				currentPathFrom.DisableHighlight();
 				currentPathTo.DisableHighlight();
 			}
@@ -239,7 +279,8 @@ namespace HexMap
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
-			} else {
+			}
+			else {
 				searchFrontier.Clear();
 			}
 
@@ -273,9 +314,11 @@ namespace HexMap
 					int moveCost;
 					if (current.HasRoadThroughEdge(d)) {
 						moveCost = 1;
-					} else if (current.Walled != neighbor.Walled) {
+					}
+					else if (current.Walled != neighbor.Walled) {
 						continue;
-					} else {
+					}
+					else {
 						moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
 						moveCost += neighbor.UrbanLevel + neighbor.FarmLevel +
 							neighbor.PlantLevel;
@@ -293,7 +336,8 @@ namespace HexMap
 						neighbor.PathFrom = current;
 						neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
 						searchFrontier.Enqueue(neighbor);
-					} else if (distance < neighbor.Distance) {
+					}
+					else if (distance < neighbor.Distance) {
 						int oldPriority = neighbor.SearchPriority;
 						neighbor.Distance = distance;
 						neighbor.PathFrom = current;

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.IO;
 using UnityEngine;
 
 namespace HexMap
@@ -9,28 +9,16 @@ namespace HexMap
 		[SerializeField]
 		private int x, z;
 
-		public int X {
-			get {
-				return x;
-			}
-		}
+		public int X => x;
 
-		public int Z {
-			get {
-				return z;
-			}
-		}
+		public int Z => z;
 
 		public HexCoordinates(int x, int z) {
 			this.x = x;
 			this.z = z;
 		}
 
-		public int Y {
-			get {
-				return -X - Z;
-			}
-		}
+		public int Y => -X - Z;
 
 		public static HexCoordinates FromOffsetCoordinates(int x, int z) {
 			return new HexCoordinates(x - z / 2, z);
@@ -76,5 +64,17 @@ namespace HexMap
 					(Y < other.Y ? other.Y - Y : Y - other.Y) +
 					(z < other.z ? other.z - z : z - other.z)) / 2;
 		}
-	} 
+
+		public void Save(BinaryWriter writer) {
+			writer.Write(x);
+			writer.Write(z);
+		}
+
+		public static HexCoordinates Load(BinaryReader reader) {
+			HexCoordinates c;
+			c.x = reader.ReadInt32();
+			c.z = reader.ReadInt32();
+			return c;
+		}
+	}
 }

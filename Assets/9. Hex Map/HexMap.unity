@@ -5474,6 +5474,8 @@ MonoBehaviour:
   chunkPrefab: {fileID: 3134508886542257025, guid: 3d65e2578b165e245826e8dc998d1361,
     type: 3}
   seed: 1234
+  unitPrefab: {fileID: 325650941335232685, guid: 41c38c3eb0674f245957af8d4bbef6b4,
+    type: 3}
 --- !u!4 &807912070
 Transform:
   m_ObjectHideFlags: 0
