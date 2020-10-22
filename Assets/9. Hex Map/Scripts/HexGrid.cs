@@ -24,10 +24,13 @@ namespace HexMap
 
 		public HexUnit unitPrefab;
 
+		HexCellShaderData cellShaderData;
+
 		private void Awake() {
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
 			HexUnit.unitPrefab = unitPrefab;
+			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -59,6 +62,7 @@ namespace HexMap
 			cellCountZ = z;
 			chunkCountX = cellCountX / HexMetrics.chunkSizeX;
 			chunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
+			cellShaderData.Initialize(cellCountX, cellCountZ);
 			CreateChunks();
 			CreateCells();
 
@@ -95,6 +99,8 @@ namespace HexMap
 			HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
 			cell.transform.localPosition = position;
 			cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+			cell.Index = i;
+			cell.ShaderData = cellShaderData;
 
 			// link neighbor
 			if (x > 0) {

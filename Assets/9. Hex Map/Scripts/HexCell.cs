@@ -7,6 +7,7 @@ namespace HexMap
 	public class HexCell : MonoBehaviour
 	{
 		public HexCoordinates coordinates;
+		public int Index { get; set; }
 
 		private int terrainTypeIndex;
 
@@ -15,7 +16,7 @@ namespace HexMap
 			set {
 				if (terrainTypeIndex != value) {
 					terrainTypeIndex = value;
-					Refresh();
+					ShaderData.RefreshTerrain(this);
 				}
 			}
 		}
@@ -76,6 +77,7 @@ namespace HexMap
 
 		public RectTransform uiRect;
 		public HexGridChunk chunk;
+		public HexCellShaderData ShaderData { get; set; }
 
 		#region Rivers
 		private bool hasIncomingRiver, hasOutgoingRiver;
@@ -410,6 +412,7 @@ namespace HexMap
 
 		public void Load(BinaryReader reader) {
 			terrainTypeIndex = reader.ReadByte();
+			ShaderData.RefreshTerrain(this);
 			elevation = reader.ReadByte();
 			RefreshPosition();
 			waterLevel = reader.ReadByte();
