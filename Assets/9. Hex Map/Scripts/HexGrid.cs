@@ -106,8 +106,7 @@ namespace HexMap
 					if (x > 0) {
 						cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
 					}
-				}
-				else {
+				} else {
 					cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
 					if (x < cellCountX - 1) {
 						cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
@@ -262,8 +261,7 @@ namespace HexMap
 				}
 				current.DisableHighlight();
 				currentPathExists = false;
-			}
-			else if (currentPathFrom) {
+			} else if (currentPathFrom) {
 				currentPathFrom.DisableHighlight();
 				currentPathTo.DisableHighlight();
 			}
@@ -274,7 +272,7 @@ namespace HexMap
 			if (currentPathExists) {
 				HexCell current = currentPathTo;
 				while (current != currentPathFrom) {
-					int turn = current.Distance / speed;
+					int turn = (current.Distance - 1) / speed;
 					current.SetLabel(turn.ToString());
 					current.EnableHighlight(Color.white);
 					current = current.PathFrom;
@@ -284,12 +282,24 @@ namespace HexMap
 			currentPathTo.EnableHighlight(Color.red);
 		}
 
+		public List<HexCell> GetPath() {
+			if (!currentPathExists) {
+				return null;
+			}
+			List<HexCell> path = ListPool<HexCell>.Get();
+			for (HexCell c = currentPathTo; c != currentPathFrom; c = c.PathFrom) {
+				path.Add(c);
+			}
+			path.Add(currentPathFrom);
+			path.Reverse();
+			return path;
+		}
+
 		private bool Search(HexCell fromCell, HexCell toCell, int speed) {
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
-			}
-			else {
+			} else {
 				searchFrontier.Clear();
 			}
 
@@ -306,7 +316,7 @@ namespace HexMap
 
 				}
 
-				int currentTurn = current.Distance / speed;
+				int currentTurn = (current.Distance - 1) / speed;
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 					HexCell neighbor = current.GetNeighbor(d);
 					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
@@ -323,18 +333,16 @@ namespace HexMap
 					int moveCost;
 					if (current.HasRoadThroughEdge(d)) {
 						moveCost = 1;
-					}
-					else if (current.Walled != neighbor.Walled) {
+					} else if (current.Walled != neighbor.Walled) {
 						continue;
-					}
-					else {
+					} else {
 						moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
 						moveCost += neighbor.UrbanLevel + neighbor.FarmLevel +
 							neighbor.PlantLevel;
 					}
 
 					int distance = current.Distance + moveCost;
-					int turn = distance / speed;
+					int turn = (distance - 1) / speed;
 					if (turn > currentTurn) {
 						distance = turn * speed + moveCost;
 					}
@@ -345,8 +353,7 @@ namespace HexMap
 						neighbor.PathFrom = current;
 						neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
 						searchFrontier.Enqueue(neighbor);
-					}
-					else if (distance < neighbor.Distance) {
+					} else if (distance < neighbor.Distance) {
 						int oldPriority = neighbor.SearchPriority;
 						neighbor.Distance = distance;
 						neighbor.PathFrom = current;

@@ -17,7 +17,6 @@ namespace HexMap
 				else if (selectedUnit) {
 					if (Input.GetMouseButtonDown(1)) {
 						DoMove();
-						selectedUnit = null;
 					}
 					else {
 						DoPathfinding();
@@ -62,7 +61,7 @@ namespace HexMap
 
 		private void DoMove() {
 			if (grid.HasPath) {
-				selectedUnit.Location = currentCell;
+				selectedUnit.Travel(grid.GetPath());
 				grid.ClearPath();
 			}
 		}
