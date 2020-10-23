@@ -4,8 +4,8 @@ namespace HexMap
 {
 	public class HexCellShaderData : MonoBehaviour
 	{
-		Texture2D cellTexture;
-		Color32[] cellTextureData;
+		private Texture2D cellTexture;
+		private Color32[] cellTextureData;
 
 		public void Initialize(int x, int z) {
 			if (cellTexture) {
@@ -42,10 +42,10 @@ namespace HexMap
 			enabled = true;
 		}
 
-		void LateUpdate() {
+		private void LateUpdate() {
 			cellTexture.SetPixels32(cellTextureData);
 			cellTexture.Apply();
 			enabled = false;
 		}
-	} 
+	}
 }
