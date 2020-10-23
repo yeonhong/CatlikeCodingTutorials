@@ -15,6 +15,7 @@
 		#pragma surface surf Standard fullforwardshadows vertex:vert
 		#pragma target 3.5
 		#pragma multi_compile _ GRID_ON
+		#pragma multi_compile _ HEX_MAP_EDIT_MODE
 
 		#include "HexCellData.cginc"
 
