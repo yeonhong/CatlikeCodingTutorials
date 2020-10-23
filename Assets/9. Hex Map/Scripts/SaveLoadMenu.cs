@@ -7,6 +7,8 @@ namespace HexMap
 {
 	public class SaveLoadMenu : MonoBehaviour
 	{
+		const int mapFileVersion = 3;
+
 		public Text menuLabel, actionButtonLabel;
 		public InputField nameInput;
 		public RectTransform listContent;
@@ -58,7 +60,7 @@ namespace HexMap
 
 		private void Save(string path) {
 			using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
-				writer.Write(2);
+				writer.Write(mapFileVersion);
 				hexGrid.Save(writer);
 			}
 		}
@@ -71,7 +73,7 @@ namespace HexMap
 
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(path))) {
 				int header = reader.ReadInt32();
-				if (header <= 2) {
+				if (header <= mapFileVersion) {
 					hexGrid.Load(reader, header);
 					HexMapCamera.ValidatePosition();
 				}
