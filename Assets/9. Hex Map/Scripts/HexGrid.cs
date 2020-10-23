@@ -23,8 +23,7 @@ namespace HexMap
 		public int seed;
 
 		public HexUnit unitPrefab;
-
-		HexCellShaderData cellShaderData;
+		private HexCellShaderData cellShaderData;
 
 		private void Awake() {
 			HexMetrics.noiseSource = noiseSource;
@@ -112,7 +111,8 @@ namespace HexMap
 					if (x > 0) {
 						cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
 					}
-				} else {
+				}
+				else {
 					cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
 					if (x < cellCountX - 1) {
 						cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
@@ -212,6 +212,7 @@ namespace HexMap
 
 		public void AddUnit(HexUnit unit, HexCell location, float orientation) {
 			units.Add(unit);
+			unit.Grid = this;
 			unit.transform.SetParent(transform, false);
 			unit.Location = location;
 			unit.Orientation = orientation;
@@ -267,7 +268,8 @@ namespace HexMap
 				}
 				current.DisableHighlight();
 				currentPathExists = false;
-			} else if (currentPathFrom) {
+			}
+			else if (currentPathFrom) {
 				currentPathFrom.DisableHighlight();
 				currentPathTo.DisableHighlight();
 			}
@@ -305,7 +307,8 @@ namespace HexMap
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
-			} else {
+			}
+			else {
 				searchFrontier.Clear();
 			}
 
@@ -339,9 +342,11 @@ namespace HexMap
 					int moveCost;
 					if (current.HasRoadThroughEdge(d)) {
 						moveCost = 1;
-					} else if (current.Walled != neighbor.Walled) {
+					}
+					else if (current.Walled != neighbor.Walled) {
 						continue;
-					} else {
+					}
+					else {
 						moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
 						moveCost += neighbor.UrbanLevel + neighbor.FarmLevel +
 							neighbor.PlantLevel;
@@ -359,7 +364,8 @@ namespace HexMap
 						neighbor.PathFrom = current;
 						neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
 						searchFrontier.Enqueue(neighbor);
-					} else if (distance < neighbor.Distance) {
+					}
+					else if (distance < neighbor.Distance) {
 						int oldPriority = neighbor.SearchPriority;
 						neighbor.Distance = distance;
 						neighbor.PathFrom = current;
@@ -368,6 +374,71 @@ namespace HexMap
 				}
 			}
 			return false;
+		}
+
+		public void IncreaseVisibility(HexCell fromCell, int range) {
+			List<HexCell> cells = GetVisibleCells(fromCell, range);
+			for (int i = 0; i < cells.Count; i++) {
+				cells[i].IncreaseVisibility();
+			}
+			ListPool<HexCell>.Add(cells);
+		}
+
+		public void DecreaseVisibility(HexCell fromCell, int range) {
+			List<HexCell> cells = GetVisibleCells(fromCell, range);
+			for (int i = 0; i < cells.Count; i++) {
+				cells[i].DecreaseVisibility();
+			}
+			ListPool<HexCell>.Add(cells);
+		}
+
+		private List<HexCell> GetVisibleCells(HexCell fromCell, int range) {
+			List<HexCell> visibleCells = ListPool<HexCell>.Get();
+
+			searchFrontierPhase += 2;
+			if (searchFrontier == null) {
+				searchFrontier = new HexCellPriorityQueue();
+			}
+			else {
+				searchFrontier.Clear();
+			}
+
+			fromCell.SearchPhase = searchFrontierPhase;
+			fromCell.Distance = 0;
+			searchFrontier.Enqueue(fromCell);
+			while (searchFrontier.Count > 0) {
+				HexCell current = searchFrontier.Dequeue();
+				current.SearchPhase += 1;
+				visibleCells.Add(current);
+
+				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+					HexCell neighbor = current.GetNeighbor(d);
+					if (
+						neighbor == null ||
+						neighbor.SearchPhase > searchFrontierPhase
+					) {
+						continue;
+					}
+
+					int distance = current.Distance + 1;
+					if (distance > range) {
+						continue;
+					}
+
+					if (neighbor.SearchPhase < searchFrontierPhase) {
+						neighbor.SearchPhase = searchFrontierPhase;
+						neighbor.Distance = distance;
+						neighbor.SearchHeuristic = 0;
+						searchFrontier.Enqueue(neighbor);
+					}
+					else if (distance < neighbor.Distance) {
+						int oldPriority = neighbor.SearchPriority;
+						neighbor.Distance = distance;
+						searchFrontier.Change(neighbor, oldPriority);
+					}
+				}
+			}
+			return visibleCells;
 		}
 	}
 }

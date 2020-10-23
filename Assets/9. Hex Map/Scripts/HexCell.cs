@@ -29,11 +29,7 @@ namespace HexMap
 
 		public HexCell PathFrom { get; set; }
 		public int SearchHeuristic { get; set; }
-		public int SearchPriority {
-			get {
-				return distance + SearchHeuristic;
-			}
-		}
+		public int SearchPriority => distance + SearchHeuristic;
 		public HexCell NextWithSamePriority { get; set; }
 		public int SearchPhase { get; set; }
 
@@ -314,13 +310,8 @@ namespace HexMap
 		private int distance;
 
 		public int Distance {
-			get {
-				return distance;
-			}
-			set {
-				distance = value;
-				//UpdateDistanceLabel();
-			}
+			get => distance;
+			set => distance = value;//UpdateDistanceLabel();
 		}
 		public void SetLabel(string text) {
 			UnityEngine.UI.Text label = uiRect.GetComponent<Text>();
@@ -374,7 +365,7 @@ namespace HexMap
 			if (Unit) {
 				Unit.ValidateLocation();
 			}
-		} 
+		}
 		#endregion
 
 		#region Data
@@ -391,13 +382,15 @@ namespace HexMap
 
 			if (hasIncomingRiver) {
 				writer.Write((byte)(incomingRiver + 128));
-			} else {
+			}
+			else {
 				writer.Write((byte)0);
 			}
 
 			if (hasOutgoingRiver) {
 				writer.Write((byte)(outgoingRiver + 128));
-			} else {
+			}
+			else {
 				writer.Write((byte)0);
 			}
 
@@ -427,7 +420,8 @@ namespace HexMap
 			if (riverData >= 128) {
 				hasIncomingRiver = true;
 				incomingRiver = (HexDirection)(riverData - 128);
-			} else {
+			}
+			else {
 				hasIncomingRiver = false;
 			}
 
@@ -435,7 +429,8 @@ namespace HexMap
 			if (riverData >= 128) {
 				hasOutgoingRiver = true;
 				outgoingRiver = (HexDirection)(riverData - 128);
-			} else {
+			}
+			else {
 				hasOutgoingRiver = false;
 			}
 
@@ -461,6 +456,26 @@ namespace HexMap
 
 		#region Unit
 		public HexUnit Unit { get; set; }
+		#endregion
+
+		#region Visibility
+		public bool IsVisible => visibility > 0;
+
+		private int visibility;
+
+		public void IncreaseVisibility() {
+			visibility += 1;
+			if (visibility == 1) {
+				ShaderData.RefreshVisibility(this);
+			}
+		}
+
+		public void DecreaseVisibility() {
+			visibility -= 1;
+			if (visibility == 0) {
+				ShaderData.RefreshVisibility(this);
+			}
+		}
 		#endregion
 	}
 }
