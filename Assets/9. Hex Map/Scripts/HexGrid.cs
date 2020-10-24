@@ -244,18 +244,12 @@ namespace HexMap
 		private bool currentPathExists;
 		public bool HasPath => currentPathExists;
 
-		public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
-			//var sw = new System.Diagnostics.Stopwatch();
-			//sw.Start();
-
+		public void FindPath(HexCell fromCell, HexCell toCell, HexUnit unit) {
 			ClearPath();
 			currentPathFrom = fromCell;
 			currentPathTo = toCell;
-			currentPathExists = Search(fromCell, toCell, speed);
-			ShowPath(speed);
-
-			//sw.Stop();
-			//Debug.Log($"{sw.ElapsedMilliseconds}");
+			currentPathExists = Search(fromCell, toCell, unit);
+			ShowPath(unit.Speed);
 		}
 
 		public void ClearPath() {
@@ -303,7 +297,8 @@ namespace HexMap
 			return path;
 		}
 
-		private bool Search(HexCell fromCell, HexCell toCell, int speed) {
+		private bool Search(HexCell fromCell, HexCell toCell, HexUnit unit) {
+			int speed = unit.Speed;
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
@@ -331,25 +326,13 @@ namespace HexMap
 					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
-					if (neighbor.IsUnderwater || neighbor.Unit) {
-						continue;
-					}
-					HexEdgeType edgeType = current.GetEdgeType(neighbor);
-					if (edgeType == HexEdgeType.Cliff) {
-						continue;
-					}
 
-					int moveCost;
-					if (current.HasRoadThroughEdge(d)) {
-						moveCost = 1;
-					}
-					else if (current.Walled != neighbor.Walled) {
+					if (!unit.IsValidDestination(neighbor)) {
 						continue;
 					}
-					else {
-						moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
-						moveCost += neighbor.UrbanLevel + neighbor.FarmLevel +
-							neighbor.PlantLevel;
+					int moveCost = unit.GetMoveCost(current, neighbor, d);
+					if (moveCost < 0) {
+						continue;
 					}
 
 					int distance = current.Distance + moveCost;
