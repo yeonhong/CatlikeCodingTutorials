@@ -10,7 +10,7 @@
 			LOD 200
 
 			CGPROGRAM
-			#pragma surface surf Standard alpha vertex:vert
+			#pragma surface surf StandardSpecular alpha vertex:vert
 			#pragma target 3.0
 			#pragma multi_compile _ HEX_MAP_EDIT_MODE
 
@@ -22,11 +22,11 @@
 			struct Input {
 				float2 uv_MainTex;
 				float3 worldPos;
-				float visibility;
+				float2 visibility;
 			};
 
 			half _Glossiness;
-			half _Metallic;
+			fixed3 _Specular;
 			fixed4 _Color;
 
 			void vert(inout appdata_full v, out Input data) {
@@ -36,19 +36,23 @@
 				float4 cell1 = GetCellData(v, 1);
 				float4 cell2 = GetCellData(v, 2);
 
-				data.visibility =
+				data.visibility.x =
 					cell0.x * v.color.x + cell1.x * v.color.y + cell2.x * v.color.z;
-				data.visibility = lerp(0.25, 1, data.visibility);
+				data.visibility.x = lerp(0.25, 1, data.visibility.x);
+				data.visibility.y =
+					cell0.y * v.color.x + cell1.y * v.color.y + cell2.y * v.color.z;
 			}
 
-			void surf(Input IN, inout SurfaceOutputStandard o) {
+			void surf(Input IN, inout SurfaceOutputStandardSpecular o) {
 				float waves = Waves(IN.worldPos.xz, _MainTex);
 
 				fixed4 c = saturate(_Color + waves);
-				o.Albedo = c.rgb * IN.visibility;
-				o.Metallic = _Metallic;
+				float explored = IN.visibility.y;
+				o.Albedo = c.rgb * IN.visibility.x;
+				o.Specular = _Specular * explored;
 				o.Smoothness = _Glossiness;
-				o.Alpha = c.a;
+				o.Occlusion = explored;
+				o.Alpha = c.a * explored;
 			}
 			ENDCG
 		}
