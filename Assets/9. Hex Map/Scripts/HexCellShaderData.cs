@@ -5,10 +5,14 @@ namespace HexMap
 {
 	public class HexCellShaderData : MonoBehaviour
 	{
+		public HexGrid Grid { get; set; }
+
 		private Texture2D cellTexture;
 		private Color32[] cellTextureData;
 
 		public bool ImmediateMode { get; set; }
+
+		private bool needsVisibilityReset;
 
 		private List<HexCell> transitioningCells = new List<HexCell>();
 		private const float transitionSpeed = 255f;
@@ -58,6 +62,11 @@ namespace HexMap
 		}
 
 		private void LateUpdate() {
+			if (needsVisibilityReset) {
+				needsVisibilityReset = false;
+				Grid.ResetVisibility();
+			}
+
 			int delta = (int)(Time.deltaTime * transitionSpeed);
 			if (delta == 0) {
 				delta = 1;
@@ -100,6 +109,11 @@ namespace HexMap
 			}
 			cellTextureData[index] = data;
 			return stillUpdating;
+		}
+
+		public void ViewElevationChanged() {
+			needsVisibilityReset = true;
+			enabled = true;
 		}
 	}
 }

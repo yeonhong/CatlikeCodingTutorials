@@ -13,6 +13,12 @@ namespace HexMap
 			}
 		}
 
+		public int VisionRange {
+			get {
+				return 3;
+			}
+		}
+
 		private const float travelSpeed = 4f;
 		private const float rotationSpeed = 180f;
 		const int visionRange = 3;

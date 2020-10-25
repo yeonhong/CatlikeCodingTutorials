@@ -30,6 +30,7 @@ namespace HexMap
 			HexMetrics.InitializeHashGrid(seed);
 			HexUnit.unitPrefab = unitPrefab;
 			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
+			cellShaderData.Grid = this;
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -38,6 +39,7 @@ namespace HexMap
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
 				HexUnit.unitPrefab = unitPrefab;
+				ResetVisibility();
 			}
 		}
 
@@ -389,9 +391,12 @@ namespace HexMap
 				searchFrontier.Clear();
 			}
 
+			range += fromCell.ViewElevation;
 			fromCell.SearchPhase = searchFrontierPhase;
 			fromCell.Distance = 0;
 			searchFrontier.Enqueue(fromCell);
+			HexCoordinates fromCoordinates = fromCell.coordinates;
+
 			while (searchFrontier.Count > 0) {
 				HexCell current = searchFrontier.Dequeue();
 				current.SearchPhase += 1;
@@ -407,7 +412,9 @@ namespace HexMap
 					}
 
 					int distance = current.Distance + 1;
-					if (distance > range) {
+					if (distance + neighbor.ViewElevation > range ||
+						distance > fromCoordinates.DistanceTo(neighbor.coordinates)
+					) {
 						continue;
 					}
 
@@ -425,6 +432,17 @@ namespace HexMap
 				}
 			}
 			return visibleCells;
+		}
+
+		public void ResetVisibility() {
+			for (int i = 0; i < cells.Length; i++) {
+				cells[i].ResetVisibility();
+			}
+
+			for (int i = 0; i < units.Count; i++) {
+				HexUnit unit = units[i];
+				IncreaseVisibility(unit.Location, unit.VisionRange);
+			}
 		}
 	}
 }

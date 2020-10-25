@@ -44,7 +44,11 @@ namespace HexMap
 					return;
 				}
 
+				int originalViewElevation = ViewElevation;
 				elevation = value;
+				if (ViewElevation != originalViewElevation) {
+					ShaderData.ViewElevationChanged();
+				}
 				RefreshPosition();
 				ValidateRivers();
 
@@ -56,6 +60,12 @@ namespace HexMap
 				}
 
 				Refresh();
+			}
+		}
+
+		public int ViewElevation {
+			get {
+				return elevation >= waterLevel ? elevation : waterLevel;
 			}
 		}
 
@@ -231,7 +241,11 @@ namespace HexMap
 				if (waterLevel == value) {
 					return;
 				}
+				int originalViewElevation = ViewElevation;
 				waterLevel = value;
+				if (ViewElevation != originalViewElevation) {
+					ShaderData.ViewElevationChanged();
+				}
 				ValidateRivers();
 				Refresh();
 			}
@@ -479,6 +493,13 @@ namespace HexMap
 		public void DecreaseVisibility() {
 			visibility -= 1;
 			if (visibility == 0) {
+				ShaderData.RefreshVisibility(this);
+			}
+		}
+
+		public void ResetVisibility() {
+			if (visibility > 0) {
+				visibility = 0;
 				ShaderData.RefreshVisibility(this);
 			}
 		}
