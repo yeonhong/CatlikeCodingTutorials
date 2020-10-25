@@ -8,7 +8,6 @@ namespace HexMap
 	{
 		public HexCoordinates coordinates;
 		public int Index { get; set; }
-		public bool IsExplored { get; private set; }
 
 		private int terrainTypeIndex;
 
@@ -68,6 +67,8 @@ namespace HexMap
 				return elevation >= waterLevel ? elevation : waterLevel;
 			}
 		}
+
+		
 
 		private void RefreshPosition() {
 			Vector3 position = transform.localPosition;
@@ -397,15 +398,13 @@ namespace HexMap
 
 			if (hasIncomingRiver) {
 				writer.Write((byte)(incomingRiver + 128));
-			}
-			else {
+			} else {
 				writer.Write((byte)0);
 			}
 
 			if (hasOutgoingRiver) {
 				writer.Write((byte)(outgoingRiver + 128));
-			}
-			else {
+			} else {
 				writer.Write((byte)0);
 			}
 
@@ -436,8 +435,7 @@ namespace HexMap
 			if (riverData >= 128) {
 				hasIncomingRiver = true;
 				incomingRiver = (HexDirection)(riverData - 128);
-			}
-			else {
+			} else {
 				hasIncomingRiver = false;
 			}
 
@@ -445,8 +443,7 @@ namespace HexMap
 			if (riverData >= 128) {
 				hasOutgoingRiver = true;
 				outgoingRiver = (HexDirection)(riverData - 128);
-			}
-			else {
+			} else {
 				hasOutgoingRiver = false;
 			}
 
@@ -478,7 +475,24 @@ namespace HexMap
 		#endregion
 
 		#region Visibility
-		public bool IsVisible => visibility > 0;
+		public bool Explorable { get; set; }
+
+		public bool IsExplored {
+			get {
+				return explored && Explorable;
+			}
+			private set {
+				explored = value;
+			}
+		}
+
+		bool explored;
+
+		public bool IsVisible {
+			get {
+				return visibility > 0 && Explorable;
+			}
+		}
 
 		private int visibility;
 

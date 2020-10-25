@@ -102,6 +102,7 @@ namespace HexMap
 			cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 			cell.Index = i;
 			cell.ShaderData = cellShaderData;
+			cell.Explorable = x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
 
 			// link neighbor
 			if (x > 0) {
@@ -406,7 +407,8 @@ namespace HexMap
 					HexCell neighbor = current.GetNeighbor(d);
 					if (
 						neighbor == null ||
-						neighbor.SearchPhase > searchFrontierPhase
+						neighbor.SearchPhase > searchFrontierPhase ||
+						!neighbor.Explorable
 					) {
 						continue;
 					}
