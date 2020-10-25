@@ -194,7 +194,8 @@ namespace HexMap
 					return;
 				}
 			}
-
+			bool originalImmediateMode = cellShaderData.ImmediateMode;
+			cellShaderData.ImmediateMode = true;
 			for (int i = 0; i < cells.Length; i++) {
 				cells[i].Load(reader, header);
 			}
@@ -208,6 +209,8 @@ namespace HexMap
 					HexUnit.Load(reader, this);
 				}
 			}
+
+			cellShaderData.ImmediateMode = originalImmediateMode;
 		}
 
 		public void AddUnit(HexUnit unit, HexCell location, float orientation) {
