@@ -13,6 +13,7 @@ namespace HexMap
 		[Range(20, 200)] public int chunkSizeMin = 30;
 		[Range(20, 200)] public int chunkSizeMax = 100;
 		[Range(5, 95)] public int landPercentage = 50;
+		[Range(1, 5)] public int waterLevel = 3;
 
 		public void GenerateMap(int x, int z) {
 			cellCount = x * z;
@@ -21,7 +22,11 @@ namespace HexMap
 				searchFrontier = new HexCellPriorityQueue();
 			}
 
+			for (int i = 0; i < cellCount; i++) {
+				grid.GetCell(i).WaterLevel = waterLevel;
+			}
 			CreateLand();
+			SetTerrainType();
 
 			for (int i = 0; i < cellCount; i++) {
 				grid.GetCell(i).SearchPhase = 0;
@@ -49,11 +54,9 @@ namespace HexMap
 			int size = 0;
 			while (size < chunkSize && searchFrontier.Count > 0) {
 				HexCell current = searchFrontier.Dequeue();
-				if (current.TerrainTypeIndex == 0) {
-					current.TerrainTypeIndex = 1;
-					if (--budget == 0) {
-						break;
-					}
+				current.Elevation += 1;
+				if (current.Elevation == waterLevel && --budget == 0) {
+					break;
 				}
 				size += 1;
 
@@ -74,6 +77,15 @@ namespace HexMap
 
 		private HexCell GetRandomCell() {
 			return grid.GetCell(Random.Range(0, cellCount));
+		}
+
+		private void SetTerrainType() {
+			for (int i = 0; i < cellCount; i++) {
+				HexCell cell = grid.GetCell(i);
+				if (!cell.IsUnderwater) {
+					cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
+				}
+			}
 		}
 	}
 }
