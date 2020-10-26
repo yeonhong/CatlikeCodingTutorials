@@ -244,6 +244,14 @@ namespace HexMap
 			return null;
 		}
 
+		public HexCell GetCell(int xOffset, int zOffset) {
+			return cells[xOffset + zOffset * cellCountX];
+		}
+
+		public HexCell GetCell(int cellIndex) {
+			return cells[cellIndex];
+		}
+
 		private HexCellPriorityQueue searchFrontier;
 		private int searchFrontierPhase;
 		private HexCell currentPathFrom, currentPathTo;
