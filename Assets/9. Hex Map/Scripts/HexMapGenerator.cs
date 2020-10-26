@@ -9,6 +9,9 @@ namespace HexMap
 		private HexCellPriorityQueue searchFrontier;
 		private int searchFrontierPhase;
 
+		public bool useFixedSeed;
+		public int seed;
+
 		[Range(0f, 0.5f)] public float jitterProbability = 0.25f;
 		[Range(20, 200)] public int chunkSizeMin = 30;
 		[Range(20, 200)] public int chunkSizeMax = 100;
@@ -20,21 +23,32 @@ namespace HexMap
 		[Range(6, 10)] public int elevationMaximum = 8;
 
 		public void GenerateMap(int x, int z) {
-			cellCount = x * z;
-			grid.CreateMap(x, z);
-			if (searchFrontier == null) {
-				searchFrontier = new HexCellPriorityQueue();
+			Random.State originalRandomState = Random.state;
+			if (!useFixedSeed) {
+				seed = Random.Range(0, int.MaxValue);
+				seed ^= (int)System.DateTime.Now.Ticks;
+				seed ^= (int)Time.time;
+				seed &= int.MaxValue;
 			}
+			Random.InitState(seed);
+			{
+				cellCount = x * z;
+				grid.CreateMap(x, z);
+				if (searchFrontier == null) {
+					searchFrontier = new HexCellPriorityQueue();
+				}
 
-			for (int i = 0; i < cellCount; i++) {
-				grid.GetCell(i).WaterLevel = waterLevel;
-			}
-			CreateLand();
-			SetTerrainType();
+				for (int i = 0; i < cellCount; i++) {
+					grid.GetCell(i).WaterLevel = waterLevel;
+				}
+				CreateLand();
+				SetTerrainType();
 
-			for (int i = 0; i < cellCount; i++) {
-				grid.GetCell(i).SearchPhase = 0;
+				for (int i = 0; i < cellCount; i++) {
+					grid.GetCell(i).SearchPhase = 0;
+				}
 			}
+			Random.state = originalRandomState;
 		}
 
 		private void CreateLand() {
