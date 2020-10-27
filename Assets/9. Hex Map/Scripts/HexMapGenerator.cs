@@ -15,12 +15,16 @@ namespace HexMap
 		[Range(0f, 0.5f)] public float jitterProbability = 0.25f;
 		[Range(20, 200)] public int chunkSizeMin = 30;
 		[Range(20, 200)] public int chunkSizeMax = 100;
-		[Range(0f, 1f)]	public float highRiseProbability = 0.25f;
+		[Range(0f, 1f)] public float highRiseProbability = 0.25f;
 		[Range(0f, 0.4f)] public float sinkProbability = 0.2f;
 		[Range(5, 95)] public int landPercentage = 50;
 		[Range(1, 5)] public int waterLevel = 3;
 		[Range(-4, 0)] public int elevationMinimum = -2;
 		[Range(6, 10)] public int elevationMaximum = 8;
+		[Range(0, 10)] public int mapBorderX = 5;
+		[Range(0, 10)] public int mapBorderZ = 5;
+
+		private int xMin, xMax, zMin, zMax;
 
 		public void GenerateMap(int x, int z) {
 			Random.State originalRandomState = Random.state;
@@ -41,6 +45,10 @@ namespace HexMap
 				for (int i = 0; i < cellCount; i++) {
 					grid.GetCell(i).WaterLevel = waterLevel;
 				}
+				xMin = mapBorderX;
+				xMax = x - mapBorderX;
+				zMin = mapBorderZ;
+				zMax = z - mapBorderZ;
 				CreateLand();
 				SetTerrainType();
 
@@ -53,14 +61,16 @@ namespace HexMap
 
 		private void CreateLand() {
 			int landBudget = Mathf.RoundToInt(cellCount * landPercentage * 0.01f);
-			while (landBudget > 0) {
+			for (int guard = 0; landBudget > 0 && guard < 10000; guard++) {
 				int chunkSize = Random.Range(chunkSizeMin, chunkSizeMax - 1);
 				if (Random.value < sinkProbability) {
 					landBudget = SinkTerrain(chunkSize, landBudget);
-				}
-				else {
+				} else {
 					landBudget = RaiseTerrain(chunkSize, landBudget);
 				}
+			}
+			if (landBudget > 0) {
+				Debug.LogWarning("Failed to use up " + landBudget + " land budget.");
 			}
 		}
 
@@ -153,7 +163,7 @@ namespace HexMap
 		}
 
 		private HexCell GetRandomCell() {
-			return grid.GetCell(Random.Range(0, cellCount));
+			return grid.GetCell(Random.Range(xMin, xMax), Random.Range(zMin, zMax));
 		}
 
 		private void SetTerrainType() {
