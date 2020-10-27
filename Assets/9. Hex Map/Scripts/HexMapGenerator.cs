@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace HexMap
 {
@@ -26,13 +27,14 @@ namespace HexMap
 		[Range(0, 10)] public int mapBorderZ = 5;
 		[Range(0, 10)] public int regionBorder = 5;
 		[Range(1, 4)] public int regionCount = 1;
+		[Range(0, 100)] public int erosionPercentage = 50;
 
-		struct MapRegion
+		private struct MapRegion
 		{
 			public int xMin, xMax, zMin, zMax;
 		}
 
-		List<MapRegion> regions;
+		private List<MapRegion> regions;
 
 		public void GenerateMap(int x, int z) {
 			Random.State originalRandomState = Random.state;
@@ -55,6 +57,7 @@ namespace HexMap
 				}
 				CreateRegions();
 				CreateLand();
+				ErodeLand();
 				SetTerrainType();
 
 				for (int i = 0; i < cellCount; i++) {
@@ -64,7 +67,7 @@ namespace HexMap
 			Random.state = originalRandomState;
 		}
 
-		void CreateRegions() {
+		private void CreateRegions() {
 			if (regions == null) {
 				regions = new List<MapRegion>();
 			} else {
@@ -135,7 +138,7 @@ namespace HexMap
 
 		private void CreateLand() {
 			int landBudget = Mathf.RoundToInt(cellCount * landPercentage * 0.01f);
-			for (int guard = 0; guard < 10000; guard++)	{
+			for (int guard = 0; guard < 10000; guard++) {
 				bool sink = Random.value < sinkProbability;
 				for (int i = 0; i < regions.Count; i++) {
 					MapRegion region = regions[i];
@@ -153,6 +156,84 @@ namespace HexMap
 			if (landBudget > 0) {
 				Debug.LogWarning("Failed to use up " + landBudget + " land budget.");
 			}
+		}
+
+		private bool IsErodible(HexCell cell) {
+			int erodibleElevation = cell.Elevation - 2;
+			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+				HexCell neighbor = cell.GetNeighbor(d);
+				if (neighbor && neighbor.Elevation <= erodibleElevation) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		HexCell GetErosionTarget(HexCell cell) {
+			List<HexCell> candidates = ListPool<HexCell>.Get();
+			int erodibleElevation = cell.Elevation - 2;
+			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+				HexCell neighbor = cell.GetNeighbor(d);
+				if (neighbor && neighbor.Elevation <= erodibleElevation) {
+					candidates.Add(neighbor);
+				}
+			}
+			HexCell target = candidates[Random.Range(0, candidates.Count)];
+			ListPool<HexCell>.Add(candidates);
+			return target;
+		}
+
+		private void ErodeLand() {
+			List<HexCell> erodibleCells = ListPool<HexCell>.Get();
+			for (int i = 0; i < cellCount; i++) {
+				HexCell cell = grid.GetCell(i);
+				if (IsErodible(cell)) {
+					erodibleCells.Add(cell);
+				}
+			}
+
+			int targetErodibleCount = 
+				(int)(erodibleCells.Count * (100 - erosionPercentage) * 0.01f);
+
+			while (erodibleCells.Count > targetErodibleCount) {
+				int index = Random.Range(0, erodibleCells.Count);
+				HexCell cell = erodibleCells[index];
+				HexCell targetCell = GetErosionTarget(cell);
+
+				cell.Elevation -= 1;
+				targetCell.Elevation += 1;
+
+				if (!IsErodible(cell)) {
+					erodibleCells[index] = erodibleCells[erodibleCells.Count - 1];
+					erodibleCells.RemoveAt(erodibleCells.Count - 1);
+				}
+
+				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+					HexCell neighbor = cell.GetNeighbor(d);
+					if (
+						neighbor && neighbor.Elevation == cell.Elevation + 2 &&
+						!erodibleCells.Contains(neighbor)
+					) {
+						erodibleCells.Add(neighbor);
+					}
+				}
+
+				if (IsErodible(targetCell) && !erodibleCells.Contains(targetCell)) {
+					erodibleCells.Add(targetCell);
+				}
+
+				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+					HexCell neighbor = targetCell.GetNeighbor(d);
+					if (
+						neighbor && neighbor != cell && !IsErodible(neighbor) &&
+						erodibleCells.Contains(neighbor)
+					) {
+						erodibleCells.Remove(neighbor);
+					}
+				}
+			}
+
+			ListPool<HexCell>.Add(erodibleCells);
 		}
 
 		private int RaiseTerrain(int chunkSize, int budget, MapRegion region) {
@@ -243,7 +324,7 @@ namespace HexMap
 			return budget;
 		}
 
-		HexCell GetRandomCell(MapRegion region) {
+		private HexCell GetRandomCell(MapRegion region) {
 			return grid.GetCell(
 				Random.Range(region.xMin, region.xMax),
 				Random.Range(region.zMin, region.zMax)
