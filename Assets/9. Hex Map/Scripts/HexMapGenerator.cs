@@ -337,6 +337,10 @@ namespace HexMap
 				if (!cell.IsUnderwater) {
 					cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
 				}
+				cell.SetMapData(
+					(cell.Elevation - elevationMinimum) /
+					(float)(elevationMaximum - elevationMinimum)
+				);
 			}
 		}
 	}

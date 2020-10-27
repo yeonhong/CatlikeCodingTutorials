@@ -68,8 +68,6 @@ namespace HexMap
 			}
 		}
 
-		
-
 		private void RefreshPosition() {
 			Vector3 position = transform.localPosition;
 			position.y = elevation * HexMetrics.elevationStep;
@@ -81,6 +79,10 @@ namespace HexMap
 			Vector3 uiPosition = uiRect.localPosition;
 			uiPosition.z = -position.y;
 			uiRect.localPosition = uiPosition;
+		}
+
+		public void SetMapData(float data) {
+			ShaderData.SetMapData(this, data);
 		}
 
 		public RectTransform uiRect;
