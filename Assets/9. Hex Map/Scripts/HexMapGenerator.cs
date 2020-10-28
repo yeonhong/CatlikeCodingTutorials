@@ -28,8 +28,10 @@ namespace HexMap
 		[Range(0, 10)] public int regionBorder = 5;
 		[Range(1, 4)] public int regionCount = 1;
 		[Range(0, 100)] public int erosionPercentage = 50;
-		[Range(0f, 1f)]	public float evaporation = 0.5f;
+		[Range(0f, 1f)]	public float evaporationFactor = 0.5f;
 		[Range(0f, 1f)] public float precipitationFactor = 0.25f;
+		[Range(0f, 1f)]	public float runoffFactor = 0.25f;
+		[Range(0f, 1f)]	public float seepageFactor = 0.125f;
 
 		private struct MapRegion
 		{
@@ -40,7 +42,7 @@ namespace HexMap
 
 		private struct ClimateData
 		{
-			public float clouds;
+			public float clouds, moisture;
 		}
 
 		private List<ClimateData> climate = new List<ClimateData>();
@@ -266,13 +268,21 @@ namespace HexMap
 			ClimateData cellClimate = climate[cellIndex];
 
 			if (cell.IsUnderwater) {
+				cellClimate.moisture = 1f;
+				cellClimate.clouds += evaporationFactor;
+			} else {
+				float evaporation = cellClimate.moisture * evaporationFactor;
+				cellClimate.moisture -= evaporation;
 				cellClimate.clouds += evaporation;
 			}
 
 			float precipitation = cellClimate.clouds * precipitationFactor;
 			cellClimate.clouds -= precipitation;
+			cellClimate.moisture += precipitation;
 
 			float cloudDispersal = cellClimate.clouds * (1f / 6f);
+			float runoff = cellClimate.moisture * runoffFactor * (1f / 6f);
+			float seepage = cellClimate.moisture * seepageFactor * (1f / 6f);
 			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 				HexCell neighbor = cell.GetNeighbor(d);
 				if (!neighbor) {
@@ -280,6 +290,17 @@ namespace HexMap
 				}
 				ClimateData neighborClimate = climate[neighbor.Index];
 				neighborClimate.clouds += cloudDispersal;
+
+				int elevationDelta = neighbor.ViewElevation - cell.ViewElevation;
+				if (elevationDelta < 0) {
+					cellClimate.moisture -= runoff;
+					neighborClimate.moisture += runoff;
+				} else if (elevationDelta == 0) {
+					cellClimate.moisture -= seepage;
+					neighborClimate.moisture += seepage;
+				}
+
+
 				climate[neighbor.Index] = neighborClimate;
 			}
 			cellClimate.clouds = 0f;
@@ -392,7 +413,7 @@ namespace HexMap
 				//	(cell.Elevation - elevationMinimum) /
 				//	(float)(elevationMaximum - elevationMinimum)
 				//);
-				cell.SetMapData(climate[i].clouds);
+				cell.SetMapData(climate[i].moisture);
 			}
 		}
 	}
