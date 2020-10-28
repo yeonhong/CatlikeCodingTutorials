@@ -28,6 +28,8 @@ namespace HexMap
 		[Range(0, 10)] public int regionBorder = 5;
 		[Range(1, 4)] public int regionCount = 1;
 		[Range(0, 100)] public int erosionPercentage = 50;
+		[Range(0f, 1f)]	public float evaporation = 0.5f;
+		[Range(0f, 1f)] public float precipitationFactor = 0.25f;
 
 		private struct MapRegion
 		{
@@ -35,6 +37,13 @@ namespace HexMap
 		}
 
 		private List<MapRegion> regions;
+
+		private struct ClimateData
+		{
+			public float clouds;
+		}
+
+		private List<ClimateData> climate = new List<ClimateData>();
 
 		public void GenerateMap(int x, int z) {
 			Random.State originalRandomState = Random.state;
@@ -55,9 +64,11 @@ namespace HexMap
 				for (int i = 0; i < cellCount; i++) {
 					grid.GetCell(i).WaterLevel = waterLevel;
 				}
+
 				CreateRegions();
 				CreateLand();
 				ErodeLand();
+				CreateClimate();
 				SetTerrainType();
 
 				for (int i = 0; i < cellCount; i++) {
@@ -169,7 +180,7 @@ namespace HexMap
 			return false;
 		}
 
-		HexCell GetErosionTarget(HexCell cell) {
+		private HexCell GetErosionTarget(HexCell cell) {
 			List<HexCell> candidates = ListPool<HexCell>.Get();
 			int erodibleElevation = cell.Elevation - 2;
 			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
@@ -192,7 +203,7 @@ namespace HexMap
 				}
 			}
 
-			int targetErodibleCount = 
+			int targetErodibleCount =
 				(int)(erodibleCells.Count * (100 - erosionPercentage) * 0.01f);
 
 			while (erodibleCells.Count > targetErodibleCount) {
@@ -234,6 +245,46 @@ namespace HexMap
 			}
 
 			ListPool<HexCell>.Add(erodibleCells);
+		}
+
+		private void CreateClimate() {
+			climate.Clear();
+			ClimateData initialData = new ClimateData();
+			for (int i = 0; i < cellCount; i++) {
+				climate.Add(initialData);
+			}
+
+			for (int cycle = 0; cycle < 40; cycle++) {
+				for (int i = 0; i < cellCount; i++) {
+					EvolveClimate(i);
+				}
+			}
+		}
+
+		void EvolveClimate(int cellIndex) {
+			HexCell cell = grid.GetCell(cellIndex);
+			ClimateData cellClimate = climate[cellIndex];
+
+			if (cell.IsUnderwater) {
+				cellClimate.clouds += evaporation;
+			}
+
+			float precipitation = cellClimate.clouds * precipitationFactor;
+			cellClimate.clouds -= precipitation;
+
+			float cloudDispersal = cellClimate.clouds * (1f / 6f);
+			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+				HexCell neighbor = cell.GetNeighbor(d);
+				if (!neighbor) {
+					continue;
+				}
+				ClimateData neighborClimate = climate[neighbor.Index];
+				neighborClimate.clouds += cloudDispersal;
+				climate[neighbor.Index] = neighborClimate;
+			}
+			cellClimate.clouds = 0f;
+
+			climate[cellIndex] = cellClimate;
 		}
 
 		private int RaiseTerrain(int chunkSize, int budget, MapRegion region) {
@@ -337,10 +388,11 @@ namespace HexMap
 				if (!cell.IsUnderwater) {
 					cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
 				}
-				cell.SetMapData(
-					(cell.Elevation - elevationMinimum) /
-					(float)(elevationMaximum - elevationMinimum)
-				);
+				//cell.SetMapData(
+				//	(cell.Elevation - elevationMinimum) /
+				//	(float)(elevationMaximum - elevationMinimum)
+				//);
+				cell.SetMapData(climate[i].clouds);
 			}
 		}
 	}
