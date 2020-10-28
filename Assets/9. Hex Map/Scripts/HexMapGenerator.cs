@@ -32,6 +32,8 @@ namespace HexMap
 		[Range(0f, 1f)] public float precipitationFactor = 0.25f;
 		[Range(0f, 1f)]	public float runoffFactor = 0.25f;
 		[Range(0f, 1f)]	public float seepageFactor = 0.125f;
+		public HexDirection windDirection = HexDirection.NW;
+		[Range(1f, 10f)] public float windStrength = 4f;
 
 		private struct MapRegion
 		{
@@ -280,7 +282,14 @@ namespace HexMap
 			cellClimate.clouds -= precipitation;
 			cellClimate.moisture += precipitation;
 
-			float cloudDispersal = cellClimate.clouds * (1f / 6f);
+			float cloudMaximum = 1f - cell.ViewElevation / (elevationMaximum + 1f);
+			if (cellClimate.clouds > cloudMaximum) {
+				cellClimate.moisture += cellClimate.clouds - cloudMaximum;
+				cellClimate.clouds = cloudMaximum;
+			}
+
+			HexDirection mainDispersalDirection = windDirection.Opposite();
+			float cloudDispersal = cellClimate.clouds * (1f / (5f + windStrength));
 			float runoff = cellClimate.moisture * runoffFactor * (1f / 6f);
 			float seepage = cellClimate.moisture * seepageFactor * (1f / 6f);
 			for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
@@ -289,7 +298,11 @@ namespace HexMap
 					continue;
 				}
 				ClimateData neighborClimate = climate[neighbor.Index];
-				neighborClimate.clouds += cloudDispersal;
+				if (d == mainDispersalDirection) {
+					neighborClimate.clouds += cloudDispersal * windStrength;
+				} else {
+					neighborClimate.clouds += cloudDispersal;
+				}
 
 				int elevationDelta = neighbor.ViewElevation - cell.ViewElevation;
 				if (elevationDelta < 0) {
