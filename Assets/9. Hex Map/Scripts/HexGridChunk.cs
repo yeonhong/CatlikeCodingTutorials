@@ -188,7 +188,8 @@ namespace HexMap
 				center2 + HexMetrics.GetFirstSolidCorner(direction.Opposite())
 			);
 			if (cell.HasRiverThroughEdge(direction)) {
-				TriangulateEstuary(e1, e2, cell.IncomingRiver == direction, indices);
+				TriangulateEstuary(e1, e2,
+					cell.HasIncomingRiver && cell.IncomingRiver == direction, indices);
 			}
 			else {
 				waterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
