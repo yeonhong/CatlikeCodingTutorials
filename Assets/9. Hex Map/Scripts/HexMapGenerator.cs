@@ -10,6 +10,7 @@ namespace HexMap
 		private int cellCount, landCells;
 		private HexCellPriorityQueue searchFrontier;
 		private int searchFrontierPhase;
+		private int temperatureJitterChannel;
 
 		public bool useFixedSeed;
 		public int seed;
@@ -28,15 +29,27 @@ namespace HexMap
 		[Range(0, 10)] public int regionBorder = 5;
 		[Range(1, 4)] public int regionCount = 1;
 		[Range(0, 100)] public int erosionPercentage = 50;
+
 		[Range(0f, 1f)] public float startingMoisture = 0.1f;
 		[Range(0f, 1f)] public float evaporationFactor = 0.5f;
 		[Range(0f, 1f)] public float precipitationFactor = 0.25f;
 		[Range(0f, 1f)] public float runoffFactor = 0.25f;
 		[Range(0f, 1f)] public float seepageFactor = 0.125f;
+
 		public HexDirection windDirection = HexDirection.NW;
 		[Range(1f, 10f)] public float windStrength = 4f;
+
 		[Range(0, 20)] public int riverPercentage = 10;
 		[Range(0f, 1f)] public float extraLakeProbability = 0.25f;
+		[Range(0f, 1f)] public float lowTemperature = 0f;
+		[Range(0f, 1f)] public float highTemperature = 1f;
+
+		public enum HemisphereMode
+		{
+			Both, North, South
+		}
+		public HemisphereMode hemisphere;
+		[Range(0f, 1f)] public float temperatureJitter = 0.1f;
 
 		private struct MapRegion
 		{
@@ -52,7 +65,7 @@ namespace HexMap
 
 		private List<ClimateData> climate = new List<ClimateData>();
 		private List<ClimateData> nextClimate = new List<ClimateData>();
-		List<HexDirection> flowDirections = new List<HexDirection>();
+		private List<HexDirection> flowDirections = new List<HexDirection>();
 
 		public void GenerateMap(int x, int z) {
 			Random.State originalRandomState = Random.state;
@@ -481,7 +494,7 @@ namespace HexMap
 			ListPool<HexCell>.Add(riverOrigins);
 		}
 
-		int CreateRiver(HexCell origin) {
+		private int CreateRiver(HexCell origin) {
 			int length = 1;
 			HexCell cell = origin;
 			HexDirection direction = HexDirection.NE;
@@ -563,8 +576,11 @@ namespace HexMap
 		}
 
 		private void SetTerrainType() {
+			temperatureJitterChannel = Random.Range(0, 4);
 			for (int i = 0; i < cellCount; i++) {
 				HexCell cell = grid.GetCell(i);
+				float temperature = DetermineTemperature(cell);
+				cell.SetMapData(temperature);
 				float moisture = climate[i].moisture;
 				if (!cell.IsUnderwater) {
 					if (moisture < 0.05f) {
@@ -583,6 +599,29 @@ namespace HexMap
 				}
 				cell.SetMapData(moisture);
 			}
+		}
+
+		private float DetermineTemperature(HexCell cell) {
+			float latitude = (float)cell.coordinates.Z / grid.cellCountZ;
+			if (hemisphere == HemisphereMode.Both) {
+				latitude *= 2f;
+				if (latitude > 1f) {
+					latitude = 2f - latitude;
+				}
+			} else if (hemisphere == HemisphereMode.North) {
+				latitude = 1f - latitude;
+			}
+
+			float temperature =
+				Mathf.LerpUnclamped(lowTemperature, highTemperature, latitude);
+			temperature *= 1f - (cell.ViewElevation - waterLevel) /
+				(elevationMaximum - waterLevel + 1f);
+
+			float jitter =
+				HexMetrics.SampleNoise(cell.Position * 0.1f)[temperatureJitterChannel];
+			temperature += (jitter * 2f - 1f) * temperatureJitter;
+
+			return temperature;
 		}
 	}
 }
