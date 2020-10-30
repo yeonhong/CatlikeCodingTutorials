@@ -21,7 +21,7 @@ namespace HexMap
 		private int chunkCountX, chunkCountZ;
 		private HexGridChunk[] chunks;
 		private Transform[] columns;
-		int currentCenterColumnIndex = -1;
+		private int currentCenterColumnIndex = -1;
 
 		public int seed;
 
@@ -113,12 +113,16 @@ namespace HexMap
 			cell.transform.localPosition = position;
 			cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 			cell.Index = i;
+			cell.ColumnIndex = x / HexMetrics.chunkSizeX;
 			cell.ShaderData = cellShaderData;
 			cell.Explorable = x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
 
 			// link neighbor
 			if (x > 0) {
 				cell.SetNeighbor(HexDirection.W, cells[i - 1]);
+				if (wrapping && x == cellCountX - 1) {
+					cell.SetNeighbor(HexDirection.E, cells[i - x]);
+				}
 			}
 			if (z > 0) {
 				if ((z & 1) == 0) {
@@ -126,11 +130,19 @@ namespace HexMap
 					if (x > 0) {
 						cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
 					}
+					else if (wrapping) {
+						cell.SetNeighbor(HexDirection.SW, cells[i - 1]);
+					}
 				}
 				else {
 					cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
 					if (x < cellCountX - 1) {
 						cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
+					}
+					else if (wrapping) {
+						cell.SetNeighbor(
+							HexDirection.SE, cells[i - cellCountX * 2 + 1]
+						);
 					}
 				}
 			}

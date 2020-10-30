@@ -8,6 +8,7 @@ namespace HexMap
 	{
 		public HexCoordinates coordinates;
 		public int Index { get; set; }
+		public int ColumnIndex { get; set; }
 
 		private int terrainTypeIndex;
 
