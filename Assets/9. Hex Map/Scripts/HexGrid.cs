@@ -115,7 +115,13 @@ namespace HexMap
 			cell.Index = i;
 			cell.ColumnIndex = x / HexMetrics.chunkSizeX;
 			cell.ShaderData = cellShaderData;
-			cell.Explorable = x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
+			if (wrapping) {
+				cell.Explorable = z > 0 && z < cellCountZ - 1;
+			}
+			else {
+				cell.Explorable =
+					x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
+			}
 
 			// link neighbor
 			if (x > 0) {
@@ -245,9 +251,12 @@ namespace HexMap
 		public void AddUnit(HexUnit unit, HexCell location, float orientation) {
 			units.Add(unit);
 			unit.Grid = this;
-			unit.transform.SetParent(transform, false);
 			unit.Location = location;
 			unit.Orientation = orientation;
+		}
+
+		public void MakeChildOfColumn(Transform child, int columnIndex) {
+			child.SetParent(columns[columnIndex], false);
 		}
 
 		public void RemoveUnit(HexUnit unit) {

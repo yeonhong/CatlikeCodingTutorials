@@ -37,6 +37,8 @@ namespace HexMap
 				value.Unit = this;
 				Grid.IncreaseVisibility(value, visionRange);
 				transform.localPosition = value.Position;
+
+				Grid.MakeChildOfColumn(transform, value.ColumnIndex);
 			}
 		}
 
@@ -96,6 +98,16 @@ namespace HexMap
 		}
 
 		private IEnumerator LookAt(Vector3 point) {
+			if (HexMetrics.Wrapping) {
+				float xDistance = point.x - transform.localPosition.x;
+				if (xDistance < -HexMetrics.innerRadius * HexMetrics.wrapSize) {
+					point.x += HexMetrics.innerDiameter * HexMetrics.wrapSize;
+				}
+				else if (xDistance > HexMetrics.innerRadius * HexMetrics.wrapSize) {
+					point.x -= HexMetrics.innerDiameter * HexMetrics.wrapSize;
+				}
+			}
+
 			point.y = transform.localPosition.y;
 			Quaternion fromRotation = transform.localRotation;
 			Quaternion toRotation =
@@ -131,18 +143,33 @@ namespace HexMap
 		private IEnumerator TravelPath() {
 			Vector3 a, b, c = pathToTravel[0].Position;
 			yield return LookAt(pathToTravel[1].Position);
-			Grid.DecreaseVisibility(
-				currentTravelLocation ? currentTravelLocation : pathToTravel[0],
-				visionRange
-			);
+			if (!currentTravelLocation) {
+				currentTravelLocation = pathToTravel[0];
+			}
+			Grid.DecreaseVisibility(currentTravelLocation, VisionRange);
+			int currentColumn = currentTravelLocation.ColumnIndex;
 
 			float t = Time.deltaTime * travelSpeed;
 			for (int i = 1; i < pathToTravel.Count; i++) {
 				currentTravelLocation = pathToTravel[i];
 				a = c;
 				b = pathToTravel[i - 1].Position;
+				int nextColumn = currentTravelLocation.ColumnIndex;
+				if (currentColumn != nextColumn) {
+					if (nextColumn < currentColumn - 1) {
+						a.x -= HexMetrics.innerDiameter * HexMetrics.wrapSize;
+						b.x -= HexMetrics.innerDiameter * HexMetrics.wrapSize;
+					}
+					else if (nextColumn > currentColumn + 1) {
+						a.x += HexMetrics.innerDiameter * HexMetrics.wrapSize;
+						b.x += HexMetrics.innerDiameter * HexMetrics.wrapSize;
+					}
+					Grid.MakeChildOfColumn(transform, nextColumn);
+					currentColumn = nextColumn;
+				}
 				c = (b + currentTravelLocation.Position) * 0.5f;
-				Grid.IncreaseVisibility(pathToTravel[i], visionRange);
+				Grid.IncreaseVisibility(pathToTravel[i], VisionRange);
+
 				for (; t < 1f; t += Time.deltaTime * travelSpeed) {
 					transform.localPosition = Bezier.GetPoint(a, b, c, t);
 					Vector3 d = Bezier.GetDerivative(a, b, c, t);
