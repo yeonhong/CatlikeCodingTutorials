@@ -8,6 +8,7 @@ namespace HexMap
 	public class HexGrid : MonoBehaviour
 	{
 		public int cellCountX = 20, cellCountZ = 15;
+		public bool wrapping;
 		public HexCell cellPrefab;
 		private HexCell[] cells;
 		private List<HexUnit> units = new List<HexUnit>();
@@ -31,7 +32,7 @@ namespace HexMap
 			HexUnit.unitPrefab = unitPrefab;
 			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
 			cellShaderData.Grid = this;
-			CreateMap(cellCountX, cellCountZ);
+			CreateMap(cellCountX, cellCountZ, wrapping);
 		}
 
 		private void OnEnable() {
@@ -39,11 +40,12 @@ namespace HexMap
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
 				HexUnit.unitPrefab = unitPrefab;
+				HexMetrics.wrapSize = wrapping ? cellCountX : 0;
 				ResetVisibility();
 			}
 		}
 
-		public bool CreateMap(int x, int z) {
+		public bool CreateMap(int x, int z, bool wrapping) {
 			if (x <= 0 || x % HexMetrics.chunkSizeX != 0 ||
 				z <= 0 || z % HexMetrics.chunkSizeZ != 0) {
 				Debug.LogError("Unsupported map size.");
@@ -61,6 +63,8 @@ namespace HexMap
 
 			cellCountX = x;
 			cellCountZ = z;
+			this.wrapping = wrapping;
+			HexMetrics.wrapSize = wrapping ? cellCountX : 0;
 			chunkCountX = cellCountX / HexMetrics.chunkSizeX;
 			chunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
 			cellShaderData.Initialize(cellCountX, cellCountZ);
@@ -93,7 +97,7 @@ namespace HexMap
 
 		private void CreateCell(int x, int z, int i) {
 			Vector3 position;
-			position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
+			position.x = (x + z * 0.5f - z / 2) * HexMetrics.innerDiameter;
 			position.y = 0f;
 			position.z = z * (HexMetrics.outerRadius * 1.5f);
 
@@ -173,6 +177,7 @@ namespace HexMap
 		public void Save(BinaryWriter writer) {
 			writer.Write(cellCountX);
 			writer.Write(cellCountZ);
+			writer.Write(wrapping);
 			for (int i = 0; i < cells.Length; i++) {
 				cells[i].Save(writer);
 			}
@@ -192,8 +197,9 @@ namespace HexMap
 				z = reader.ReadInt32();
 			}
 
-			if (x != cellCountX || z != cellCountZ) {
-				if (!CreateMap(x, z)) {
+			bool wrapping = header >= 5 ? reader.ReadBoolean() : false;
+			if (x != cellCountX || z != cellCountZ || this.wrapping != wrapping) {
+				if (!CreateMap(x, z, wrapping)) {
 					return;
 				}
 			}

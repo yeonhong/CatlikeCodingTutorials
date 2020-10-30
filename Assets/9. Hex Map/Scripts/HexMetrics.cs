@@ -14,6 +14,7 @@ namespace HexMap
 		public const float innerToOuter = 1f / outerToInner;
 		public const float outerRadius = 10f;
 		public const float innerRadius = outerRadius * outerToInner;
+		public const float innerDiameter = innerRadius * 2f;
 		public const float solidFactor = 0.8f;
 		public const float blendFactor = 1f - solidFactor;
 
@@ -115,6 +116,14 @@ namespace HexMap
 		public static Vector3 GetBridge(HexDirection direction) {
 			return (corners[(int)direction] + corners[(int)direction + 1]) *
 				blendFactor;
+		}
+
+		public static int wrapSize;
+
+		public static bool Wrapping {
+			get {
+				return wrapSize > 0;
+			}
 		}
 		#endregion
 

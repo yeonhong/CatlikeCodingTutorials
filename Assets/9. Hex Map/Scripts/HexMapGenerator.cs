@@ -89,7 +89,7 @@ namespace HexMap
 
 
 
-		public void GenerateMap(int x, int z) {
+		public void GenerateMap(int x, int z, bool wrapping) {
 			Random.State originalRandomState = Random.state;
 			if (!useFixedSeed) {
 				seed = Random.Range(0, int.MaxValue);
@@ -100,7 +100,7 @@ namespace HexMap
 			Random.InitState(seed);
 			{
 				cellCount = x * z;
-				grid.CreateMap(x, z);
+				grid.CreateMap(x, z, wrapping);
 				if (searchFrontier == null) {
 					searchFrontier = new HexCellPriorityQueue();
 				}
