@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 public class GraphAdvence : MonoBehaviour
 {
-	private enum GraphFunctionName : int
+	public enum GraphFunctionName : int
 	{
 		Sine,
 		MultiSine,
@@ -20,11 +21,23 @@ public class GraphAdvence : MonoBehaviour
 	[SerializeField] private GraphFunctionName graphName = GraphFunctionName.Sine;
 
 	private Transform[] _points;
+	private float duration;
+	private bool transitioning;
+	private GraphFunctionName transitionFunction;
+
 	private delegate Vector3 GraphFunction(float u, float v, float t);
 	private static GraphFunction[] functions = {
 		GetSine, GetMultiSine, Sine2DFunction, MultiSine2DFunction, Ripple,
 		Cylinder, Sphere, Torus,
 	};
+
+	public enum TransitionMode { Cycle, Random }
+
+	[SerializeField]
+	private TransitionMode transitionMode = TransitionMode.Cycle;
+
+	[SerializeField, Min(0f)]
+	private float functionDuration = 1f, transitionDuration = 1f;
 
 	private void Awake() {
 		Assert.IsNotNull(_pointPrefab);
@@ -43,6 +56,63 @@ public class GraphAdvence : MonoBehaviour
 	}
 
 	private void Update() {
+		duration += Time.deltaTime;
+		if (transitioning) {
+			if (duration >= transitionDuration) {
+				duration -= transitionDuration;
+				transitioning = false;
+			}
+		}
+		else if (duration >= functionDuration) {
+			duration -= functionDuration;
+			transitioning = true;
+			transitionFunction = graphName;
+			PickNextFunction();
+		}
+
+		if (transitioning) {
+			UpdateFunctionTransition();
+		} else {
+			UpdateFunction();
+		}
+	}
+
+	private void UpdateFunctionTransition() {
+		float progress = duration / transitionDuration;
+
+		float t = Time.time;
+		GraphFunction f = functions[(int)graphName];
+		float step = 2f / _resolution;
+
+		for (int i = 0, z = 0; z < _resolution; z++) {
+			float v = (z + 0.5f) * step - 1f;
+			for (int x = 0; x < _resolution; x++, i++) {
+				float u = (x + 0.5f) * step - 1f;
+				_points[i].localPosition = Morph(u, v, t, transitionFunction, graphName, progress);
+			}
+		}
+	}
+
+	private void PickNextFunction() {
+		graphName = transitionMode == TransitionMode.Cycle ?
+			GetNextFunctionName(graphName) :
+			GetRandomFunctionNameOtherThan(graphName);
+	}
+
+	public static GraphFunctionName GetNextFunctionName(GraphFunctionName name) {
+		return (int)name < functions.Length - 1 ? name + 1 : 0;
+	}
+
+	public static GraphFunctionName GetRandomFunctionNameOtherThan(GraphFunctionName name) {
+		var choice = (GraphFunctionName)UnityEngine.Random.Range(1, functions.Length);
+		return choice == name ? 0 : choice;
+	}
+
+	public static Vector3 Morph(float u, float v, float t, GraphFunctionName from, GraphFunctionName to, float progress) {
+		return Vector3.LerpUnclamped(functions[(int)from](u, v, t), functions[(int)to](u, v, t), progress);
+	}
+
+	private void UpdateFunction() {
 		float t = Time.time;
 		GraphFunction f = functions[(int)graphName];
 		float step = 2f / _resolution;
