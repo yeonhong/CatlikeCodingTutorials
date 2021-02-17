@@ -1,8 +1,6 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.Assertions;
+﻿using UnityEngine;
 
-public class GraphAdvence : MonoBehaviour
+public class GPUGraph : MonoBehaviour
 {
 	public enum GraphFunctionName : int
 	{
@@ -15,12 +13,16 @@ public class GraphAdvence : MonoBehaviour
 		Sphere,
 		Torus
 	}
-
-	[SerializeField] private Transform _pointPrefab = null;
-	[SerializeField] [Range(10, 200)] private int _resolution = 10;
+	[SerializeField] private ComputeShader computeShader = default;
+	[SerializeField] [Range(10, 200)] private int resolution = 10;
 	[SerializeField] private GraphFunctionName graphName = GraphFunctionName.Sine;
 
-	private Transform[] _points;
+	static readonly int
+		positionsId = Shader.PropertyToID("_Positions"),
+		resolutionId = Shader.PropertyToID("_Resolution"),
+		stepId = Shader.PropertyToID("_Step"),
+		timeId = Shader.PropertyToID("_Time");
+
 	private float duration;
 	private bool transitioning;
 	private GraphFunctionName transitionFunction;
@@ -39,20 +41,30 @@ public class GraphAdvence : MonoBehaviour
 	[SerializeField, Min(0f)]
 	private float functionDuration = 1f, transitionDuration = 1f;
 
+	private ComputeBuffer positionsBuffer;
+
+	void UpdateFunctionOnGPU () {
+		float step = 2f / resolution;
+		computeShader.SetInt(resolutionId, resolution);
+		computeShader.SetFloat(stepId, step);
+		computeShader.SetFloat(timeId, Time.time);
+		computeShader.SetBuffer(0, positionsId, positionsBuffer);
+
+		int groups = Mathf.CeilToInt(resolution / 8f);
+		computeShader.Dispatch(0, groups, groups, 1);
+	}
+
 	private void Awake() {
-		Assert.IsNotNull(_pointPrefab);
+		positionsBuffer = new ComputeBuffer(resolution * resolution, 3 * 4);
+	}
 
-		var maxStep = 2f / _resolution;
-		var initScale = Vector3.one * maxStep;
+	private void OnEnable() {
+		positionsBuffer = new ComputeBuffer(resolution * resolution, 3 * 4);
+	}
 
-		_points = new Transform[_resolution * _resolution];
-
-		for (int i = 0; i < _points.Length; i++) {
-			Transform point = Instantiate(_pointPrefab);
-			point.localScale = initScale;
-			point.SetParent(transform, false);
-			_points[i] = point;
-		}
+	private void OnDisable() {
+		positionsBuffer.Release();
+		positionsBuffer = null;
 	}
 
 	private void Update() {
@@ -70,27 +82,7 @@ public class GraphAdvence : MonoBehaviour
 			PickNextFunction();
 		}
 
-		if (transitioning) {
-			UpdateFunctionTransition();
-		} else {
-			UpdateFunction();
-		}
-	}
-
-	private void UpdateFunctionTransition() {
-		float progress = duration / transitionDuration;
-
-		float t = Time.time;
-		GraphFunction f = functions[(int)graphName];
-		float step = 2f / _resolution;
-
-		for (int i = 0, z = 0; z < _resolution; z++) {
-			float v = (z + 0.5f) * step - 1f;
-			for (int x = 0; x < _resolution; x++, i++) {
-				float u = (x + 0.5f) * step - 1f;
-				_points[i].localPosition = Morph(u, v, t, transitionFunction, graphName, progress);
-			}
-		}
+		UpdateFunctionOnGPU();
 	}
 
 	private void PickNextFunction() {
@@ -110,20 +102,6 @@ public class GraphAdvence : MonoBehaviour
 
 	public static Vector3 Morph(float u, float v, float t, GraphFunctionName from, GraphFunctionName to, float progress) {
 		return Vector3.LerpUnclamped(functions[(int)from](u, v, t), functions[(int)to](u, v, t), progress);
-	}
-
-	private void UpdateFunction() {
-		float t = Time.time;
-		GraphFunction f = functions[(int)graphName];
-		float step = 2f / _resolution;
-
-		for (int i = 0, z = 0; z < _resolution; z++) {
-			float v = (z + 0.5f) * step - 1f;
-			for (int x = 0; x < _resolution; x++, i++) {
-				float u = (x + 0.5f) * step - 1f;
-				_points[i].localPosition = f(u, v, t);
-			}
-		}
 	}
 
 	private static Vector3 GetSine(float x, float z, float t) {
