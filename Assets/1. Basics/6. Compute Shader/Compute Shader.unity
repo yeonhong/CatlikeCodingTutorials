@@ -329,10 +329,10 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 81d3a496efefe1f4a85433e3008208dc, type: 2}
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   resolution: 1000
-  graphName: 7
+  function: 0
   transitionMode: 0
   functionDuration: 1
-  transitionDuration: 0
+  transitionDuration: 1
 --- !u!4 &1290836918
 Transform:
   m_ObjectHideFlags: 0
