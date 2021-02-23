@@ -2,7 +2,7 @@
 
 namespace Jobs
 {
-	public class Fractal : MonoBehaviour
+	public class Fractal_ComputeShader : MonoBehaviour
 	{
 		private struct FractalPart
 		{
