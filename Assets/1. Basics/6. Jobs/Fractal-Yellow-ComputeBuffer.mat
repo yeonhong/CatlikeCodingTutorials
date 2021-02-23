@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fractal-Yellow-Legacy
+  m_Name: Fractal-Yellow-ComputeBuffer
   m_Shader: {fileID: 4800000, guid: 0eef147ed225a5e468cc66492e3a21ce, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
